@@ -15,10 +15,9 @@ async def reader():
         try:
             r = await reader.readexactly(2)
         except asyncio.IncompleteReadError:
+            #on eof, break
             break
         print(struct.unpack('<h', r)[0])
-        if not r:
-            continue
 
 
 async def main():

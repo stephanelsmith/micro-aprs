@@ -7,7 +7,7 @@ import numpy as np
 import struct
 import binascii
 
-from crc16 import crc16
+from crc16 import crc16_ccit
 
 verbose = False
 
@@ -82,21 +82,16 @@ class AX25():
     def encode_bytes(self, bytes_in):
         # print('encode_bytes')
 
-        print(_.map(bytes_in,hex))
-
-        crc = bytearray(struct.pack('>H',crc16(bytes_in)))
-        print('crc',_.map(crc,hex))
-        print('crc',_.map(self.reverse_bit_order(crc),hex))
+        # print(' '.join(_.map(bytes_in,hex)))
 
         #revese bit order
-        print('reverse_bit_order')
+        # print('reverse_bit_order')
         bytes_in = self.reverse_bit_order(bytes_in)
-        print(_.map(bytes_in,hex))
+        # print(' '.join(_.map(bytes_in,hex)))
 
         #crc
-        crc = bytearray(struct.pack('>H',crc16(bytes_in)))
-        print('crc',_.map(crc,hex))
-        print('crc',_.map(self.reverse_bit_order(crc),hex))
+        crc = bytearray(struct.pack('>H',crc16_ccit(bytes_in)))
+        # print('crc',' '.join(_.map(crc,hex)))
 
         #create bit array from input bits + CRC
         self.bitarray = bytearray(len(bytes_in)*8 + 2*8)
@@ -109,19 +104,32 @@ class AX25():
             else:
                 #crc
                 crc_idx = idx - len(bytes_in)*8
-                self.bitarray[idx] = 1 if crc[crc_idx//8] & (0x01<<(crc_idx%8)) else 0
+                self.bitarray[idx] = 1 if crc[crc_idx//8] & (0x80>>(crc_idx%8)) else 0
         # print(self.bitarray)
 
-        #mutate bitarray to stuff bits
+        #stuff bits
         self.bitarray = self.do_bitstuffing(self.bitarray)
 
         #add flags
-        self.bitarray = bytearray([0,1,1,1,1,1,1,0])+self.bitarray+bytearray([0,1,1,1,1,1,1,0])
+        flag = bytearray([0,1,1,1,1,1,1,0])
+        self.bitarray = flag + self.bitarray + flag
+
+        # self.print_bytes(self.bitarray)
 
         #convert to nrzi
         self.bitarray = self.convert_nrzi(self.bitarray)
 
+    # def print_bytes(self, bitarray):
+        # if len(bitarray)%8 != 0:
+            # return
+        # _bytes = bytearray(len(bitarray)//8)
+        # for byteidx in range(len(bitarray)//8):
+            # for bitidx in range(8):
+                # _bytes[byteidx] += (0x80>>bitidx) if bitarray[byteidx*8+bitidx] else 0
+        # print(' '.join(_.map(_bytes,hex)))
+
     def reverse_byte(self, _byte):
+        #xor reverse bit technique
         _byte = ((_byte & 0x55) << 1) | ((_byte & 0xAA) >> 1);
         _byte = ((_byte & 0x33) << 2) | ((_byte & 0xCC) >> 2);
         _byte = ((_byte & 0x0F) << 4) | ((_byte & 0xF0) >> 4);
@@ -143,11 +151,10 @@ class AX25():
                 bitstuff_counter += 1
             else:
                 bitstuff_counter = 0
+            idx += 1
             if bitstuff_counter == 5:
-                bitarray.insert(idx+1,0)
+                bitarray.insert(idx,0)
                 bitstuff_counter = 0
-                idx += 2
-            else:
                 idx += 1
         # print(bitarray)
         return bitarray
@@ -155,12 +162,14 @@ class AX25():
     def convert_nrzi(self, bitarray):
         # print('convert_nrzi')
         # print(bitarray)
-        for idx in range(1,len(bitarray)):
-            prev = bitarray[idx-1]
+        current = 1
+        for idx in range(0,len(bitarray)):
+            # prev = bitarray[idx-1]
             if bitarray[idx]:
-                bitarray[idx] = prev
+                bitarray[idx] = current
             else:
-                bitarray[idx] = 0 if prev else 1
+                bitarray[idx] = 0 if current else 1
+            current = bitarray[idx]
         # print(bitarray)
         return bitarray
 
@@ -170,7 +179,7 @@ ax25.encode_bytes(bytes_in=[0x96,0x92,0x6A,0xA8,0x9E,0x8C,0xE0,0x96,0x92,0x6A,0x
 afsk = AFSK()
 afsk.encode_bitarray(bitarray = ax25.bitarray)
 
-# for b in afsk.afsk_out:
-    # _b = struct.pack('<h', (b//2))
-    # if not verbose:
-        # sys.stdout.buffer.write(_b)
+for b in afsk.afsk_out:
+    _b = struct.pack('<h', (b//10))
+    if not verbose:
+        sys.stdout.buffer.write(_b)

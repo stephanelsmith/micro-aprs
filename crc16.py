@@ -48,3 +48,9 @@ def crc16(data, crc=0):
         crc = ((crc<<8)&0xff00) ^ table[((crc>>8)&0xff)^byte]
     return crc & 0xffff
 
+def crc16_ccit(data, crc=0xffff):
+    table = CRC16_XMODEM_TABLE
+    for byte in data:
+        crc = ((crc<<8)&0xff00) ^ table[((crc>>8)&0xff)^byte]
+    return (crc ^ 0xffff) & 0xffff
+

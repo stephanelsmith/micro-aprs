@@ -6,34 +6,50 @@ from pydash import py_ as _
 import numpy as np
 import struct
 import binascii
+import argparse
 
 from crc16 import crc16_ccit
 
 verbose = False
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-r','--rate',
+                    help='sampling rate',
+                    nargs='?',
+                    default=22050, 
+                    type=int,
+                    )
+args = parser.parse_args()
+
 class AFSK():
-    def __init__(self):
+
+    def __init__(self, sampling_rate=22050):
         self.fmark = 1200
         self.tmark = 1/self.fmark
         self.fspace = 2200
         self.tspace = 1/self.fspace
-        self.fs = 22050
+        self.fs = sampling_rate
         self.ts = 1/self.fs
+        self.fbaud = 1200
+        self.tbaud = 1/self.fbaud
+        self.residue_size = 10000
 
         self.lookup_size = 1024
-        a1 = [(2**15-1)*math.sin(x) for x in np.arange(0,2*math.pi,2*math.pi/self.lookup_size)]
-        self.sin_array = _.map(a1, round)
+        s16_sin = [(2**15-1)*math.sin(x) for x in np.arange(0,2*math.pi,2*math.pi/self.lookup_size)]
+        self.sin_array = _.map(s16_sin, round)
 
-        self.mark_step_int = 55
-        self.mark_residue = 7279
+        self.mark_step     = self.lookup_size / (self.tmark/self.ts)
+        self.mark_step_int = int(self.mark_step)
+        self.mark_residue  = int((self.mark_step%1)*self.residue_size)
 
-        self.space_step_int = 102
-        self.space_residue = 1678
+        self.space_step     = self.lookup_size / (self.tspace/self.ts)
+        self.space_step_int = int(self.space_step)
+        self.space_residue  = int((self.space_step%1)*self.residue_size)
 
-        self.baud_step_int = 18
-        self.baud_residue = 3750
+        self.baud_step     = self.tbaud / self.ts
+        self.baud_step_int = int(self.baud_step)
+        self.baud_residue  = int((self.baud_step%1)*self.residue_size)
 
-        self.residue_size = 10000
         self.markspace_residue_accumulator = 0
         self.baud_residue_accumulator = 0
 
@@ -56,11 +72,9 @@ class AFSK():
         #cycle one baud period
         while self.ts_index < self.baud_index:
             if markspace:
-                #mark
                 self.markspace_index += self.mark_step_int
                 self.markspace_residue_accumulator += self.mark_residue 
             else:
-                #space
                 self.markspace_index += self.space_step_int
                 self.markspace_residue_accumulator += self.space_residue  		
             
@@ -174,12 +188,15 @@ class AX25():
         return bitarray
 
 ax25 = AX25()
-ax25.encode_bytes(bytes_in=[0x96,0x92,0x6A,0xA8,0x9E,0x8C,0xE0,0x96,0x92,0x6A,0xA8,0x9E,0x8C,0x61,0x03,0xF0,0x68,0x65,0x6C,0x6C,0x6F,0x20,0x77,0x6F,0x72,0x6C,0x64])
+afsk = AFSK(sampling_rate = args.rate)
 
-afsk = AFSK()
+ax25.encode_bytes(bytes_in=[0x96,0x92,0x6A,0xA8,0x9E,0x8C,0xE0,0x96,0x92,0x6A,0xA8,0x9E,0x8C,0x61,0x03,0xF0,0x68,0x65,0x6C,0x6C,0x6F,0x20,0x77,0x6F,0x72,0x6C,0x64])
+# ax25.encode_bytes(bytes_in=[0x86,0xA2,0x40,0x40,0x40,0x40,0x60,0xAE,0x64,0x8C,0xA6,0x40,0x40,0x68,0xA4,0x8A,0x98,0x82,0xB2,0x40,0x61,0x3F,0xF0,0x54,0x65,0x73,0x74])
+
 afsk.encode_bitarray(bitarray = ax25.bitarray)
+# afsk.encode_bitarray(bitarray = bytearray([0,1,1,1,1,1,1,0]*100))
 
 for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//10))
+    _b = struct.pack('<h', (b//100))
     if not verbose:
         sys.stdout.buffer.write(_b)

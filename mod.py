@@ -59,9 +59,12 @@ class AFSK():
 
         self.afsk_out = []
 
-    def encode_bitarray(self, bitarray):
-        for bit in bitarray:
+    def encode_bit_array(self, bit_array):
+        for bit in bit_array:
             self.append_baud_period(markspace = bit)
+    def encode_byte_array(self, byte_array):
+        for idx in range(len(byte_array)*8):
+            self.append_baud_period(markspace = byte_array[idx//8]&(0x80>>(idx%8)))
 
     def append_baud_period(self, markspace):
         self.baud_index = self.ts_index + self.baud_step_int
@@ -92,6 +95,16 @@ class AFSK():
 class AX25():
     def __init__(self):
         self.bitarray = None
+
+    def encode_ui_frame(self, _from,
+                              to, 
+                              digipeaters,
+                              info):
+        b =  bytearray()
+        _from = _form.split('-')
+
+    def decode_frame(self, bytes_in)
+        pass
 
     def encode_bytes(self, bytes_in):
         # print('encode_bytes')
@@ -188,15 +201,29 @@ class AX25():
         return bitarray
 
 ax25 = AX25()
+
+h = encode_frame(aprs = 'W2FS-4>CQ,RELAY:Test')
+#"KI5TOF>WORLD:>hello"
+#'FROMCALL>TOCALL:>status text'
+exit()
+
 afsk = AFSK(sampling_rate = args.rate)
 
-ax25.encode_bytes(bytes_in=[0x96,0x92,0x6A,0xA8,0x9E,0x8C,0xE0,0x96,0x92,0x6A,0xA8,0x9E,0x8C,0x61,0x03,0xF0,0x68,0x65,0x6C,0x6C,0x6F,0x20,0x77,0x6F,0x72,0x6C,0x64])
-# ax25.encode_bytes(bytes_in=[0x86,0xA2,0x40,0x40,0x40,0x40,0x60,0xAE,0x64,0x8C,0xA6,0x40,0x40,0x68,0xA4,0x8A,0x98,0x82,0xB2,0x40,0x61,0x3F,0xF0,0x54,0x65,0x73,0x74])
+for _b in range(int(0.0265/(1.0/args.rate))+1):
+    if not verbose:
+        sys.stdout.buffer.write(b'\x00\x00')
 
-afsk.encode_bitarray(bitarray = ax25.bitarray)
-# afsk.encode_bitarray(bitarray = bytearray([0,1,1,1,1,1,1,0]*100))
-
+afsk.encode_bit_array(bit_array = bytearray(33*8))
 for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//100))
+    _b = struct.pack('<h', (b//12))
+    if not verbose:
+        sys.stdout.buffer.write(_b)
+
+afsk.afsk_out = []
+
+ax25.encode_bytes(bytes_in=[0xAE,0x9E,0xA4,0x98,0x88,0x40,0xE0,0x96,0x92,0x6A,0xA8,0x9E,0x8C,0x61,0x03,0xF0,0x3A,0x68,0x65,0x6C,0x6C,0x6F,0x20,0x77,0x6F,0x72,0x6C,0x64])
+afsk.encode_bit_array(bit_array = ax25.bitarray)
+for b in afsk.afsk_out:
+    _b = struct.pack('<h', (b//8))
     if not verbose:
         sys.stdout.buffer.write(_b)

@@ -96,14 +96,33 @@ class AX25():
     def __init__(self):
         self.bitarray = None
 
+    def encode_callsign(self, callsign,):
+        #split callsign from ssid
+        call_ssid = callsign.split('-')
+        call = call_ssid[0]
+        ssid = int(call_ssid[1]) if len(call_ssid)==2 else 0
+        #callsign exactly 6 characters
+        call = call[:6]
+        call = call+' '*(6-len(call))
+        #to bytes
+        addr = bytearray(7)
+        addr[:6] = bytes(call, 'utf')
+        addr[6]  = ssid
+        #shift left in place
+        for idx in range(7):
+            addr[idx] = addr[idx]<<1
+        return addr
+
     def encode_ui_frame(self, _from,
                               to, 
                               digipeaters,
                               info):
-        b =  bytearray()
-        _from = _form.split('-')
+        print(self.encode_callsign(_from))
+        print(self.encode_callsign(to))
+        for digi in digipeaters:
+            print(self.encode_callsign(digi))
 
-    def decode_frame(self, bytes_in)
+    def decode_frame(self, bytes_in):
         pass
 
     def encode_bytes(self, bytes_in):
@@ -202,7 +221,10 @@ class AX25():
 
 ax25 = AX25()
 
-h = encode_frame(aprs = 'W2FS-4>CQ,RELAY:Test')
+h = ax25.encode_ui_frame(_from       = 'W2FS-4',
+                         to          = 'CQ',
+                         digipeaters = ['RELAY'],
+                         info        = 'Test')
 #"KI5TOF>WORLD:>hello"
 #'FROMCALL>TOCALL:>status text'
 exit()

@@ -96,7 +96,7 @@ class AX25():
     def __init__(self):
         self.bitarray = None
 
-    def encode_callsign(self, callsign,):
+    def encode_callsign(self, b_out, callsign,):
         #split callsign from ssid
         call_ssid = callsign.split('-')
         call = call_ssid[0]
@@ -105,22 +105,51 @@ class AX25():
         call = call[:6]
         call = call+' '*(6-len(call))
         #to bytes
-        addr = bytearray(7)
-        addr[:6] = bytes(call, 'utf')
-        addr[6]  = ssid
+        b_out[:6] = bytes(call, 'utf')
         #shift left in place
-        for idx in range(7):
-            addr[idx] = addr[idx]<<1
-        return addr
+        for idx in range(6):
+            b_out[idx] = b_out[idx]<<1
+        b_out[6]  = 0x60|(ssid<<1)
 
     def encode_ui_frame(self, _from,
                               to, 
                               digipeaters,
                               info):
-        print(self.encode_callsign(_from))
-        print(self.encode_callsign(to))
+
+        #pre-allocate entire buffer size
+        frame = bytearray(1+(2+len(digipeaters))*7+2+len(info)+3)
+
+        #create slices without copying
+        mv    = memoryview(frame)
+
+        #flags
+        frame[0] = 0xe7
+        frame[-1] = 0xe7
+
+        addr_size = 7
+        idx = 1
+        self.encode_callsign(b_out    = mv[idx:idx+addr_size],
+                             callsign = to)
+        idx += addr_size
+        self.encode_callsign(b_out    = mv[idx:idx+addr_size],
+                             callsign = _from)
+        idx += addr_size
         for digi in digipeaters:
-            print(self.encode_callsign(digi))
+            self.encode_callsign(b_out    = mv[idx:idx+addr_size],
+                                 callsign = digi)
+            idx += addr_size
+        frame[idx-1]  |= 0x01  #last bit of the addr
+        frame[idx] = 0x3f #control
+        idx += 1
+        frame[idx] = 0xf0 #pid
+        idx += 1
+
+        #copy info
+        frame[idx:idx+len(info)] = bytes(info,'utf')
+        idx += len(info)
+
+        print(frame)
+        print(_.map(frame, lambda x: hex(x)))
 
     def decode_frame(self, bytes_in):
         pass

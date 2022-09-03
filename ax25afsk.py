@@ -228,7 +228,7 @@ ax25 = AX25()
 frame = ax25.encode_ui_frame(src   = 'KI5TOF',
                              dst   = 'WORLD',
                              digis = [],
-                             info  = '>hello')
+                             info  = '>hello sara')
 # 0.236
 #bit 55 is where gold/test mismatch
 # exit()

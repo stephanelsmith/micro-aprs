@@ -4,6 +4,8 @@
 
 A python based library for encoding and decoding APRS/AX.25 packets in AFSK.  
 
+![AFSK hello world](media/afsk_hello.png?raw=true "AFSK hello")
+
 The purpose of this library is to thread-the-needle of both enabling APRS/AX.25/AFSK from PC to microcontroller while maintaining portability and readability of python.  This library is optimized for embedded systems, especially [micropython supported targets and platforms ](https://github.com/micropython/micropython#supported-platforms--architectures) and small computers (eg. OpenWRT), not to mention and machine running python!
 
 In practice this means we:

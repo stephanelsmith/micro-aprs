@@ -28,6 +28,16 @@ def reverse_byte(_byte):
     _byte = ((_byte & 0x0F) << 4) | ((_byte & 0xF0) >> 4);
     return _byte
 
+AX25_FLAG      = 0x7e
+AX25_FLAG_NRZI = 0xfe #preconverted to NRZI
+AX25_FLAG_LEN  = 1
+AX25_ADDR_LEN  = 7
+AX25_CONTROLPID_LEN = 2
+AX25_CRC_LEN   = 2
+AX25_BITSTUFF_MARGIN = 5
+
+AFSK_SCALE     = 50
+
 class AFSK():
 
     def __init__(self, sampling_rate=22050):
@@ -125,8 +135,14 @@ class AX25():
                               info):
 
         #pre-allocate entire buffer size
-        frame_len = (2+len(digis))*7+2+len(info)+2
-        frame = bytearray(frame_len)
+        frame_len = AX25_ADDR_LEN +\
+                    AX25_ADDR_LEN +\
+                    len(digis)*AX25_ADDR_LEN+\
+                    AX25_CONTROLPID_LEN+\
+                    len(info)+\
+                    AX25_CRC_LEN
+        framebits_len = frame_len * 8
+        frame = bytearray(frame_len + AX25_BITSTUFF_MARGIN)
 
         #create slices without copying
         mv    = memoryview(frame)
@@ -135,24 +151,23 @@ class AX25():
         # frame[0] = 0x7e
         # frame[-1] = 0x7e
 
-        addr_size = 7
         idx = 0
         # destination Address  (note: opposite order in printed format)
-        self.encode_callsign(b_out    = mv[idx:idx+addr_size],
+        self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
                              callsign = dst)
-        idx += addr_size
+        idx += AX25_ADDR_LEN
         frame[idx-1]  |= 0xe0  #last bit of the addr
         # source Address
-        self.encode_callsign(b_out    = mv[idx:idx+addr_size],
+        self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
                              callsign = src)
-        idx += addr_size
+        idx += AX25_ADDR_LEN
         frame[idx-1]  |= 0xe0  #last bit of the addr
         # 0-8 Digipeater Addresses
         for digi in digis[:8]:
-            self.encode_callsign(b_out    = mv[idx:idx+addr_size],
+            self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
                                  callsign = digi)
             frame[idx-1]  |= 0x60  #last bit of the addr
-            idx += addr_size
+            idx += AX25_ADDR_LEN
         frame[idx-1]  |= 0x01  #last bit of the addr
         frame[idx] = 0x03 #control
         idx += 1
@@ -163,7 +178,7 @@ class AX25():
         frame[idx:idx+len(info)] = bytes(info,'utf')
         idx += len(info)
 
-        #crc, exclude
+        #crc
         # print(len(frame),idx)
         crc_len = 2
         frame[idx:idx+crc_len] = bytearray(struct.pack('<H',crc16_ccit(mv[0:idx])))
@@ -179,35 +194,74 @@ class AX25():
 
         #create bit array from input bits + CRC
         self.bitarray = bytearray(len(frame)*8)
-        # mv = memoryview(self.bitarray)
 
-        for idx in range(len(self.bitarray)):
-            if idx < len(frame)*8:
-                #input bytes
-                self.bitarray[idx] = 1 if frame[idx//8] & (0x80>>(idx%8)) else 0
+        # for idx in range(len(self.bitarray)):
+            # if idx < len(frame)*8:
+                # #input bytes
+                # self.bitarray[idx] = 1 if frame[idx//8] & (0x80>>(idx%8)) else 0
 
-        #stuff bits
-        self.bitarray = self.do_bitstuffing(self.bitarray)
+        # stuff bits in place
+        # update the total number of bits
+        framebits_len = self.do_bitstuffing(mv, 
+                                            start_bit = 0, 
+                                            stop_bit = framebits_len):
+        # self.bitarray = self.do_bitstuffing(self.bitarray)
 
         #convert to nrzi
         self.bitarray = self.convert_nrzi(self.bitarray)
 
-    def do_bitstuffing(self, bitarray):
-        # print('do_bitstuffing')
-        idx = 0
-        bitstuff_counter = 0
-        while idx < len(bitarray):
-            if bitarray[idx]:
-                bitstuff_counter += 1
+    def do_bitstuffing(self, mv, start_bit, stop_bit):
+        #bit stuff frame in place
+        idx = start_bit
+        cnt = 0
+        while idx < stop_bit:
+            if mv[idx//8] & (0x80>>(idx%8)):
+                cnt += 1
             else:
-                bitstuff_counter = 0
+                cnt = 0
             idx += 1
-            if bitstuff_counter == 5:
-                bitarray.insert(idx,0)
-                bitstuff_counter = 0
+            if cnt == 5:
+                #stuff a bit
+                #shift all bytes to the right, starting next byte
+                self.shift_bytes_right(mv, start_bit = idx//8+1)
+                self.split_shift_byte(mv, idx)
+                cnt = 0
+                stop_bit += 1 #
                 idx += 1
-        # print(bitarray)
-        return bitarray
+        return stop_bit
+
+    def shift_bytes_right(self, mv, start_byte, stop_byte=None):
+        if not stop_byte:
+            stop_byte = len(mv)
+        for idx in range(stop_byte-1, start_byte-1, -1):
+            mv[idx] = mv[idx]>>1 | (mv[idx-1]&0x80)
+
+    def split_shift_byte(self, mv, idx):
+        #right side
+        t_shift = mv[idx//8] & (0xff>>(idx%8))
+        t_shift = t_shift >> 1
+        #left side
+        mv[idx//8] = mv[idx//8] & (0xff<<((8-idx)%8))
+        #combine, 0 (stuffed bit), left in center
+        mv[idx//8] = mv[idx//8] | t_shift
+
+
+    # def do_bitstuffing(self, bitarray):
+        # # print('do_bitstuffing')
+        # idx = 0
+        # bitstuff_counter = 0
+        # while idx < len(bitarray):
+            # if bitarray[idx]:
+                # bitstuff_counter += 1
+            # else:
+                # bitstuff_counter = 0
+            # idx += 1
+            # if bitstuff_counter == 5:
+                # bitarray.insert(idx,0)
+                # bitstuff_counter = 0
+                # idx += 1
+        # # print(bitarray)
+        # return bitarray
     
     def convert_nrzi(self, bitarray):
         current = 1
@@ -222,6 +276,18 @@ class AX25():
 
 
 afsk = AFSK(sampling_rate = args.rate)
+
+# bit_array = []
+# byte_array = b'Hello'
+# for idx in range(len(byte_array)*8):
+    # bit_array.append(byte_array[idx//8]&(0x80>>(idx%8)))
+# afsk.encode_bit_array(bit_array = bit_array)
+# for b in afsk.afsk_out:
+    # print('{},'.format(b//10),end='')
+# print('')
+# exit()
+
+
 ax25 = AX25()
 #"KI5TOF>WORLD:>hello"
 #'FROMCALL>TOCALL:>status text'
@@ -237,30 +303,41 @@ for _b in range(int(0.0265/(1.0/args.rate))+1):
     if not verbose:
         sys.stdout.buffer.write(b'\x00\x00')
 
-afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00'*32)
+afsk.encode_byte_array(byte_array = bytearray([AX25_FLAG_NRZI]*32))
+# afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00')
 for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//20))
+    _b = struct.pack('<h', (b//AFSK_SCALE))
     if not verbose:
         sys.stdout.buffer.write(_b)
 afsk.afsk_out = []
 
-afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00')
+# afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00')
+afsk.encode_byte_array(byte_array = bytearray([AX25_FLAG_NRZI]))
 for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//12))
+    _b = struct.pack('<h', (b//AFSK_SCALE))
     if not verbose:
         sys.stdout.buffer.write(_b)
 afsk.afsk_out = []
 
 afsk.encode_bit_array(bit_array = ax25.bitarray)
 for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//10))
+    _b = struct.pack('<h', (b//AFSK_SCALE))
     if not verbose:
         sys.stdout.buffer.write(_b)
 afsk.afsk_out = []
 
-afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00'*3)
+# afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00')
+afsk.encode_byte_array(byte_array = bytearray([AX25_FLAG_NRZI]))
 for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//12))
+    _b = struct.pack('<h', (b//AFSK_SCALE))
+    if not verbose:
+        sys.stdout.buffer.write(_b)
+afsk.afsk_out = []
+
+# afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00'*1)
+afsk.encode_byte_array(byte_array = bytearray([AX25_FLAG_NRZI]))
+for b in afsk.afsk_out:
+    _b = struct.pack('<h', (b//AFSK_SCALE))
     if not verbose:
         sys.stdout.buffer.write(_b)
 afsk.afsk_out = []

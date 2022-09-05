@@ -1,25 +1,4 @@
 
-def do_bitstuffing(mv, start_bit, stop_bit):
-    #bit stuff frame in place
-    idx = start_bit
-    cnt = 0
-    while idx < stop_bit:
-        if mv[idx//8] & (0x80>>(idx%8)):
-            cnt += 1
-        else:
-            cnt = 0
-        idx += 1
-        if cnt == 5:
-            #stuff a bit
-            #shift all bytes to the right, starting next byte
-            shift_bytes_right(mv, start_bit = idx//8+1)
-            split_shift_byte(mv, idx)
-            cnt = 0
-            stop_bit += 1 #
-            idx += 1
-    print_binary(mv)
-    print(stop_bit)
-    return stop_bit
 
 def insert_bit_in_array(mv, bit_idx):
     shift_bytes_right(mv, start_byte = bit_idx//8+1)
@@ -66,6 +45,6 @@ print_binary(ba)
 print()
 # shift_bytes_right(ba, start_byte=1)
 # split_shift_byte(ba, idx=17)
-insert_bit_in_array(ba, 2)
+insert_bit_in_array(ba, 8)
 print_binary(ba)
 

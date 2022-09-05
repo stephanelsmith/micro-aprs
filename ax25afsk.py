@@ -6,20 +6,27 @@ from pydash import py_ as _
 import numpy as np
 import struct
 import binascii
-import argparse
 
 from crc16 import crc16_ccit
 
+from utils import print_binary
+from utils import parse_args
+
 verbose = False
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-r','--rate',
-                    help='sampling rate',
-                    nargs='?',
-                    default=22050, 
-                    type=int,
-                    )
-args = parser.parse_args()
+# parser = argparse.ArgumentParser()
+# parser.add_argument('-r','--rate',
+                    # help='sampling rate',
+                    # nargs='?',
+                    # default=22050, 
+                    # type=int,
+                    # )
+# parser.add_argument('--print_frame',
+                    # help='print the frame',
+                    # nargs='?',
+                    # type=int,
+                    # )
+# args = parser.parse_args()
 
 def reverse_byte(_byte):
     #xor reverse bit technique
@@ -74,16 +81,15 @@ class AFSK():
         self.baud_index = 0
         self.markspace_index = 0
 
-        self.afsk_out = []
 
-    def encode_bit_array(self, bit_array):
-        for bit in bit_array:
-            self.append_baud_period(markspace = bit)
-    def encode_byte_array(self, byte_array):
-        for idx in range(len(byte_array)*8):
-            self.append_baud_period(markspace = byte_array[idx//8]&(0x80>>(idx%8)))
+    def gen_bits_from_bytes(self, frame, stop_bit = None):
+        if stop_bit == None:
+            stop_bit = len(frame)*8
+        for idx in range(stop_bit):
+            # self.append_baud_period(markspace = frame[idx//8]&(0x80>>(idx%8)))
+            yield frame[idx//8]&(0x80>>(idx%8))
 
-    def append_baud_period(self, markspace):
+    def gen_baud_period_samples(self, markspace):
         self.baud_index = self.ts_index + self.baud_step_int
         self.baud_residue_accumulator += self.baud_residue
         self.baud_index += self.baud_residue_accumulator // self.residue_size
@@ -105,13 +111,118 @@ class AFSK():
             self.markspace_residue_accumulator = self.markspace_residue_accumulator % self.residue_size
             
             #push the next point to the waveform
-            self.afsk_out.append(self.sin_array[self.markspace_index%self.lookup_size])
+            yield self.sin_array[self.markspace_index%self.lookup_size]
 
             self.ts_index += 1 #increment one unit time step (ts = 1/fs)
 
+    def dump_ax25_raw_samples(self, ax25,
+                                    zpad_ms):
+        #zero padding
+        for b in range(int(zpad_ms/self.ts+1)):
+            sys.stdout.buffer.write(b'\x00\x00')
+
+        #write data
+        for bit in self.gen_bits_from_bytes(frame    = ax25.frame,
+                                            stop_bit = ax25.frame_len_bits):
+            for sample in self.gen_baud_period_samples(bit):
+                _s = struct.pack('<h', (sample//AFSK_SCALE))
+                sys.stdout.buffer.write(_s)
+
 class AX25():
     def __init__(self):
-        self.bitarray = None
+        self.frame = bytearray()
+        self.frame_len_bits = 0
+
+    def encode_ui_frame(self, src,
+                              dst, 
+                              digis,
+                              info, 
+                              flags_pre  = 1,
+                              flags_post = 1,
+                              dbg_frame = False):
+
+        #pre-allocate entire buffer size
+        frame_len = AX25_FLAG_LEN*flags_pre +\
+                    AX25_ADDR_LEN +\
+                    AX25_ADDR_LEN +\
+                    len(digis)*AX25_ADDR_LEN+\
+                    AX25_CONTROLPID_LEN+\
+                    len(info)+\
+                    AX25_CRC_LEN +\
+                    AX25_FLAG_LEN*flags_post
+        self.frame_len_bits = frame_len * 8
+        self.frame = bytearray(frame_len + AX25_BITSTUFF_MARGIN)
+
+        #create slices without copying
+        mv    = memoryview(self.frame)
+        idx = 0
+
+        #pre-flags
+        for fidx in range(flags_pre):
+            mv[idx] = AX25_FLAG
+            idx += AX25_FLAG_LEN
+
+        # destination Address  (note: opposite order in printed format)
+        self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
+                             callsign = dst)
+        idx += AX25_ADDR_LEN
+        mv[idx-1]  |= 0xe0  #last bit of the addr
+        # source Address
+        self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
+                             callsign = src)
+        idx += AX25_ADDR_LEN
+        mv[idx-1]  |= 0xe0  #last bit of the addr
+        # 0-8 Digipeater Addresses
+        for digi in digis[:8]:
+            self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
+                                 callsign = digi)
+            mv[idx-1]  |= 0x60  #last bit of the addr
+            idx += AX25_ADDR_LEN
+        mv[idx-1]  |= 0x01  #last bit of the addr
+        mv[idx] = 0x03 #control
+        idx += 1
+        mv[idx] = 0xf0 #pid
+        idx += 1
+
+        #copy info
+        mv[idx:idx+len(info)] = bytes(info,'utf')
+        idx += len(info)
+
+        #crc
+        # print(len(mv),idx)
+
+        crc_len = 2
+        mv[idx:idx+crc_len] = bytearray(struct.pack('<H',crc16_ccit(mv[flags_pre*AX25_FLAG_LEN:idx])))
+        idx += crc_len
+
+        #post-flags
+        for fidx in range(flags_post):
+            mv[idx] = AX25_FLAG
+            idx += AX25_FLAG_LEN
+
+        if idx != frame_len:
+            raise Exception('frame len error: idx ({}) != frame_len ({})'.format(idx, frame_len))
+
+        if dbg_frame:
+            print_binary(mv)
+
+        #revese bit order
+        self.reverse_bit_order(mv, frame_len)
+
+        # stuff bits in place
+        # update the total number of bits
+        stuff_cnt = self.do_bitstuffing(mv, 
+                                        start_bit = flags_pre*AX25_FLAG_LEN*8, 
+                                        stop_bit  = self.frame_len_bits - flags_post*AX25_FLAG_LEN*8)
+        self.frame_len_bits += stuff_cnt
+        # print('-bit stiffed-')
+        # print('frame_len_bits', frame_len_bits)
+        # print_binary(mv)
+
+        #convert to nrzi
+        self.convert_nrzi(mv,
+                          stop_bit = self.frame_len_bits)
+        # print_binary(mv)
 
     def encode_callsign(self, b_out, callsign,):
         #split callsign from ssid
@@ -128,92 +239,16 @@ class AX25():
             b_out[idx] = b_out[idx]<<1
         # b_out[6]  = 0x60|(ssid<<1)
         b_out[6]  = ssid<<1
-
-    def encode_ui_frame(self, src,
-                              dst, 
-                              digis,
-                              info):
-
-        #pre-allocate entire buffer size
-        frame_len = AX25_ADDR_LEN +\
-                    AX25_ADDR_LEN +\
-                    len(digis)*AX25_ADDR_LEN+\
-                    AX25_CONTROLPID_LEN+\
-                    len(info)+\
-                    AX25_CRC_LEN
-        framebits_len = frame_len * 8
-        frame = bytearray(frame_len + AX25_BITSTUFF_MARGIN)
-
-        #create slices without copying
-        mv    = memoryview(frame)
-
-        #flags
-        # frame[0] = 0x7e
-        # frame[-1] = 0x7e
-
-        idx = 0
-        # destination Address  (note: opposite order in printed format)
-        self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
-                             callsign = dst)
-        idx += AX25_ADDR_LEN
-        frame[idx-1]  |= 0xe0  #last bit of the addr
-        # source Address
-        self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
-                             callsign = src)
-        idx += AX25_ADDR_LEN
-        frame[idx-1]  |= 0xe0  #last bit of the addr
-        # 0-8 Digipeater Addresses
-        for digi in digis[:8]:
-            self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
-                                 callsign = digi)
-            frame[idx-1]  |= 0x60  #last bit of the addr
-            idx += AX25_ADDR_LEN
-        frame[idx-1]  |= 0x01  #last bit of the addr
-        frame[idx] = 0x03 #control
-        idx += 1
-        frame[idx] = 0xf0 #pid
-        idx += 1
-
-        #copy info
-        frame[idx:idx+len(info)] = bytes(info,'utf')
-        idx += len(info)
-
-        #crc
-        # print(len(frame),idx)
-        crc_len = 2
-        frame[idx:idx+crc_len] = bytearray(struct.pack('<H',crc16_ccit(mv[0:idx])))
-        idx += crc_len
-
-        # print(_.map(frame, lambda x: hex(x)))
-
-        #revese bit order
-        # print('reverse_bit_order')
+    
+    def reverse_bit_order(self, mv, frame_len):
         for idx in range(frame_len):
-            frame[idx] = reverse_byte(frame[idx])
-        # print(_.map(frame, lambda x: hex(x)))
-
-        #create bit array from input bits + CRC
-        self.bitarray = bytearray(len(frame)*8)
-
-        # for idx in range(len(self.bitarray)):
-            # if idx < len(frame)*8:
-                # #input bytes
-                # self.bitarray[idx] = 1 if frame[idx//8] & (0x80>>(idx%8)) else 0
-
-        # stuff bits in place
-        # update the total number of bits
-        framebits_len = self.do_bitstuffing(mv, 
-                                            start_bit = 0, 
-                                            stop_bit = framebits_len):
-        # self.bitarray = self.do_bitstuffing(self.bitarray)
-
-        #convert to nrzi
-        self.bitarray = self.convert_nrzi(self.bitarray)
+            mv[idx] = reverse_byte(mv[idx])
 
     def do_bitstuffing(self, mv, start_bit, stop_bit):
         #bit stuff frame in place
         idx = start_bit
         cnt = 0
+        stuff_cnt = 0
         while idx < stop_bit:
             if mv[idx//8] & (0x80>>(idx%8)):
                 cnt += 1
@@ -223,122 +258,100 @@ class AX25():
             if cnt == 5:
                 #stuff a bit
                 #shift all bytes to the right, starting next byte
-                self.shift_bytes_right(mv, start_bit = idx//8+1)
-                self.split_shift_byte(mv, idx)
+                self.insert_bit_in_array(mv, bit_idx = idx)
                 cnt = 0
-                stop_bit += 1 #
+                stuff_cnt += 1 #
                 idx += 1
-        return stop_bit
+        return stuff_cnt
+
+    def insert_bit_in_array(self, mv, bit_idx):
+        self.shift_bytes_right(mv, start_byte = bit_idx//8+1)
+        self.split_shift_byte(mv, bit_idx)
 
     def shift_bytes_right(self, mv, start_byte, stop_byte=None):
         if not stop_byte:
             stop_byte = len(mv)
         for idx in range(stop_byte-1, start_byte-1, -1):
-            mv[idx] = mv[idx]>>1 | (mv[idx-1]&0x80)
+            p       = 0 if idx == 0 else (mv[idx-1]&0x01)
+            q       = 0x80 if p else 0
+            mv[idx] = (mv[idx]>>1) | q
 
     def split_shift_byte(self, mv, idx):
-        #right side
-        t_shift = mv[idx//8] & (0xff>>(idx%8))
-        t_shift = t_shift >> 1
-        #left side
-        mv[idx//8] = mv[idx//8] & (0xff<<((8-idx)%8))
-        #combine, 0 (stuffed bit), left in center
-        mv[idx//8] = mv[idx//8] | t_shift
-
-
-    # def do_bitstuffing(self, bitarray):
-        # # print('do_bitstuffing')
-        # idx = 0
-        # bitstuff_counter = 0
-        # while idx < len(bitarray):
-            # if bitarray[idx]:
-                # bitstuff_counter += 1
-            # else:
-                # bitstuff_counter = 0
-            # idx += 1
-            # if bitstuff_counter == 5:
-                # bitarray.insert(idx,0)
-                # bitstuff_counter = 0
-                # idx += 1
-        # # print(bitarray)
-        # return bitarray
+        if idx%8 == 0:
+            mv[idx//8] = mv[idx//8] >> 1
+        else:
+            #right side
+            t_shift = mv[idx//8] & (0xff>>(idx%8))
+            t_shift = t_shift >> 1
+            #left side
+            mv[idx//8] = mv[idx//8] & (0xff<<((8-idx)%8))
+            #combine, 0 (stuffed bit), left in center
+            mv[idx//8] = mv[idx//8] | t_shift
     
-    def convert_nrzi(self, bitarray):
-        current = 1
-        for idx in range(len(bitarray)):
-            if bitarray[idx] == 0:
-                bitarray[idx] = 0 if current else 1
-                current = bitarray[idx]
+    def convert_nrzi(self, mv, stop_bit):
+        cur = 1
+        for idx in range(stop_bit):
+            mask = (0x80>>(idx%8))
+            b    = mv[idx//8] & mask
+            if b == 0:
+                cur = cur ^ 0x01  #equivalent to statement below
+                # cur = 0 if cur else 1
+            if cur:
+                # set bit
+                mv[idx//8]  = mv[idx//8] | mask
             else:
-                bitarray[idx] = current
-            bitarray[idx] = 0 if bitarray[idx] else 1 
-        return bitarray
+                # clear bit, no bitwise 'not' in python, xor 0xff to mimick
+                mv[idx//8]  = mv[idx//8] & (mask ^ 0xff)
+            #invert bit
+            mv[idx//8]  = mv[idx//8] ^ mask
 
 
-afsk = AFSK(sampling_rate = args.rate)
+args = parse_args({
+    'rate' : {
+        'short'   : 'r',
+        'type'    : int,
+        'default' : 22050,
+    },
+    'zpad_ms' : {
+        'short'   : 'z',
+        'type'    : float,
+        'default' : 26.5,
+    },
+    'flags_pre' : {
+        'short'   : 'flags_pre',
+        'type'    : int,
+        'default' : 1+32,
+    },
+    'flags_post' : {
+        'short'   : 'flags_post',
+        'type'    : int,
+        'default' : 1+2,
+    },
+    'print_frame' : {
+        'short'   : 'print_frame',
+        'type'    : bool,
+        'default' : False,
+    },
+})
 
-# bit_array = []
-# byte_array = b'Hello'
-# for idx in range(len(byte_array)*8):
-    # bit_array.append(byte_array[idx//8]&(0x80>>(idx%8)))
-# afsk.encode_bit_array(bit_array = bit_array)
-# for b in afsk.afsk_out:
-    # print('{},'.format(b//10),end='')
-# print('')
-# exit()
+afsk = AFSK(sampling_rate = args['rate'])
 
 
 ax25 = AX25()
 #"KI5TOF>WORLD:>hello"
 #'FROMCALL>TOCALL:>status text'
-frame = ax25.encode_ui_frame(src   = 'KI5TOF',
-                             dst   = 'WORLD',
-                             digis = [],
-                             info  = '>hello sara')
-# 0.236
-#bit 55 is where gold/test mismatch
-# exit()
+ax25.encode_ui_frame(src        = 'A',
+                     dst        = 'APRS',
+                     digis      = [],
+                     info       = '>hello', 
+                     flags_pre  = args['flags_pre'],
+                     flags_post = args['flags_post'],
+                     dbg_frame  = args['print_frame'])
+if args['print_frame']:
+    #we are debugging, exit early
+    exit()
 
-for _b in range(int(0.0265/(1.0/args.rate))+1):
-    if not verbose:
-        sys.stdout.buffer.write(b'\x00\x00')
-
-afsk.encode_byte_array(byte_array = bytearray([AX25_FLAG_NRZI]*32))
-# afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00')
-for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//AFSK_SCALE))
-    if not verbose:
-        sys.stdout.buffer.write(_b)
-afsk.afsk_out = []
-
-# afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00')
-afsk.encode_byte_array(byte_array = bytearray([AX25_FLAG_NRZI]))
-for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//AFSK_SCALE))
-    if not verbose:
-        sys.stdout.buffer.write(_b)
-afsk.afsk_out = []
-
-afsk.encode_bit_array(bit_array = ax25.bitarray)
-for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//AFSK_SCALE))
-    if not verbose:
-        sys.stdout.buffer.write(_b)
-afsk.afsk_out = []
-
-# afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00')
-afsk.encode_byte_array(byte_array = bytearray([AX25_FLAG_NRZI]))
-for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//AFSK_SCALE))
-    if not verbose:
-        sys.stdout.buffer.write(_b)
-afsk.afsk_out = []
-
-# afsk.encode_bit_array(bit_array = b'\x01\x01\x01\x01\x01\x01\x01\x00'*1)
-afsk.encode_byte_array(byte_array = bytearray([AX25_FLAG_NRZI]))
-for b in afsk.afsk_out:
-    _b = struct.pack('<h', (b//AFSK_SCALE))
-    if not verbose:
-        sys.stdout.buffer.write(_b)
-afsk.afsk_out = []
+afsk.dump_ax25_raw_samples(ax25    = ax25,
+                           zpad_ms = args['zpad_ms'],
+                           )
 

@@ -3,6 +3,7 @@ import sys
 import io
 import asyncio
 import struct
+from array import array
 
 async def reader():
     # stream reader in py
@@ -11,13 +12,16 @@ async def reader():
     reader = asyncio.StreamReader()
     protocol = asyncio.StreamReaderProtocol(reader)
     await loop.connect_read_pipe(lambda: protocol, sys.stdin)
+    buf = array('i',[])
     while True:
         try:
             r = await reader.readexactly(2)
         except asyncio.IncompleteReadError:
             #on eof, break
             break
-        print(struct.unpack('<h', r)[0])
+        # print(struct.unpack('<h', r)[0])
+        buf.append(int.from_bytes(r, 'little'))
+    print(buf)
 
 
 async def main():

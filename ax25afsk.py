@@ -3,7 +3,7 @@ import random
 import sys
 import math
 from pydash import py_ as _
-import numpy as np
+import numpy as np #TO DO REMOVE
 import struct
 import binascii
 
@@ -11,29 +11,10 @@ from crc16 import crc16_ccit
 
 from utils import print_binary
 from utils import parse_args
+from utils import reverse_byte
 
 verbose = False
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument('-r','--rate',
-                    # help='sampling rate',
-                    # nargs='?',
-                    # default=22050, 
-                    # type=int,
-                    # )
-# parser.add_argument('--print_frame',
-                    # help='print the frame',
-                    # nargs='?',
-                    # type=int,
-                    # )
-# args = parser.parse_args()
-
-def reverse_byte(_byte):
-    #xor reverse bit technique
-    _byte = ((_byte & 0x55) << 1) | ((_byte & 0xAA) >> 1);
-    _byte = ((_byte & 0x33) << 2) | ((_byte & 0xCC) >> 2);
-    _byte = ((_byte & 0x0F) << 4) | ((_byte & 0xF0) >> 4);
-    return _byte
 
 AX25_FLAG      = 0x7e
 AX25_FLAG_NRZI = 0xfe #preconverted to NRZI
@@ -58,21 +39,24 @@ class AFSK():
         self.tbaud = 1/self.fbaud
         self.residue_size = 10000
 
+        #pre-compute sine lookup table
         self.lookup_size = 1024
+        #TODO REMOVE NUMPY
         s16_sin = [(2**15-1)*math.sin(x) for x in np.arange(0,2*math.pi,2*math.pi/self.lookup_size)]
         self.sin_array = _.map(s16_sin, round)
 
-        self.mark_step     = self.lookup_size / (self.tmark/self.ts)
-        self.mark_step_int = int(self.mark_step)
-        self.mark_residue  = int((self.mark_step%1)*self.residue_size)
+        #get step sizes (integer and residue)
+        mark_step     = self.lookup_size / (self.tmark/self.ts)
+        self.mark_step_int = int(mark_step)
+        self.mark_residue  = int((mark_step%1)*self.residue_size)
 
-        self.space_step     = self.lookup_size / (self.tspace/self.ts)
-        self.space_step_int = int(self.space_step)
-        self.space_residue  = int((self.space_step%1)*self.residue_size)
+        space_step     = self.lookup_size / (self.tspace/self.ts)
+        self.space_step_int = int(space_step)
+        self.space_residue  = int((space_step%1)*self.residue_size)
 
-        self.baud_step     = self.tbaud / self.ts
-        self.baud_step_int = int(self.baud_step)
-        self.baud_residue  = int((self.baud_step%1)*self.residue_size)
+        baud_step     = self.tbaud / self.ts
+        self.baud_step_int = int(baud_step)
+        self.baud_residue  = int((baud_step%1)*self.residue_size)
 
         self.markspace_residue_accumulator = 0
         self.baud_residue_accumulator = 0
@@ -115,18 +99,32 @@ class AFSK():
 
             self.ts_index += 1 #increment one unit time step (ts = 1/fs)
 
+
+    #TODO, DONT APPEND TO ARRAY
     def dump_ax25_raw_samples(self, ax25,
-                                    zpad_ms):
+                                    zpad_ms,
+                                    out_type):
+        o = []
         #zero padding
         for b in range(int(zpad_ms/self.ts+1)):
-            sys.stdout.buffer.write(b'\x00\x00')
+            o.append(0)
 
         #write data
         for bit in self.gen_bits_from_bytes(frame    = ax25.frame,
                                             stop_bit = ax25.frame_len_bits):
             for sample in self.gen_baud_period_samples(bit):
-                _s = struct.pack('<h', (sample//AFSK_SCALE))
-                sys.stdout.buffer.write(_s)
+                o.append(sample//AFSK_SCALE)
+
+        if out_type == 'raw':
+            buf = bytearray(len(o)*2)
+            for i,s in enumerate(o):
+                x = struct.pack('<h', s)
+                # x = int.to_bytes(s, 2, 'little', signed=True)
+                buf[i*2]   = x[0]
+                buf[i*2+1] = x[1]
+            sys.stdout.buffer.write(buf)
+        else:
+            print('type not implemented', out_type)
 
 class AX25():
     def __init__(self):
@@ -332,14 +330,19 @@ args = parse_args({
         'type'    : bool,
         'default' : False,
     },
+    # 'volume' : {
+    # },
+    'out_type' : {
+        'short'   : 't',
+        'type'    : str,
+        'default' : 'raw', #raw|int|list
+    },
 })
 
 afsk = AFSK(sampling_rate = args['rate'])
 
 
 ax25 = AX25()
-#"KI5TOF>WORLD:>hello"
-#'FROMCALL>TOCALL:>status text'
 ax25.encode_ui_frame(src        = 'A',
                      dst        = 'APRS',
                      digis      = [],
@@ -351,7 +354,8 @@ if args['print_frame']:
     #we are debugging, exit early
     exit()
 
-afsk.dump_ax25_raw_samples(ax25    = ax25,
-                           zpad_ms = args['zpad_ms'],
+afsk.dump_ax25_raw_samples(ax25     = ax25,
+                           zpad_ms  = args['zpad_ms'],
+                           out_type = args['out_type'],
                            )
 

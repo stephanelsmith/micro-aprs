@@ -29,3 +29,9 @@ def print_binary(mv):
         if idx%8==7:
             print('')
 
+def reverse_byte(_byte):
+    #xor reverse bit technique
+    _byte = ((_byte & 0x55) << 1) | ((_byte & 0xAA) >> 1);
+    _byte = ((_byte & 0x33) << 2) | ((_byte & 0xCC) >> 2);
+    _byte = ((_byte & 0x0F) << 4) | ((_byte & 0xF0) >> 4);
+    return _byte

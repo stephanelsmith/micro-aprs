@@ -147,7 +147,7 @@ class AFSK_DEMOD():
         o = self.o
         for i in range(len(arr)):
             o[i] = arr[i]
-            o[i] = band(o[i])
+            #o[i] = band(o[i])
             o[i] = agc(o[i])
             o[i] = corr(o[i])
             o[i] = lpf(o[i])

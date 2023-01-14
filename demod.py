@@ -33,11 +33,27 @@ async def read_file(src):
         arr.append(struct.unpack('<h', mv[i:i+2])[0])
     return arr
 
-CORRELATOR_DELAY = 446e-6
 
+def create_agc(sp,depth):
+    bufin = array('i', (0 for x in range(depth)))
+    idx = 0
+    def inner(v:int)->int:
+        nonlocal sp,idx,bufin,depth
+        bufin[idx] = v
+        m = max(bufin)
+        #sp = scale*m
+        try:
+            scale = sp//m
+        except:
+            scale = 1
+        idx = (idx+1)%depth
+        return scale*v
+    return inner
+
+CORRELATOR_DELAY = 446e-6
 def create_corr(ts, shift):
     delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
-    dat = array('i', (x for x in range(delay)))
+    dat = array('i', (0 for x in range(delay)))
     idx = 0
     def inner(v:int)->int:
         nonlocal idx,dat,delay,shift
@@ -58,22 +74,39 @@ class AFSK_DEMOD():
         self.fbaud = 1200
         self.tbaud = 1/self.fbaud
 
+        self.agc = create_agc(sp = 2**12,
+                              depth = int(self.tbaud/self.ts),
+                              )
         self.corr = create_corr(ts    = self.ts,
                                 shift = 1)
 
     def proc(self, arr):
         corr = self.corr
+        agc  = self.agc
         self.o = array('i', (0 for x in range(len(arr))))
         o = self.o
-        for idx in range(len(arr)):
-            o[idx] = corr(arr[idx])
-            # o[idx] = arr[idx]
+        for i in range(len(arr)):
+            o[i] = arr[i]
+            o[i] = agc(o[i])
+            o[i] = corr(o[i])
 
     def dump_raw(self, out_type):
+        o   = self.o
+        m   = max(o)
+        sca = m//(2**15-1)+1
+        #print(m)
+        #print(sca)
+        db = 0
         for s in self.o:
             # x = int.to_bytes(s, 2, 'little', signed=True)
-            x = struct.pack('<h', s//256)
+            try:
+                db = db if db > s//sca else s//sca
+                x = struct.pack('<h', s//sca)
+            except:
+                print('ERROR PACKING',s,sca,s//sca,0x7fff)
+                raise
             sys.stdout.buffer.write(x)
+        #print('max', db)
 
 
 async def main():
@@ -91,6 +124,8 @@ async def main():
     })
 
     src = sys.argv[-1]
+
+    #TODO, make arr yield results for processing as we stream in
     if src == '-':
         arr = await read_pipe()
     else:
@@ -105,6 +140,4 @@ async def main():
     # await asyncio.gather(*tasks)
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-
+    asyncio.run(main())

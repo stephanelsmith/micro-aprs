@@ -3,7 +3,7 @@ import random
 import sys
 import math
 from pydash import py_ as _
-import numpy as np #TO DO REMOVE
+#import numpy as np #TO DO REMOVE
 import struct
 import binascii
 
@@ -12,6 +12,7 @@ from crc16 import crc16_ccit
 from utils import print_binary
 from utils import parse_args
 from utils import reverse_byte
+from utils import frange
 
 verbose = False
 
@@ -41,9 +42,8 @@ class AFSK():
 
         #pre-compute sine lookup table
         self.lookup_size = 1024
-        #TODO REMOVE NUMPY
-        s16_sin = [(2**15-1)*math.sin(x) for x in np.arange(0,2*math.pi,2*math.pi/self.lookup_size)]
-        self.sin_array = _.map(s16_sin, round)
+
+        self.sin_array = array('i', int((2**15-1)*math.sin(x)) for x in frange(0,2*math.pi,2*math.pi/self.lookup_size))
 
         #get step sizes (integer and residue)
         mark_step     = self.lookup_size / (self.tmark/self.ts)

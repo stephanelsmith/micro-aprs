@@ -1,6 +1,7 @@
 
 
 import sys
+import math
 from pydash import py_ as _
 
 def parse_args(argdefs):
@@ -35,3 +36,12 @@ def reverse_byte(_byte):
     _byte = ((_byte & 0x33) << 2) | ((_byte & 0xCC) >> 2);
     _byte = ((_byte & 0x0F) << 4) | ((_byte & 0xF0) >> 4);
     return _byte
+
+def frange(start, stop, step, rnd=None):
+    n = int(math.ceil((stop - start) / step))
+    if isinstance(rnd,int):
+        for i in range(n):
+            yield round(start+i*step,rnd)
+    else:
+        for i in range(n):
+            yield start+i*step

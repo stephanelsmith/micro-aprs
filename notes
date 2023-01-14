@@ -1,4 +1,6 @@
 
+
+
 #modulation, built in encode for now
 python ax25afsk.py  | play -t raw -b 16 -e signed -c 1 -v 7 -r 22050 -  #slow....
 python ax25afsk.py  | multimon-ng -t raw -A -a AFSK1200 -
@@ -11,7 +13,7 @@ sox -t wav test.wav -t raw - | python bin2num.py
 #demodulation
 sox -t wav test.wav -t raw - | python demod.py -
 python demod.py test.raw
-python demod.py test.raw  | sox -t raw -b 32 -e signed-integer -c 1 -v 7 -r 22050 -  -t wav demod.wav
+python demod.py test.raw  | sox -t raw -b 16 -e signed-integer -c 1 -r 22050 -  -t wav demod.wav
 
 sonic-visualiser test.wav
 

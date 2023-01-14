@@ -82,9 +82,9 @@ def create_fir(coefs,scale):
         return o
     return inner
 def create_lpf(ncoefs, fa, fs):
-    wid = 200
+    wid = 400
     coefs = signal.firls(ncoefs,
-                        (0, fa, fa+wid, fs/2),
+                        (0, fa-wid, fa+wid, fs/2),
                         (1, 1,  0,      0), 
                         fs=fs)
     coefs = [round(x*10000) for x in coefs]
@@ -93,7 +93,7 @@ def create_lpf(ncoefs, fa, fs):
                       scale = g,
                       )
 def create_bandpass(ncoefs, fmark, fspace, fs):
-    wid = 200
+    wid = 400
     coefs = signal.firls(ncoefs,
                         (0, fmark-wid, fmark, fspace, fspace+wid, fs/2),
                         (0, 0,         1,     1,      0,          0), 
@@ -147,7 +147,7 @@ class AFSK_DEMOD():
         o = self.o
         for i in range(len(arr)):
             o[i] = arr[i]
-            #o[i] = band(o[i])
+            o[i] = band(o[i])
             o[i] = agc(o[i])
             o[i] = corr(o[i])
             o[i] = lpf(o[i])

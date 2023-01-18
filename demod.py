@@ -4,11 +4,13 @@ import io
 import asyncio
 import struct
 from array import array
-
-from scipy import signal
 import math
 
+import matplotlib.pyplot as plt
+from scipy import signal
+
 from utils import parse_args
+from utils import frange
 
 async def read_pipe():
     loop = asyncio.get_event_loop()
@@ -93,7 +95,7 @@ def create_lpf(ncoefs, fa, fs):
                       scale = g,
                       )
 def create_bandpass(ncoefs, fmark, fspace, fs):
-    wid = 400
+    wid = 600
     coefs = signal.firls(ncoefs,
                         (0, fmark-wid, fmark, fspace, fspace+wid, fs/2),
                         (0, 0,         1,     1,      0,          0), 
@@ -152,6 +154,48 @@ class AFSK_DEMOD():
             o[i] = corr(o[i])
             o[i] = lpf(o[i])
 
+    def analyze(self,start_from = 100e-3):
+        o = self.o
+        m   = max([max(o),abs(min(o))])
+        sca = m//(2**8)
+        st = int(start_from/self.ts)
+        while o[st-1]<0 and o[st] >= 0:
+            st+=1
+        bstp = self.tbaud/self.ts
+        ibaud = int(bstp)
+        st = st - int(bstp/4) # clk sample (center of eye)
+        eye     = {'l':None,'r':None,'u':None,'d':None} #TODO use array lookup
+        booleye = {'l':False,'r':False,} #TODO use array lookup
+        for x in frange(st, len(o)-ibaud, bstp):
+            ci = round(x)
+            r = int(3*ibaud/4) #eye scan range
+            plt.plot(list(range(-r,r)), [v//sca for v in o[ci-r:ci+r]])
+
+            #eye u/d
+            if o[ci] > 0:
+                eye['u'] = eye['u'] if eye['u'] and eye['u'] < o[ci]//sca else o[ci]//sca
+            else:
+                eye['d'] = eye['d'] if eye['d'] and eye['d'] > o[ci]//sca else o[ci]//sca
+
+            #eye l/r
+            for k in booleye:
+                booleye[k] = True
+            for e in range(r):
+                if booleye['l'] and\
+                   (o[ci-e] > 0 and o[ci-e-1] <= 0 or\
+                    o[ci-e] < 0 and o[ci-e-1] >= 0):
+                    eye['l'] = eye['l'] if eye['l'] and eye['l'] > -e else -e
+                    booleye['l'] = False
+                if booleye['r'] and\
+                   (o[ci+e] > 0 and o[ci+e+1] <= 0 or\
+                   o[ci+e] < 0 and o[ci+e+1] >= 0):
+                    eye['r'] = eye['r'] if eye['r'] and eye['r'] < +e else +e
+                    booleye['r'] = False
+                if not booleye['r'] and not booleye['l']:
+                    break
+        print(eye)
+        plt.show()
+
     def dump_raw(self, out_type):
         o   = self.o
         m   = max([max(o),abs(min(o))])
@@ -193,7 +237,8 @@ async def main():
 
     demod = AFSK_DEMOD()
     demod.proc(arr = arr)
-    demod.dump_raw(out_type = 'raw')
+    demod.analyze()
+    # demod.dump_raw(out_type = 'raw')
 
     # tasks = []
     # tasks.append(asyncio.create_task(demod()))
@@ -201,3 +246,5 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+
+

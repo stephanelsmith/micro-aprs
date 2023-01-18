@@ -7,6 +7,8 @@ from pydash import py_ as _
 import struct
 import binascii
 
+from array import array
+
 from crc16 import crc16_ccit
 
 from utils import print_binary
@@ -43,7 +45,7 @@ class AFSK():
         #pre-compute sine lookup table
         self.lookup_size = 1024
 
-        self.sin_array = array('i', int((2**15-1)*math.sin(x)) for x in frange(0,2*math.pi,2*math.pi/self.lookup_size))
+        self.sin_array = array('i', (int((2**15-1)*math.sin(x)) for x in frange(0,2*math.pi,2*math.pi/self.lookup_size)))
 
         #get step sizes (integer and residue)
         mark_step     = self.lookup_size / (self.tmark/self.ts)

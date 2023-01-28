@@ -21,6 +21,7 @@ from utils import reverse_byte
 
 AX25_FLAG      = 0x7e
 AX25_FLAG_NRZI = 0xfe #preconverted to NRZI
+AX25_ADDR_LEN  = 7
 
 async def read_pipe():
     loop = asyncio.get_event_loop()
@@ -154,6 +155,76 @@ def create_eye(fbaud,
         #print(o,end='')
         return o
     return inner
+
+
+class CallSSID():
+    __slots__ = (
+        'call',
+        'ssid',
+    )
+    def __init__(self, call = None,
+                       ssid = None,):
+        self.call = call 
+        self.ssid = ssid
+
+    def from_aprs(self, call_ssid):
+        #read in formats like KI5TOF-5
+        if isinstance(call_ssid, str):
+            call_ssid = callsign.split('-')
+            self.call = call_ssid[0].upper()
+            self.ssid = call_ssid[1] if len(call_ssid)==2 else 0
+        elif isinstance(call_ssid, (bytes, bytearray)):
+            call_ssid = callsign.decode('utf').split('-')
+            self.call = call_ssid[0].upper()
+            self.ssid = call_ssid[1] if len(call_ssid)==2 else 0
+        else:
+            raise Exception('unknown format '+str(call_ssid))
+
+    def from_ax25(self, mv):
+        #read from encoded ax25 format 
+        if len(mv) != 7:
+            raise Exception('callsign unable to read from bytes, bad length ' +str(len(mv)))
+        for call_len in range(6):
+            if mv[call_len] == 0x40: #searching for ' ' character (still left shifted one)
+                break
+            call_len += 1
+        self.call = mv[:call_len] #save as bytearray instead of string
+        for i in range(call_len):
+            self.call[i] = self.call[i]>>1
+        self.ssid = (mv[7] & 0x17)>>1
+
+    def __repr__(self):
+        if self.ssid:
+            return str(self.call)
+        else:
+            return str(self.call)+'-'+str(self.ssid)
+
+class AX25():
+    __slots__ = (
+        'src',
+        'dst',
+        'digis',
+        'ctrl',
+        'pid',
+        'info',
+        'crc',
+    )
+
+    def __init__(self, src        = None,
+                       dst        = None,
+                       digis      = [],
+                       ctrl       = None,
+                       pid        = None,
+                       info       = None,
+                       crc        = None,
+                       ):
+        self.src        = src
+        self.dst        = dst
+        self.digis      = digis
+        self.ctrl       = ctrl
+        self.pid        = pid
+        self.info       = info
+        self.crc        = crc
 
 
 class AFSK_DEMOD():
@@ -356,6 +427,20 @@ class AFSK_DEMOD():
         for idx in range(len(mv)):
             mv[idx] = reverse_byte(mv[idx])
 
+    def ax25_decode(self, mv):
+        ax25 = AX25()
+        
+        idx = 0
+
+        #flags
+        while mv[idx] == 0x7e:
+            idx+=1
+
+        #destination
+        ax25.dst = bytearray(mv[idx:idx+AX25_ADDR_LEN])
+
+        return ax25
+
     async def frame_coro(self, debug = True):
         try:
             while True:
@@ -384,8 +469,11 @@ class AFSK_DEMOD():
                     pretty_binary(mv)
 
                 #decode
+                ax25 = self.ax25_decode(mv)
+                if debug:
+                    print('-ax25 decoded-')
+                    print(ax25)
 
-                #check crc
 
         except Exception as err:
             traceback.print_exc()

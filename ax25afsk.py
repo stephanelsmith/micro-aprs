@@ -134,10 +134,10 @@ class AX25():
         self.frame = bytearray()
         self.frame_len_bits = 0
 
-    def encode_ui_frame(self, src,
-                              dst, 
-                              digis,
-                              info, 
+    def encode_ui_frame(self, src,       # source address
+                              dst,       # destination address
+                              digis,     # digipeater list
+                              info,      # info
                               flags_pre   = 1,
                               flags_post  = 1,
                               debug       = False,

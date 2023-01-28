@@ -3,14 +3,24 @@ import sys
 import io
 import asyncio
 import struct
+import traceback
 from array import array
 import math
+from pydash import py_ as _
 
 import matplotlib.pyplot as plt
 from scipy import signal
 
+from asyncio import Queue
+
 from utils import parse_args
 from utils import frange
+from utils import pretty_binary
+from utils import int_div_ceil
+from utils import reverse_byte
+
+AX25_FLAG      = 0x7e
+AX25_FLAG_NRZI = 0xfe #preconverted to NRZI
 
 async def read_pipe():
     loop = asyncio.get_event_loop()
@@ -108,6 +118,43 @@ def create_bandpass(ncoefs, fmark, fspace, fs):
                       scale = g,
                       )
 
+def create_eye(fbaud, 
+               fs, ):
+    tbaud = fs/fbaud #inverted for t
+    ibaud = round(tbaud) #integer step
+    ibaud_2 = round(tbaud/2)
+    buf = array('i', (0 for x in range(2)))
+    buflen = 2
+    idx = 0
+    lastx = 0 #last crossing
+    o = 0
+    oidx = 0
+    _NONE = 2
+    def inner(v:int)->int:
+        nonlocal idx,buf,lastx
+        nonlocal o,oidx
+        buf[idx] = v
+        if (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0):
+            #detected crossing
+            if lastx > ibaud_2 and lastx < ibaud*8:
+                oidx = (lastx - ibaud_2)//ibaud+1 #number of baud periods
+                # o = 1 if buf[idx-1]>0 else 0
+                # the correlator inverts mark/space, invert here to mark=1, space=0
+                o = 0 if buf[idx-1]>0 else 1
+                # print(''.join([str(o)]*oidx))
+            else:
+                oidx = 0
+            lastx = 0
+        else:
+            lastx += 1
+        idx = (idx+1)%buflen
+        if oidx == 0:
+            return _NONE
+        oidx -= 1
+        #print(o,end='')
+        return o
+    return inner
+
 
 class AFSK_DEMOD():
     def __init__(self, sampling_rate=22050):
@@ -139,20 +186,21 @@ class AFSK_DEMOD():
         self.lpf = create_lpf(ncoefs = ncoefs,
                               fa     = 1200,
                               fs     = self.fs)
+        self.eye = create_eye(fbaud = self.fbaud,
+                              fs    = self.fs)
 
-    def proc(self, arr):
-        corr  = self.corr
-        agc   = self.agc
-        lpf   = self.lpf
-        band  = self.band
-        self.o = array('i', (0 for x in range(len(arr))))
-        o = self.o
-        for i in range(len(arr)):
-            o[i] = arr[i]
-            o[i] = band(o[i])
-            o[i] = agc(o[i])
-            o[i] = corr(o[i])
-            o[i] = lpf(o[i])
+        self.tasks = []
+        self.bits_q = Queue()
+        self.frame_q = Queue()
+
+    async def __aenter__(self):
+        self.tasks.append(asyncio.create_task(self.delimin_coro()))
+        self.tasks.append(asyncio.create_task(self.frame_coro()))
+        return self
+
+    async def __aexit__(self, *args):
+        _.for_each(self.tasks, lambda t: t.cancel())
+        await asyncio.gather(*self.tasks, return_exceptions=True)
 
     def analyze(self,start_from = 100e-3):
         o = self.o
@@ -169,7 +217,7 @@ class AFSK_DEMOD():
         for x in frange(st, len(o)-ibaud, bstp):
             ci = round(x)
             r = int(3*ibaud/4) #eye scan range
-            plt.plot(list(range(-r,r)), [v//sca for v in o[ci-r:ci+r]])
+            #plt.plot(list(range(-r,r)), [v//sca for v in o[ci-r:ci+r]])
 
             #eye u/d
             if o[ci] > 0:
@@ -194,7 +242,155 @@ class AFSK_DEMOD():
                 if not booleye['r'] and not booleye['l']:
                     break
         print(eye)
-        plt.show()
+        # plt.show()
+
+    async def afsk_arr_in(self, arr):
+        corr  = self.corr
+        agc   = self.agc
+        lpf   = self.lpf
+        band  = self.band
+        eye  = self.eye
+        self.o = array('i', (0 for x in range(len(arr))))
+        o = self.o
+        self.bs = array('i', (0 for x in range(len(arr))))
+        bs = self.bs
+
+        for i in range(len(arr)):
+            o[i] = arr[i]
+            o[i] = band(o[i])
+            #o[i] = agc(o[i])
+            o[i] = corr(o[i])
+            o[i] = lpf(o[i])
+            bs[i] = eye(o[i])
+        for b in bs:
+            if b == 1 or b == 0:
+                await self.bits_q.put(b)
+
+    async def delimin_coro(self):
+        try:
+            inbsize = 512
+            inb = bytearray(inbsize)
+            mv = memoryview(inb)
+            idx = 0
+            flgcnt = 0
+            while True:
+                b = await self.bits_q.get()
+                mask = (0x80>>(idx%8))
+                inb[idx//8] = inb[idx//8]|mask if b else inb[idx//8]&(mask^0xff)
+                if b == 0 and flgcnt == 7:
+                    #detected ax25 frame flag
+                    #print('\nax25 nrzi flag')
+                    if idx//8 > 6: 
+                        #at least 6 bytes
+                        await self.frame_q.put((bytearray(mv[:int_div_ceil(idx,8)]), idx))
+                    flgcnt = 0
+                    #copy flag
+                    mv[0] = AX25_FLAG_NRZI
+                    idx = 8
+                    continue
+                flgcnt = flgcnt + 1 if b else 0
+                if flgcnt == 8:
+                    #print('\nainvalid, 8 1s')
+                    idx = 0
+                    flgcnt = 0
+                    continue
+                idx += 1
+                if idx == inbsize:
+                    #print('overflow')
+                    idx = 0
+        except Exception as err:
+            traceback.print_exc()
+
+    def decode_nrzi(self, mv, stop_bit):
+        c = 0
+        for idx in range(stop_bit):
+            mask = (0x80)>>(idx%8)
+            b = (mv[idx//8] & mask) >> ((8-idx-1)%8) #pick bit
+            if b != c:
+                c = b
+                mv[idx//8] &= (mask ^ 0xff)
+            else:
+                c = b
+                mv[idx//8] |= mask
+
+    def unstuff(self, mv, stop_bit):
+        #look for 111110, remove the 0
+        c = 0
+        for idx in range(stop_bit):
+            mask = (0x80>>(idx%8))
+            b = (mv[idx//8] & mask) >> ((8-idx-1)%8) #pick bit
+            if b == 0 and c == 5:
+                #detected stuffed bit, remove it
+                shift_in = self.shift_bytes_left(mv, idx//8+1)
+                self.remove_bit_shift_from_right(mv, idx, shift_in)
+                c = 0
+            c = c+b if b==1 else 0
+
+    def remove_bit_shift_from_right(self, mv, idx, shift_in=0):
+        if idx%8 == 7:
+            #the bit is far right, just apply shift_in
+            pass
+        else:
+            #we need to split at specific bit index position
+            #get the portion that's getting shifted
+            rmask = 0xff >> (idx%8)
+            lmask = rmask ^ 0xff
+            mv[idx//8] = (lmask & mv[idx//8]) | (((mv[idx//8]&rmask)<<1)&0xff)
+        if shift_in:
+            mv[idx//8] |= 0x01
+        else:
+            mv[idx//8] &= (0x01 ^ 0xff)
+
+    def shift_bytes_left(self, mv, start_byte):
+        l = 0x00
+        #idx iterating byte index
+        for idx in range(len(mv)-1,start_byte-1, -1):
+            #work from right to left
+            t = 0x80 & mv[idx] #save bit shifted out
+            mv[idx] = (mv[idx]<<1)&0xff
+            mv[idx] = mv[idx] | 0x01 if l else mv[idx] #shift l
+            l = t # store shifted bit for next iteration
+        return l
+
+    def reverse_bit_order(self, mv):
+        for idx in range(len(mv)):
+            mv[idx] = reverse_byte(mv[idx])
+
+    async def frame_coro(self, debug = True):
+        try:
+            while True:
+                buf,stop_bit = await self.frame_q.get()
+                mv = memoryview(buf)
+                if debug:
+                    print('-afsk ax25 deliminated bits-')
+                    pretty_binary(mv)
+
+                #de-nrzi
+                self.decode_nrzi(mv, stop_bit)
+                if debug:
+                    print('-un-nrzi-')
+                    pretty_binary(mv)
+
+                #unstuff
+                self.unstuff(mv, stop_bit)
+                if debug:
+                    print('-un-stuffed-')
+                    pretty_binary(mv)
+
+                #reverse bit order
+                self.reverse_bit_order(mv)
+                if debug:
+                    print('-un-reversed-')
+                    pretty_binary(mv)
+
+                #decode
+
+                #check crc
+
+        except Exception as err:
+            traceback.print_exc()
+
+
 
     def dump_raw(self, out_type):
         o   = self.o
@@ -235,14 +431,12 @@ async def main():
     else:
         arr = await read_file(src = src)
 
-    demod = AFSK_DEMOD()
-    demod.proc(arr = arr)
-    demod.analyze()
-    # demod.dump_raw(out_type = 'raw')
+    async with AFSK_DEMOD() as demod:
+        await demod.afsk_arr_in(arr = arr)
+        await asyncio.sleep(1)
 
-    # tasks = []
-    # tasks.append(asyncio.create_task(demod()))
-    # await asyncio.gather(*tasks)
+    #demod.analyze()
+    # demod.dump_raw(out_type = 'raw')
 
 if __name__ == '__main__':
     asyncio.run(main())

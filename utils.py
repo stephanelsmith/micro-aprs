@@ -16,19 +16,50 @@ def parse_args(argdefs):
                 args[arg] = argdef['type'](sys.argv[idx+1])
     return args
 
+# integer division + ceil operation
+# used in place of int(math.ceil(total_size/chunk_size))
+def int_div_ceil(total_size, chunk_size):
+    # return total_size//chunk_size + (bool(total_size%chunk_size))
+    return total_size//chunk_size + (1 if total_size%chunk_size else 0)
 
-def print_byte(b):
-    print_binary([b])
+def pretty_binary(mv, cols=10):
+    for ridx in range(0,len(mv),cols):
+        #byte number
+        print(str(ridx).zfill(4),' ',end='') 
+        #hex
+        for idx in range(ridx,ridx+cols):
+            v = hex(mv[idx])[2:].zfill(2) if idx<len(mv) else '--'
+            print(v,end=' ')
+        print('  ',end='')
+        #binary
+        for idx in range(ridx,ridx+cols):
+            for b in range(8):
+                if idx<len(mv):
+                    v = 1 if (0x80>>b) & mv[idx] else 0
+                else:
+                    v = '-'
+                print(v,end='')
+            print(' ',end='')
+        print('  ',end='')
+        #string
+        for idx in range(ridx,ridx+cols):
+            v = chr(mv[idx]) if idx<len(mv) else '-'
+            print(v,end='')
+        print()
 
-def print_binary(mv):
-    for idx in range(len(mv)*8):
-        if idx%8==0:
-            print('{} {} {} 0x{} '.format(str(idx//8).zfill(4), str(idx).zfill(4), chr(mv[idx//8]), hex(mv[idx//8])[2:].zfill(2)), end='')
-        if idx%8==4:
-            print(' ', end='')
-        print(1 if mv[idx//8] & (0x80>>(idx%8)) else 0, end='')
-        if idx%8==7:
-            print('')
+def format_bytes(mv):
+    o = ''
+    for idx in range(len(mv)):
+        o += hex(mv[idx])[2:].zfill(2)
+        o += ' '
+    return o
+def format_bits(mv):
+    o = ''
+    for idx in range(len(mv)):
+        for b in range(8):
+            o += '1' if (0x80>>b)&mv[idx] else '0'
+        o += ' '
+    return o
 
 def reverse_byte(_byte):
     #xor reverse bit technique

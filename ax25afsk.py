@@ -11,7 +11,9 @@ from array import array
 
 from crc16 import crc16_ccit
 
-from utils import print_binary
+from utils import pretty_binary
+from utils import format_bytes
+from utils import format_bits
 from utils import parse_args
 from utils import reverse_byte
 from utils import frange
@@ -102,7 +104,6 @@ class AFSK():
             self.ts_index += 1 #increment one unit time step (ts = 1/fs)
 
 
-    #TODO, DONT APPEND TO ARRAY
     def dump_ax25_raw_samples(self, ax25,
                                     zpad_ms,
                                     out_type):
@@ -137,9 +138,10 @@ class AX25():
                               dst, 
                               digis,
                               info, 
-                              flags_pre  = 1,
-                              flags_post = 1,
-                              dbg_frame = False):
+                              flags_pre   = 1,
+                              flags_post  = 1,
+                              debug       = False,
+                              ):
 
         #pre-allocate entire buffer size
         frame_len = AX25_FLAG_LEN*flags_pre +\
@@ -157,57 +159,82 @@ class AX25():
         mv    = memoryview(self.frame)
         idx = 0
 
+        if debug:
+            print('-FRAME-')
+
         #pre-flags
         for fidx in range(flags_pre):
             mv[idx] = AX25_FLAG
             idx += AX25_FLAG_LEN
+        if debug:
+            print('FLAGS:'.ljust(15), format_bytes(mv[:idx]))
 
         # destination Address  (note: opposite order in printed format)
         self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
                              callsign = dst)
+        if debug:
+            print('DEST_ADDR:'.ljust(15),dst.ljust(15),format_bytes(mv[idx:idx+AX25_ADDR_LEN]), format_bits(mv[idx:idx+AX25_ADDR_LEN]))
         idx += AX25_ADDR_LEN
-        mv[idx-1]  |= 0xe0  #last bit of the addr
+
         # source Address
         self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
                              callsign = src)
+        if debug:
+            print('SRC_ADDR:'.ljust(15),src.ljust(15),format_bytes(mv[idx:idx+AX25_ADDR_LEN]), format_bits(mv[idx:idx+AX25_ADDR_LEN]))
         idx += AX25_ADDR_LEN
-        mv[idx-1]  |= 0xe0  #last bit of the addr
+
         # 0-8 Digipeater Addresses
         for digi in digis[:8]:
             self.encode_callsign(b_out    = mv[idx:idx+AX25_ADDR_LEN],
                                  callsign = digi)
-            mv[idx-1]  |= 0x60  #last bit of the addr
+            if debug:
+                print('DIGI_ADDR:'.ljust(15),digi.ljust(15),format_bytes(mv[idx:idx+AX25_ADDR_LEN]), format_bits(mv[idx:idx+AX25_ADDR_LEN]))
             idx += AX25_ADDR_LEN
-        mv[idx-1]  |= 0x01  #last bit of the addr
+
+        #LAST BIT OF ADDRESS, SET LSB TO 1
+        mv[idx-1]  |= 0x01 
+
         mv[idx] = 0x03 #control
         idx += 1
         mv[idx] = 0xf0 #pid
         idx += 1
+        if debug:
+            print('CONTROL/PID:'.ljust(15), format_bytes(mv[idx-2:idx]), format_bits(mv[idx-2:idx]))
 
-        #copy info
+        #payload
         mv[idx:idx+len(info)] = bytes(info,'utf')
+        if debug:
+            print('INFO (bin):'.ljust(15), format_bytes(mv[idx:idx+len(info)]), format_bits(mv[idx:idx+len(info)]))
+            print('INFO (str):'.ljust(15), bytes(mv[idx:idx+len(info)]))
         idx += len(info)
 
         #crc
-        # print(len(mv),idx)
-
         crc_len = 2
         mv[idx:idx+crc_len] = bytearray(struct.pack('<H',crc16_ccit(mv[flags_pre*AX25_FLAG_LEN:idx])))
+        if debug:
+            print('CRC:'.ljust(15), format_bytes(mv[idx:idx+crc_len]), format_bits(mv[idx:idx+crc_len]))
         idx += crc_len
 
         #post-flags
+        tidx = idx 
         for fidx in range(flags_post):
             mv[idx] = AX25_FLAG
             idx += AX25_FLAG_LEN
+        if debug:
+            print('FLAGS:'.ljust(15), format_bytes(mv[tidx:idx]))
 
         if idx != frame_len:
             raise Exception('frame len error: idx ({}) != frame_len ({})'.format(idx, frame_len))
 
-        if dbg_frame:
-            print_binary(mv)
+        if debug:
+            print('-frame-')
+            pretty_binary(mv)
 
         #revese bit order
         self.reverse_bit_order(mv, frame_len)
+        if debug:
+            print('-reversed-')
+            pretty_binary(mv)
 
         # stuff bits in place
         # update the total number of bits
@@ -215,17 +242,19 @@ class AX25():
                                         start_bit = flags_pre*AX25_FLAG_LEN*8, 
                                         stop_bit  = self.frame_len_bits - flags_post*AX25_FLAG_LEN*8)
         self.frame_len_bits += stuff_cnt
-        # print('-bit stiffed-')
-        # print('frame_len_bits', frame_len_bits)
-        # print_binary(mv)
+        if debug:
+            print('-bit stuffed-')
+            pretty_binary(mv)
 
         #convert to nrzi
         self.convert_nrzi(mv,
                           stop_bit = self.frame_len_bits)
-        # print_binary(mv)
+        if debug:
+            print('-nrzi-')
+            pretty_binary(mv)
 
     def encode_callsign(self, b_out, callsign,):
-        #split callsign from ssid
+        #split callsign from ssid, eg. KI5TOF-5
         call_ssid = callsign.split('-')
         call = call_ssid[0].upper()
         ssid = int(call_ssid[1]) if len(call_ssid)==2 else 0
@@ -237,8 +266,10 @@ class AX25():
         #shift left in place
         for idx in range(6):
             b_out[idx] = b_out[idx]<<1
-        # b_out[6]  = 0x60|(ssid<<1)
+        #SSID is is the 6th bit, shift left by one
+        #the right most bit is used to indicate last address
         b_out[6]  = ssid<<1
+        b_out[6]  |= 0x60
     
     def reverse_bit_order(self, mv, frame_len):
         for idx in range(frame_len):
@@ -247,39 +278,47 @@ class AX25():
     def do_bitstuffing(self, mv, start_bit, stop_bit):
         #bit stuff frame in place
         idx = start_bit
-        cnt = 0
+        c = 0
         stuff_cnt = 0
         while idx < stop_bit:
             if mv[idx//8] & (0x80>>(idx%8)):
-                cnt += 1
+                c += 1
             else:
-                cnt = 0
+                c = 0
             idx += 1
-            if cnt == 5:
+            if c == 5:
                 #stuff a bit
                 #shift all bytes to the right, starting next byte
                 self.insert_bit_in_array(mv, bit_idx = idx)
-                cnt = 0
+                c = 0
                 stuff_cnt += 1 #
                 idx += 1
         return stuff_cnt
 
     def insert_bit_in_array(self, mv, bit_idx):
+        #shift bytes right
         self.shift_bytes_right(mv, start_byte = bit_idx//8+1)
+        #byte in question, stuff the bit
         self.split_shift_byte(mv, bit_idx)
 
     def shift_bytes_right(self, mv, start_byte, stop_byte=None):
+        #shift bytes right by one bit
         if not stop_byte:
             stop_byte = len(mv)
+        #idx iterating byte index
         for idx in range(stop_byte-1, start_byte-1, -1):
+            #work from right to left
             p       = 0 if idx == 0 else (mv[idx-1]&0x01)
             q       = 0x80 if p else 0
             mv[idx] = (mv[idx]>>1) | q
 
     def split_shift_byte(self, mv, idx):
+        #insert a 0 at bit index position
         if idx%8 == 0:
+            #if we are shifting the first bit, just shift
             mv[idx//8] = mv[idx//8] >> 1
         else:
+            #we need to split at specific bit index position
             #right side
             t_shift = mv[idx//8] & (0xff>>(idx%8))
             t_shift = t_shift >> 1
@@ -289,13 +328,14 @@ class AX25():
             mv[idx//8] = mv[idx//8] | t_shift
     
     def convert_nrzi(self, mv, stop_bit):
+        #https://en.wikipedia.org/wiki/Non-return-to-zero
+        #The HDLC a logical 0 is transmitted as a transition, and a logical 1 is transmitted as no transition.
         cur = 1
         for idx in range(stop_bit):
             mask = (0x80>>(idx%8))
             b    = mv[idx//8] & mask
             if b == 0:
-                cur = cur ^ 0x01  #equivalent to statement below
-                # cur = 0 if cur else 1
+                cur ^= 0x01 #flip
             if cur:
                 # set bit
                 mv[idx//8]  = mv[idx//8] | mask
@@ -327,8 +367,8 @@ args = parse_args({
         'type'    : int,
         'default' : 1+2,
     },
-    'print_frame' : {
-        'short'   : 'print_frame',
+    'debug' : {
+        'short'   : 'debug',
         'type'    : bool,
         'default' : False,
     },
@@ -351,8 +391,8 @@ ax25.encode_ui_frame(src        = 'A',
                      info       = '>hello', 
                      flags_pre  = args['flags_pre'],
                      flags_post = args['flags_post'],
-                     dbg_frame  = args['print_frame'])
-if args['print_frame']:
+                     debug      = args['debug'])
+if args['debug']:
     #we are debugging, exit early
     exit()
 

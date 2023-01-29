@@ -68,6 +68,16 @@ def reverse_byte(_byte):
     _byte = ((_byte & 0x0F) << 4) | ((_byte & 0xF0) >> 4);
     return _byte
 
+def assign_bit(byte, idx, value):
+    mask = (0x80>>(idx%8))
+    if value:
+        return byte | mask
+    else:
+        return byte & (mask ^ 0xff)
+def get_bit(byte, idx):
+    mask = (0x80)>>(idx%8)
+    return (byte & mask) >> ((8-idx-1)%8)
+
 def frange(start, stop, step, rnd=None):
     n = int(math.ceil((stop - start) / step))
     if isinstance(rnd,int):

@@ -13,14 +13,18 @@ from scipy import signal
 
 from asyncio import Queue
 
+from crc16 import crc16_ccit
 from utils import parse_args
 from utils import frange
 from utils import pretty_binary
+from utils import format_bytes
+from utils import format_bits
 from utils import int_div_ceil
 from utils import reverse_byte
+from utils import assign_bit
+from utils import get_bit
 
 AX25_FLAG      = 0x7e
-AX25_FLAG_NRZI = 0xfe #preconverted to NRZI
 AX25_ADDR_LEN  = 7
 
 async def read_pipe():
@@ -94,6 +98,7 @@ def create_fir(coefs,scale):
         idx = (idx+1)%ncoefs
         return o
     return inner
+
 def create_lpf(ncoefs, fa, fs):
     wid = 400
     coefs = signal.firls(ncoefs,
@@ -105,6 +110,7 @@ def create_lpf(ncoefs, fa, fs):
     return create_fir(coefs = coefs,
                       scale = g,
                       )
+
 def create_bandpass(ncoefs, fmark, fspace, fs):
     wid = 600
     coefs = signal.firls(ncoefs,
@@ -119,7 +125,7 @@ def create_bandpass(ncoefs, fmark, fspace, fs):
                       scale = g,
                       )
 
-def create_eye(fbaud, 
+def create_sampler(fbaud, 
                fs, ):
     tbaud = fs/fbaud #inverted for t
     ibaud = round(tbaud) #integer step
@@ -162,23 +168,37 @@ class CallSSID():
         'call',
         'ssid',
     )
-    def __init__(self, call = None,
-                       ssid = None,):
+    def __init__(self, call = None, ssid = None,
+                       aprs = None,
+                       ax25 = None,
+                       ):
+        # Initialize a callsign ssid in three ways
+        #   1) By specifying call and ssid explicitly
+        #   2) By specifying aprs formatted string/bytes, eg. KI5TOF-5
+        #   3) By specifying ax25 bytes to be decoded
         self.call = call 
         self.ssid = ssid
+        if ax25:
+            self.from_ax25(ax25)
+        elif aprs:
+            self.from_aprs(aprs)
 
     def from_aprs(self, call_ssid):
         #read in formats like KI5TOF-5
         if isinstance(call_ssid, str):
             call_ssid = callsign.split('-')
-            self.call = call_ssid[0].upper()
-            self.ssid = call_ssid[1] if len(call_ssid)==2 else 0
         elif isinstance(call_ssid, (bytes, bytearray)):
             call_ssid = callsign.decode('utf').split('-')
-            self.call = call_ssid[0].upper()
-            self.ssid = call_ssid[1] if len(call_ssid)==2 else 0
         else:
             raise Exception('unknown format '+str(call_ssid))
+        self.call = call_ssid[0].upper()
+        self.ssid = int(call_ssid[1]) if len(call_ssid)==2 else 0
+
+    def to_aprs(self):
+        if self.ssid:
+            return str(self.call)+'-'+str(self.ssid)
+        else:
+            return str(self.call)
 
     def from_ax25(self, mv):
         #read from encoded ax25 format 
@@ -188,43 +208,98 @@ class CallSSID():
             if mv[call_len] == 0x40: #searching for ' ' character (still left shifted one)
                 break
             call_len += 1
-        self.call = mv[:call_len] #save as bytearray instead of string
+        self.call = bytearray(mv[:call_len]) #make bytearray copy, don't modify in place
         for i in range(call_len):
             self.call[i] = self.call[i]>>1
-        self.ssid = (mv[7] & 0x17)>>1
+        self.call = self.call.decode('utf')
+        self.ssid = (mv[6] & 0x17)>>1
+
+    def to_ax25(self):
+        return b''
 
     def __repr__(self):
-        if self.ssid:
-            return str(self.call)
-        else:
-            return str(self.call)+'-'+str(self.ssid)
+        return self.to_aprs()
 
 class AX25():
     __slots__ = (
         'src',
         'dst',
         'digis',
-        'ctrl',
-        'pid',
         'info',
-        'crc',
     )
 
-    def __init__(self, src        = None,
-                       dst        = None,
+    def __init__(self, src        = '',
+                       dst        = '',
                        digis      = [],
-                       ctrl       = None,
-                       pid        = None,
-                       info       = None,
-                       crc        = None,
+                       info       = '',
+                       aprs       = None,
+                       ax25       = None,
                        ):
+        # Initialize in three different ways
+        #   1) The individual fields directly
+        #   2) By APRS message, eg. M0XER-4>APRS64,TF3RPF,WIDE2*,qAR,TF3SUT-2:!/.(M4I^C,O `DXa/A=040849|#B>@\"v90!+|
+        #   3) By AX25 bytes
         self.src        = src
         self.dst        = dst
         self.digis      = digis
-        self.ctrl       = ctrl
-        self.pid        = pid
         self.info       = info
-        self.crc        = crc
+        if ax25:
+            self.from_ax25(ax25 = ax25)
+        elif aprs:
+            self.from_aprs(aprs = aprs)
+
+    def callssid_to_str(self, callssid):
+        try:
+            return callssid.to_aprs()
+        except:
+            return ''
+
+    def to_aprs(self):
+        src = self.callssid_to_str(self.src)
+        dst = self.callssid_to_str(self.dst)
+        dst_digis = ','.join([dst]+[self.callssid_to_str(digi) for digi in self.digis])
+        return src+'>'+dst_digis+':'+self.info
+    
+    def from_aprs(self, aprs):
+        pass
+
+    def from_ax25(self, ax25):
+        mv = memoryview(ax25)
+
+        idx = 0
+        #flags
+        while mv[idx] == AX25_FLAG and idx < len(mv):
+            idx+=1
+        start_idx = idx
+
+        stop_idx = idx
+        while mv[stop_idx] != AX25_FLAG and stop_idx < len(mv):
+            stop_idx+=1
+
+        #destination
+        self.dst = CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN])
+        idx += AX25_ADDR_LEN
+
+        #source
+        self.src = CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN])
+        idx += AX25_ADDR_LEN
+       
+        #digis
+        while not mv[idx-1]&0x01:
+            self.digis.append(CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN]))
+            idx += AX25_ADDR_LEN
+
+        #skip control/pid
+        idx += 2
+
+        self.info = bytes(mv[idx:stop_idx-2]).decode('utf')
+        crc  = bytes(mv[stop_idx-2:stop_idx])
+        _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
+        if crc != _crc:
+            raise Exception('crc error '+str(crc)+' != '+str(_crc))
+
+    def __repr__(self):
+        return self.to_aprs()
 
 
 class AFSK_DEMOD():
@@ -257,8 +332,8 @@ class AFSK_DEMOD():
         self.lpf = create_lpf(ncoefs = ncoefs,
                               fa     = 1200,
                               fs     = self.fs)
-        self.eye = create_eye(fbaud = self.fbaud,
-                              fs    = self.fs)
+        self.eye = create_sampler(fbaud = self.fbaud,
+                                  fs    = self.fs)
 
         self.tasks = []
         self.bits_q = Queue()
@@ -316,6 +391,9 @@ class AFSK_DEMOD():
         # plt.show()
 
     async def afsk_arr_in(self, arr):
+        # Process a chunk of samples
+        # input is arr, an integer array
+        # output is bits_q, this bit stream is delminiated in delimin_coro task
         corr  = self.corr
         agc   = self.agc
         lpf   = self.lpf
@@ -328,8 +406,8 @@ class AFSK_DEMOD():
 
         for i in range(len(arr)):
             o[i] = arr[i]
-            o[i] = band(o[i])
-            #o[i] = agc(o[i])
+            # o[i] = band(o[i])
+            # o[i] = agc(o[i])
             o[i] = corr(o[i])
             o[i] = lpf(o[i])
             bs[i] = eye(o[i])
@@ -338,51 +416,48 @@ class AFSK_DEMOD():
                 await self.bits_q.put(b)
 
     async def delimin_coro(self):
+        # We receive a stream of 1s and 0s from bits_q, this function
+        # will find/chunk the bitstream delminiated by the AX25 flags
+        # output: (bytearray, num_bits) is sent to frame_q
         try:
-            inbsize = 512
+            inbsize = 2024
             inb = bytearray(inbsize)
             mv = memoryview(inb)
             idx = 0
             flgcnt = 0
+            unnrzi = self.create_unnrzi()
             while True:
-                b = await self.bits_q.get()
-                mask = (0x80>>(idx%8))
-                inb[idx//8] = inb[idx//8]|mask if b else inb[idx//8]&(mask^0xff)
-                if b == 0 and flgcnt == 7:
-                    #detected ax25 frame flag
-                    #print('\nax25 nrzi flag')
-                    if idx//8 > 6: 
-                        #at least 6 bytes
-                        await self.frame_q.put((bytearray(mv[:int_div_ceil(idx,8)]), idx))
-                    flgcnt = 0
-                    #copy flag
-                    mv[0] = AX25_FLAG_NRZI
-                    idx = 8
-                    continue
-                flgcnt = flgcnt + 1 if b else 0
-                if flgcnt == 8:
-                    #print('\nainvalid, 8 1s')
-                    idx = 0
-                    flgcnt = 0
-                    continue
+                _b = await self.bits_q.get()
+                #UN NRZI, it's better to do it here since
+                # - easy to detect the AX25 flags decoded (they can be flipped in NRZI)
+                # - ideally done with closure
+                b = unnrzi(_b)
+                # print(b,end='')
+                inb[idx//8] = assign_bit(inb[idx//8], idx, b)
                 idx += 1
+                if b == 0 and flgcnt == 6:
+                    #detected ax25 frame flag
+                    if idx//8 > 2: 
+                        await self.frame_q.put((bytearray(mv[:int_div_ceil(idx,8)]), idx))
+                    mv[0] = AX25_FLAG #keep the frame flag that we detected in buffer
+                    idx = 8
+                flgcnt = flgcnt + 1 if b else 0
                 if idx == inbsize:
-                    #print('overflow')
                     idx = 0
         except Exception as err:
             traceback.print_exc()
 
-    def decode_nrzi(self, mv, stop_bit):
-        c = 0
-        for idx in range(stop_bit):
-            mask = (0x80)>>(idx%8)
-            b = (mv[idx//8] & mask) >> ((8-idx-1)%8) #pick bit
+    def create_unnrzi(self):
+        c = 1
+        def inner(b):
+            nonlocal c
             if b != c:
                 c = b
-                mv[idx//8] &= (mask ^ 0xff)
+                return 0
             else:
                 c = b
-                mv[idx//8] |= mask
+                return 1
+        return inner
 
     def unstuff(self, mv, stop_bit):
         #look for 111110, remove the 0
@@ -427,20 +502,6 @@ class AFSK_DEMOD():
         for idx in range(len(mv)):
             mv[idx] = reverse_byte(mv[idx])
 
-    def ax25_decode(self, mv):
-        ax25 = AX25()
-        
-        idx = 0
-
-        #flags
-        while mv[idx] == 0x7e:
-            idx+=1
-
-        #destination
-        ax25.dst = bytearray(mv[idx:idx+AX25_ADDR_LEN])
-
-        return ax25
-
     async def frame_coro(self, debug = True):
         try:
             while True:
@@ -448,12 +509,6 @@ class AFSK_DEMOD():
                 mv = memoryview(buf)
                 if debug:
                     print('-afsk ax25 deliminated bits-')
-                    pretty_binary(mv)
-
-                #de-nrzi
-                self.decode_nrzi(mv, stop_bit)
-                if debug:
-                    print('-un-nrzi-')
                     pretty_binary(mv)
 
                 #unstuff
@@ -469,32 +524,14 @@ class AFSK_DEMOD():
                     pretty_binary(mv)
 
                 #decode
-                ax25 = self.ax25_decode(mv)
+                ax25 = AX25(ax25 = mv)
                 if debug:
                     print('-ax25 decoded-')
                     print(ax25)
 
-
         except Exception as err:
             traceback.print_exc()
 
-
-
-    def dump_raw(self, out_type):
-        o   = self.o
-        m   = max([max(o),abs(min(o))])
-        m   = max(o)
-        sca = m//(2**15)+1
-        #print(m)
-        #print(sca)
-        for s in self.o:
-            # x = int.to_bytes(s, 2, 'little', signed=True)
-            try:
-                x = struct.pack('<h', s//sca)
-            except:
-                #print('ERROR PACKING',s,sca,s//sca,0x7fff)
-                x = struct.pack('<h', 0)
-            sys.stdout.buffer.write(x)
 
 
 async def main():
@@ -524,7 +561,6 @@ async def main():
         await asyncio.sleep(1)
 
     #demod.analyze()
-    # demod.dump_raw(out_type = 'raw')
 
 if __name__ == '__main__':
     asyncio.run(main())

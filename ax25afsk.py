@@ -17,12 +17,13 @@ from utils import format_bits
 from utils import parse_args
 from utils import reverse_byte
 from utils import frange
+from utils import assign_bit
+from utils import get_bit
 
 verbose = False
 
 
 AX25_FLAG      = 0x7e
-AX25_FLAG_NRZI = 0xfe #preconverted to NRZI
 AX25_FLAG_LEN  = 1
 AX25_ADDR_LEN  = 7
 AX25_CONTROLPID_LEN = 2
@@ -209,11 +210,12 @@ class AX25():
         idx += len(info)
 
         #crc
-        crc_len = 2
-        mv[idx:idx+crc_len] = bytearray(struct.pack('<H',crc16_ccit(mv[flags_pre*AX25_FLAG_LEN:idx])))
+        crc = struct.pack('<H',crc16_ccit(mv[flags_pre*AX25_FLAG_LEN:idx]))
+        mv[idx:idx+AX25_CRC_LEN] = crc
         if debug:
-            print('CRC:'.ljust(15), format_bytes(mv[idx:idx+crc_len]), format_bits(mv[idx:idx+crc_len]))
-        idx += crc_len
+            print('CRC:'.ljust(15), format_bytes(mv[idx:idx+AX25_CRC_LEN]), format_bits(mv[idx:idx+AX25_CRC_LEN]))
+            print('CRC:'.ljust(15), format_bytes(mv[flags_pre*AX25_FLAG_LEN:idx]))
+        idx += AX25_CRC_LEN
 
         #post-flags
         tidx = idx 
@@ -250,7 +252,7 @@ class AX25():
         self.convert_nrzi(mv,
                           stop_bit = self.frame_len_bits)
         if debug:
-            print('-nrzi-')
+            print('-nrzi-', self.frame_len_bits//8)
             pretty_binary(mv)
 
     def encode_callsign(self, b_out, callsign,):
@@ -278,10 +280,10 @@ class AX25():
     def do_bitstuffing(self, mv, start_bit, stop_bit):
         #bit stuff frame in place
         idx = start_bit
-        c = 0
-        stuff_cnt = 0
+        c = 0   #running count of consecutive 1s
+        cnt = 0 #count of number of bits that were stuffed
         while idx < stop_bit:
-            if mv[idx//8] & (0x80>>(idx%8)):
+            if get_bit(mv[idx//8], idx):
                 c += 1
             else:
                 c = 0
@@ -291,9 +293,9 @@ class AX25():
                 #shift all bytes to the right, starting next byte
                 self.insert_bit_in_array(mv, bit_idx = idx)
                 c = 0
-                stuff_cnt += 1 #
+                cnt += 1 
                 idx += 1
-        return stuff_cnt
+        return cnt
 
     def insert_bit_in_array(self, mv, bit_idx):
         #shift bytes right
@@ -330,21 +332,14 @@ class AX25():
     def convert_nrzi(self, mv, stop_bit):
         #https://en.wikipedia.org/wiki/Non-return-to-zero
         #The HDLC a logical 0 is transmitted as a transition, and a logical 1 is transmitted as no transition.
-        cur = 1
+        c = 0
         for idx in range(stop_bit):
-            mask = (0x80>>(idx%8))
-            b    = mv[idx//8] & mask
+            mask = (0x80)>>(idx%8)
+            b = get_bit(mv[idx//8], idx)
             if b == 0:
-                cur ^= 0x01 #flip
-            if cur:
-                # set bit
-                mv[idx//8]  = mv[idx//8] | mask
-            else:
-                # clear bit, no bitwise 'not' in python, xor 0xff to mimick
-                mv[idx//8]  = mv[idx//8] & (mask ^ 0xff)
-            #invert bit
-            mv[idx//8]  = mv[idx//8] ^ mask
-
+                #toggle
+                c ^= 0x01
+            mv[idx//8] = assign_bit(mv[idx//8], idx, c)
 
 args = parse_args({
     'rate' : {
@@ -372,8 +367,6 @@ args = parse_args({
         'type'    : bool,
         'default' : False,
     },
-    # 'volume' : {
-    # },
     'out_type' : {
         'short'   : 't',
         'type'    : str,
@@ -385,10 +378,10 @@ afsk = AFSK(sampling_rate = args['rate'])
 
 
 ax25 = AX25()
-ax25.encode_ui_frame(src        = 'A',
+ax25.encode_ui_frame(src        = 'KI5TOF',
                      dst        = 'APRS',
                      digis      = [],
-                     info       = '>hello', 
+                     info       = '>hello world', 
                      flags_pre  = args['flags_pre'],
                      flags_post = args['flags_post'],
                      debug      = args['debug'])

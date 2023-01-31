@@ -13,24 +13,36 @@ from scipy import signal
 
 from asyncio import Queue
 
-from crc16 import crc16_ccit
-from utils import parse_args
-from utils import frange
-from utils import pretty_binary
-from utils import format_bytes
-from utils import format_bits
-from utils import int_div_ceil
-from utils import reverse_byte
-from utils import assign_bit
-from utils import get_bit
+from ax25 import AX25
+
+from lib.utils import pretty_binary
+from lib.utils import int_div_ceil
+from lib.utils import reverse_byte
+from lib.utils import assign_bit
 
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
 
 
 class BitStreamToAX25():
-    def __init__(self, ):
+    def __init__(self, bits_in_q,
+                       ax25_q,
+                       verbose = False):
+        self.bits_q = bits_in_q
+        self.ax25_q = ax25_q
+        self.verbose = verbose
+
+        self.frames_q = Queue()
         self.tasks = []
+
+    async def __aenter__(self):
+        self.tasks.append(asyncio.create_task(self.delimin_coro()))
+        self.tasks.append(asyncio.create_task(self.frame_coro()))
+        return self
+
+    async def __aexit__(self, *args):
+        _.for_each(self.tasks, lambda t: t.cancel())
+        await asyncio.gather(*self.tasks, return_exceptions=True)
 
     async def delimin_coro(self):
         # We receive a stream of 1s and 0s from bits_q, this function
@@ -49,13 +61,12 @@ class BitStreamToAX25():
                 # - easy to detect the AX25 flags decoded (they can be flipped in NRZI)
                 # - ideally done with closure
                 b = unnrzi(_b)
-                # print(b,end='')
                 inb[idx//8] = assign_bit(inb[idx//8], idx, b)
                 idx += 1
                 if b == 0 and flgcnt == 6:
                     #detected ax25 frame flag
                     if idx//8 > 2: 
-                        await self.frame_q.put((bytearray(mv[:int_div_ceil(idx,8)]), idx))
+                        await self.frames_q.put((bytearray(mv[:int_div_ceil(idx,8)]), idx))
                     mv[0] = AX25_FLAG #keep the frame flag that we detected in buffer
                     idx = 8
                 flgcnt = flgcnt + 1 if b else 0
@@ -119,32 +130,30 @@ class BitStreamToAX25():
         for idx in range(len(mv)):
             mv[idx] = reverse_byte(mv[idx])
 
-    async def frame_coro(self, debug = True):
+    async def frame_coro(self):
         try:
             while True:
-                buf,stop_bit = await self.frame_q.get()
+                buf,stop_bit = await self.frames_q.get()
                 mv = memoryview(buf)
-                if debug:
-                    print('-afsk ax25 deliminated bits-')
+                if self.verbose:
+                    print('-found frame-')
                     pretty_binary(mv)
 
                 #unstuff
                 self.unstuff(mv, stop_bit)
-                if debug:
+                if self.verbose:
                     print('-un-stuffed-')
                     pretty_binary(mv)
 
                 #reverse bit order
                 self.reverse_bit_order(mv)
-                if debug:
+                if self.verbose:
                     print('-un-reversed-')
                     pretty_binary(mv)
 
                 #decode
                 ax25 = AX25(ax25 = mv)
-                if debug:
-                    print('-ax25 decoded-')
-                    print(ax25)
+                await self.ax25_q.put(ax25)
 
         except Exception as err:
             traceback.print_exc()

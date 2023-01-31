@@ -13,16 +13,7 @@ from scipy import signal
 
 from asyncio import Queue
 
-from crc16 import crc16_ccit
-from utils import parse_args
-from utils import frange
-from utils import pretty_binary
-from utils import format_bytes
-from utils import format_bits
-from utils import int_div_ceil
-from utils import reverse_byte
-from utils import assign_bit
-from utils import get_bit
+from lib.crc16 import crc16_ccit
 
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7

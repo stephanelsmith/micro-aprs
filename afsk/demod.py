@@ -13,16 +13,9 @@ from scipy import signal
 
 from asyncio import Queue
 
-from crc16 import crc16_ccit
-from utils import parse_args
-from utils import frange
-from utils import pretty_binary
-from utils import format_bytes
-from utils import format_bits
-from utils import int_div_ceil
-from utils import reverse_byte
-from utils import assign_bit
-from utils import get_bit
+
+from lib.utils import frange
+import lib.defs as defs
 
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
@@ -138,7 +131,15 @@ def create_sampler(fbaud,
 
 
 class AFSKDemodulator():
-    def __init__(self, sampling_rate=22050):
+    def __init__(self, samples_in_q,
+                       bits_out_q,
+                       sampling_rate = 22050,
+                       verbose       = False):
+
+        self.samples_q  = samples_in_q
+        self.bits_q = bits_out_q
+        self.verbose = verbose
+
         self.fmark = 1200
         self.tmark = 1/self.fmark
         self.fspace = 2200
@@ -171,39 +172,50 @@ class AFSKDemodulator():
                                   fs    = self.fs)
 
         self.tasks = []
-        self.bits_q = Queue()
 
     async def __aenter__(self):
-        # self.tasks.append(asyncio.create_task(self.frame_coro()))
+        self.tasks.append(asyncio.create_task(self.process_samples()))
         return self
 
     async def __aexit__(self, *args):
         _.for_each(self.tasks, lambda t: t.cancel())
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
-    async def process_samples(self, arr):
-        # Process a chunk of samples
-        corr  = self.corr
-        agc   = self.agc
-        lpf   = self.lpf
-        band  = self.band
-        eye  = self.eye
-        self.o = array('i', (0 for x in range(len(arr))))
-        o = self.o
-        self.bs = array('i', (0 for x in range(len(arr))))
-        bs = self.bs
+    async def process_samples(self):
+        try:
+            # Process a chunk of samples
+            corr  = self.corr
+            agc   = self.agc
+            lpf   = self.lpf
+            band  = self.band
+            eye  = self.eye
+            self.o = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
+            o = self.o
+            self.bs = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
+            bs = self.bs
 
-        for i in range(len(arr)):
-            o[i] = arr[i]
-            # o[i] = band(o[i])
-            # o[i] = agc(o[i])
-            o[i] = corr(o[i])
-            o[i] = lpf(o[i])
-            bs[i] = eye(o[i])
-        for b in bs:
-            if b == 1 or b == 0:
-                yield b
+            bits_q = self.bits_q
+            samp_q = self.samples_q
 
+            while True:
+                #fetch next chunk of samples (array)
+                arr,arr_size = await samp_q.get()
+
+                if self.verbose:
+                    print('processing bits',arr_size)
+
+                for i in range(arr_size):
+                    o[i] = arr[i]
+                    # o[i] = band(o[i])
+                    # o[i] = agc(o[i])
+                    o[i] = corr(o[i])
+                    o[i] = lpf(o[i])
+                    bs[i] = eye(o[i])
+                for b in bs:
+                    if b == 1 or b == 0:
+                        await bits_q.put(b) #bits_out_q
+        except Exception as err:
+            traceback.print_exc()
 
     def analyze(self,start_from = 100e-3):
         o = self.o

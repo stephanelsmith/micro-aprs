@@ -6,23 +6,19 @@ import struct
 import traceback
 from array import array
 import math
+import signal
 from pydash import py_ as _
 
 import matplotlib.pyplot as plt
-from scipy import signal
 
 from asyncio import Queue
+from asyncio import Event
 
-from crc16 import crc16_ccit
-from utils import parse_args
-from utils import frange
-from utils import pretty_binary
-from utils import format_bytes
-from utils import format_bits
-from utils import int_div_ceil
-from utils import reverse_byte
-from utils import assign_bit
-from utils import get_bit
+from afsk.demod import AFSKDemodulator
+from ax25.bitproc import BitStreamToAX25
+
+from lib.utils import parse_args
+import lib.defs as defs
 
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
@@ -42,22 +38,50 @@ async def read_pipe():
         print(struct.unpack('<h', r)[0])
     return arr
 
-async def read_file(src):
-    if src[-4:] != '.raw':
-        raise Exception('uknown file type', src)
-    with open(src, 'rb') as o:
-        b = o.read()
-    mv = memoryview(b)
-    arr = array('i',[])
-    for i in range(0,len(mv),2):
-        arr.append(struct.unpack('<h', mv[i:i+2])[0])
-    return arr
 
+async def read_samples_from_raw(samples_q, src):
+    try:
+        if src[-4:] != '.raw':
+            raise Exception('uknown file type', src)
+        arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
+        idx = 0
+        with open(src, 'rb') as o:
+            while True:
+                b = o.read(2) # TODO, READ INTO
+                if not b:
+                    break
+                arr[idx] = struct.unpack('<h', b)[0]
+                arr[idx]
+                idx += 1
+                if idx%defs.SAMPLES_SIZE == 0:
+                    await samples_q.put((arr, idx))
+                    arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
+                    idx = 0
+            await samples_q.put((arr, idx))
+    except Exception as err:
+        traceback.print_exc()
+    await asyncio.sleep(.1)
+    sys.exit()
 
+async def consume_ax25(ax25_q):
+    try:
+        while True:
+            ax25 = await ax25_q.get()
+            print(ax25)
+    except Exception as err:
+        traceback.print_exc()
 
-
+async def shutdown():
+    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+    [task.cancel() for task in tasks]
+    await asyncio.gather(*tasks, return_exceptions=True)
 
 async def main():
+    loop = asyncio.get_running_loop()
+    signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
+    for s in signals:
+        loop.add_signal_handler(s, lambda s=s: asyncio.create_task(shutdown()))
+
     args = parse_args({
         'rate' : {
             'short'   : 'r',
@@ -69,33 +93,53 @@ async def main():
             'type'    : int,
             'default' : 'raw',
         },
+        'verbose' : {
+            'short'   : 'v',
+            'type'    : bool,
+            'default' : False,
+        },
     })
 
     src = sys.argv[-1]
 
-    #TODO, make arr yield results for processing as we stream in
-    if src == '-':
-        arr = await read_pipe()
-    else:
-        arr = await read_file(src = src)
-
-    # Raw samples -> AFSKDemod input
     samples_q = Queue()
-
-    # AFSKDemod bits -> AX25 Processor
     bits_q = Queue()
+    ax25_q = Queue()
 
-    # AX25 
+    try:
+        tasks = []
 
-    async with AFSKDemodulator(sampling_rate=22050) as afsk_demod:
-        async with BitStreamToAX25() as bits2ax25:
-            while True:
-                #read array of data
-                async for b in afsk_demod.process_samples(arr = arr):
-                    async for ax25 in bits2ax25.in_q(b):
-                        print(ax25)
+        #from .raw file
+        tasks.append(asyncio.create_task(read_samples_from_raw(samples_q = samples_q, 
+                                                                src       = src)))
+
+        #create ax25 consumer
+        tasks.append(asyncio.create_task(consume_ax25(ax25_q = ax25_q)))
+
+        #samples_q consumer
+        #bits_q producer
+        async with AFSKDemodulator(sampling_rate = 22050,
+                                   samples_in_q  = samples_q,
+                                   bits_out_q    = bits_q,
+                                   verbose       = args['verbose']) as afsk_demod:
+            #bits_q consumer
+            #ax25_q producer
+            async with BitStreamToAX25(bits_in_q = bits_q,
+                                       ax25_q    = ax25_q,
+                                       verbose   = args['verbose']) as bits2ax25:
+                await Event().wait()
+    except Exception as err:
+        traceback.print_exc()
+    except asyncio.CancelledError:
+        return
+    finally:
+        _.for_each(tasks, lambda t: t.cancel())
+        await asyncio.gather(*tasks, return_exceptions=True)
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print(t)
 
 

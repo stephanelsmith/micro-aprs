@@ -5,82 +5,27 @@ import asyncio
 import struct
 import traceback
 from array import array
-import math
 from pydash import py_ as _
 
 import matplotlib.pyplot as plt
-from scipy import signal
 
 from asyncio import Queue
 
+from ax25.callssid import CallSSID
+from ax25.func import reverse_bit_order
+from ax25.func import convert_nrzi
+from ax25.func import do_bitstuffing
+
 from lib.crc16 import crc16_ccit
+from lib.utils import pretty_binary
 
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
-
-
-class CallSSID():
-    __slots__ = (
-        'call',
-        'ssid',
-    )
-    def __init__(self, call = None, ssid = None,
-                       aprs = None,
-                       ax25 = None,
-                       ):
-        # Initialize a callsign ssid in three ways
-        #   1) By specifying call and ssid explicitly
-        #   2) By specifying aprs formatted string/bytes, eg. KI5TOF-5
-        #   3) By specifying ax25 bytes to be decoded
-        self.call = call 
-        self.ssid = ssid
-        if ax25:
-            self.from_ax25(ax25)
-        elif aprs:
-            self.from_aprs(aprs)
-
-    def from_aprs(self, call_ssid):
-        #read in formats like KI5TOF-5
-        if isinstance(call_ssid, str):
-            call_ssid = callsign.split('-')
-        elif isinstance(call_ssid, (bytes, bytearray)):
-            call_ssid = callsign.decode('utf').split('-')
-        else:
-            raise Exception('unknown format '+str(call_ssid))
-        self.call = call_ssid[0].upper()
-        self.ssid = int(call_ssid[1]) if len(call_ssid)==2 else 0
-
-    def to_aprs(self):
-        if self.ssid:
-            return str(self.call)+'-'+str(self.ssid)
-        else:
-            return str(self.call)
-
-    def from_ax25(self, mv):
-        #read from encoded ax25 format 
-        if len(mv) != 7:
-            raise Exception('callsign unable to read from bytes, bad length ' +str(len(mv)))
-        for call_len in range(6):
-            if mv[call_len] == 0x40: #searching for ' ' character (still left shifted one)
-                break
-            call_len += 1
-        self.call = bytearray(mv[:call_len]) #make bytearray copy, don't modify in place
-        for i in range(call_len):
-            self.call[i] = self.call[i]>>1
-        self.call = self.call.decode('utf')
-        self.ssid = (mv[6] & 0x17)>>1
-
-    def to_ax25(self):
-        return b''
-
-    def __repr__(self):
-        return self.to_aprs()
-
-
-
-
-
-
+AX25_FLAG      = 0x7e
+AX25_FLAG_LEN  = 1
+AX25_ADDR_LEN  = 7
+AX25_CONTROLPID_LEN = 2
+AX25_CRC_LEN   = 2
 
 class AX25():
     __slots__ = (
@@ -96,19 +41,21 @@ class AX25():
                        info       = '',
                        aprs       = None,
                        ax25       = None,
+                       verbose    = False,
                        ):
         # Initialize in three different ways
         #   1) The individual fields directly
         #   2) By APRS message, eg. M0XER-4>APRS64,TF3RPF,WIDE2*,qAR,TF3SUT-2:!/.(M4I^C,O `DXa/A=040849|#B>@\"v90!+|
         #   3) By AX25 bytes
-        self.src        = src
-        self.dst        = dst
-        self.digis      = digis
-        self.info       = info
         if ax25:
             self.from_ax25(ax25 = ax25)
         elif aprs:
             self.from_aprs(aprs = aprs)
+        else:
+            self.src        = CallSSID(aprs = src)
+            self.dst        = CallSSID(aprs = dst)
+            self.digis      = [CallSSID(aprs = x) for x in digis]
+            self.info       = info
 
     def callssid_to_str(self, callssid):
         try:
@@ -126,6 +73,11 @@ class AX25():
         pass
 
     def from_ax25(self, ax25):
+        # from bytearray to ax25 structure
+        # this function is AFTER unNRZI, unstuffing, reversed
+        # the BitStreamToAX25 handles that, this  function
+        # only maps bytes to their field structure
+
         mv = memoryview(ax25)
 
         idx = 0
@@ -159,6 +111,108 @@ class AX25():
         _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
         if crc != _crc:
             raise Exception('crc error '+str(crc)+' != '+str(_crc))
+
+    def to_ax25(self, bit_stuff_margin = 0, # the number of additional bytes, placeholder for stuffing
+                      flags_pre        = 1, # number of pre-flags
+                      flags_post       = 1, # number of post-flags
+                      ):
+        #from structure to bytearray
+
+        #pre-allocate entire buffer size
+        ax25_len = AX25_FLAG_LEN*flags_pre +\
+                    AX25_ADDR_LEN +\
+                    AX25_ADDR_LEN +\
+                    len(self.digis)*AX25_ADDR_LEN+\
+                    AX25_CONTROLPID_LEN+\
+                    len(self.info)+\
+                    AX25_CRC_LEN +\
+                    AX25_FLAG_LEN*flags_post
+        ax25_bits = ax25_len * 8
+        ax25 = bytearray(ax25_len + bit_stuff_margin)
+
+        #create slices without copying
+        mv    = memoryview(ax25)
+        idx = 0
+
+        #pre-flags
+        for fidx in range(flags_pre):
+            mv[idx] = AX25_FLAG
+            idx += AX25_FLAG_LEN
+
+        # destination Address  (note: opposite order in printed format)
+        self.dst.to_ax25(mv = mv[idx:idx+AX25_ADDR_LEN])
+        idx += AX25_ADDR_LEN
+
+        # source Address
+        self.src.to_ax25(mv = mv[idx:idx+AX25_ADDR_LEN])
+        idx += AX25_ADDR_LEN
+
+        # 0-8 Digipeater Addresses
+        for digi in self.digis[:8]:
+            digi.to_ax25(mv = mv[idx:idx+AX25_ADDR_LEN])
+            idx += AX25_ADDR_LEN
+
+        #LAST BIT OF ADDRESS, SET LSB TO 1
+        mv[idx-1]  |= 0x01 
+
+        mv[idx] = 0x03 #control
+        idx += 1
+        mv[idx] = 0xf0 #pid
+        idx += 1
+
+        #payload
+        mv[idx:idx+len(self.info)] = bytes(self.info,'utf')
+        idx += len(self.info)
+
+        #crc
+        crc = struct.pack('<H',crc16_ccit(mv[flags_pre*AX25_FLAG_LEN:idx]))
+        mv[idx:idx+AX25_CRC_LEN] = crc
+        idx += AX25_CRC_LEN
+
+        #post-flags
+        tidx = idx 
+        for fidx in range(flags_post):
+            mv[idx] = AX25_FLAG
+            idx += AX25_FLAG_LEN
+
+        if idx != ax25_len:
+            raise Exception('ax25 len error: idx ({}) != ax25_len ({})'.format(idx, ax25_len))
+
+        return ax25
+
+
+    def to_afsk(self):
+        # everything in to_ax25, but also
+        # reverse bit order
+        # stuff bits
+        # NRZI encode
+        # ready to afsk out
+
+        ax25 = self.to_ax25(bit_stuff_margin = 8)
+        mv = memoryview(ax25)
+
+        #revese bit order
+        reverse_bit_order(mv)
+        # if self.verbose:
+            # print('-reversed-')
+            # pretty_binary(mv)
+
+        # stuff bits in place
+        # update the total number of bits
+        stuff_cnt = do_bitstuffing(mv, 
+                                   start_bit = flags_pre*AX25_FLAG_LEN*8, 
+                                   stop_bit  = self.frame_len_bits - flags_post*AX25_FLAG_LEN*8)
+        self.frame_len_bits += stuff_cnt
+        # if self.verbose:
+            # print('-bit stuffed-')
+            # pretty_binary(mv)
+
+        #convert to nrzi
+        convert_nrzi(mv,
+                     stop_bit = self.frame_len_bits)
+        # if self.verbose:
+            # print('-nrzi-', self.frame_len_bits//8)
+            # pretty_binary(mv)
 
     def __repr__(self):
         return self.to_aprs()

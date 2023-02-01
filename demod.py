@@ -5,7 +5,6 @@ import asyncio
 import struct
 import traceback
 from array import array
-import math
 import signal
 from pydash import py_ as _
 
@@ -71,16 +70,16 @@ async def consume_ax25(ax25_q):
     except Exception as err:
         traceback.print_exc()
 
-async def shutdown():
-    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
-    [task.cancel() for task in tasks]
-    await asyncio.gather(*tasks, return_exceptions=True)
+# async def shutdown():
+    # tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+    # [task.cancel() for task in tasks]
+    # await asyncio.gather(*tasks, return_exceptions=True)
 
 async def main():
-    loop = asyncio.get_running_loop()
-    signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
-    for s in signals:
-        loop.add_signal_handler(s, lambda s=s: asyncio.create_task(shutdown()))
+    # loop = asyncio.get_running_loop()
+    # signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
+    # for s in signals:
+        # loop.add_signal_handler(s, lambda s=s: asyncio.create_task(shutdown()))
 
     args = parse_args({
         'rate' : {
@@ -140,6 +139,6 @@ if __name__ == '__main__':
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print(t)
+        pass
 
 

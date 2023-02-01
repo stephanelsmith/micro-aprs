@@ -4,6 +4,7 @@ import sys
 import math
 from pydash import py_ as _
 
+
 def parse_args(argdefs):
     args = {}
     for arg,argdef in argdefs.items():
@@ -61,12 +62,6 @@ def format_bits(mv):
         o += ' '
     return o
 
-def reverse_byte(_byte):
-    #xor reverse bit technique
-    _byte = ((_byte & 0x55) << 1) | ((_byte & 0xAA) >> 1);
-    _byte = ((_byte & 0x33) << 2) | ((_byte & 0xCC) >> 2);
-    _byte = ((_byte & 0x0F) << 4) | ((_byte & 0xF0) >> 4);
-    return _byte
 
 def assign_bit(byte, idx, value):
     mask = (0x80>>(idx%8))

@@ -1,4 +1,13 @@
 
+def assign_bit(byte, idx, value):
+    mask = (0x80>>(idx%8))
+    if value:
+        return byte | mask
+    else:
+        return byte & (mask ^ 0xff)
+def get_bit(byte, idx):
+    mask = (0x80)>>(idx%8)
+    return (byte & mask) >> ((8-idx-1)%8)
 
 def reverse_byte(_byte):
     #xor reverse bit technique

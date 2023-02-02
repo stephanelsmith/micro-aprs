@@ -14,7 +14,7 @@ from asyncio import Queue
 from asyncio import Event
 
 from afsk.demod import AFSKDemodulator
-from ax25.bitproc import BitStreamToAX25
+from ax25.from_afsk import AX25FromAFSK
 
 from lib.utils import parse_args
 import lib.defs as defs
@@ -67,6 +67,7 @@ async def consume_ax25(ax25_q):
         while True:
             ax25 = await ax25_q.get()
             print(ax25)
+            ax25_q.task_done()
     except Exception as err:
         traceback.print_exc()
 
@@ -123,10 +124,11 @@ async def main():
                                    verbose       = args['verbose']) as afsk_demod:
             #bits_q consumer
             #ax25_q producer
-            async with BitStreamToAX25(bits_in_q = bits_q,
-                                       ax25_q    = ax25_q,
-                                       verbose   = args['verbose']) as bits2ax25:
-                await Event().wait()
+            async with AX25FromAFSK(bits_in_q = bits_q,
+                                    ax25_q    = ax25_q,
+                                    verbose   = args['verbose']) as bits2ax25:
+                await asyncio.sleep(0)
+                await ax25_q.join()
     except Exception as err:
         traceback.print_exc()
     except asyncio.CancelledError:

@@ -90,28 +90,38 @@ class AFSKModulator():
             self.ts_index += 1 #increment one unit time step (ts = 1/fs)
 
 
-    def dump_ax25_raw_samples(self, ax25,
-                                    zpad_ms,
-                                    out_type):
-        o = []
-        #zero padding
-        for b in range(int(zpad_ms/self.ts+1)):
-            o.append(0)
-
-        #write data
-        for bit in gen_bits_from_bytes(mv       = ax25.frame,
-                                       stop_bit = ax25.frame_len_bits):
+    async def to_samples(self, ax25,
+                         stop_bit,
+                         afsk_q,
+                         ):
+        for bit in gen_bits_from_bytes(mv       = ax25,
+                                       stop_bit = stop_bit):
             for sample in self.gen_baud_period_samples(bit):
-                o.append(sample//AFSK_SCALE)
+                await afsk_q.put(sample//AFSK_SCALE)
 
-        if out_type == 'raw':
-            buf = bytearray(len(o)*2)
-            for i,s in enumerate(o):
-                x = struct.pack('<h', s)
-                # x = int.to_bytes(s, 2, 'little', signed=True)
-                buf[i*2]   = x[0]
-                buf[i*2+1] = x[1]
-            sys.stdout.buffer.write(buf)
-        else:
-            print('type not implemented', out_type)
+
+    # def dump_ax25_raw_samples(self, ax25,
+                                    # zpad_ms,
+                                    # out_type):
+        # o = []
+        # #zero padding
+        # for b in range(int(zpad_ms/self.ts+1)):
+            # o.append(0)
+
+        # #write data
+        # for bit in gen_bits_from_bytes(mv       = ax25.frame,
+                                       # stop_bit = ax25.frame_len_bits):
+            # for sample in self.gen_baud_period_samples(bit):
+                # o.append(sample//AFSK_SCALE)
+
+        # if out_type == 'raw':
+            # buf = bytearray(len(o)*2)
+            # for i,s in enumerate(o):
+                # x = struct.pack('<h', s)
+                # # x = int.to_bytes(s, 2, 'little', signed=True)
+                # buf[i*2]   = x[0]
+                # buf[i*2+1] = x[1]
+            # sys.stdout.buffer.write(buf)
+        # else:
+            # print('type not implemented', out_type)
 

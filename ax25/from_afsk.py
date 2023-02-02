@@ -24,7 +24,7 @@ AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
 
 
-class BitStreamToAX25():
+class AX25FromAFSK():
     def __init__(self, bits_in_q,
                        ax25_q,
                        verbose = False):

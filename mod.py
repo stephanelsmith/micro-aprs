@@ -24,25 +24,21 @@ async def afsk_out(afsk_q):
         traceback.print_exc()
 
 async def main():
-    print(sys.argv)
     args = parse_args(sys.argv)
-    print(args)
-    return
 
-    tasks = []
     afsk_q = Queue()
-
+    tasks = []
     tasks.append(asyncio.create_task(afsk_out(afsk_q)))
 
     try:
         async with AFSKModulator(sampling_rate = 22050,
-                                 verbose       = args['verbose']) as afsk_demod:
+                                 verbose       = args['args']['verbose']) as afsk_demod:
             ax25 = AX25(src   = 'KI5TOF',
                         dst   = 'APRS',
                         digis = [],
                         info  = 'hello world!',
                         )
-            if args['verbose']:
+            if args['args']['verbose']:
                 print(ax25)
                 print(ax25.to_aprs())
                 print('--ax25--')
@@ -51,8 +47,8 @@ async def main():
                 ax25,stop_bit = ax25.to_afsk()
                 pretty_binary(ax25)
             else:
-                ax25,stop_bit = ax25.to_afsk(flags_pre  = 1,
-                                             flags_post = 1)
+                ax25,stop_bit = ax25.to_afsk(flags_pre  = 2,
+                                             flags_post = 2)
                 await afsk_demod.to_samples(ax25     = ax25, 
                                             stop_bit = stop_bit,
                                             afsk_q   = afsk_q,

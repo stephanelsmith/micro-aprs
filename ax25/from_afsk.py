@@ -37,7 +37,7 @@ class AX25FromAFSK():
 
     async def __aenter__(self):
         self.tasks.append(asyncio.create_task(self.delimin_coro()))
-        self.tasks.append(asyncio.create_task(self.frame_coro()))
+        # self.tasks.append(asyncio.create_task(self.frame_coro()))
         return self
 
     async def __aexit__(self, *args):
@@ -57,6 +57,7 @@ class AX25FromAFSK():
             unnrzi = create_unnrzi()
             while True:
                 _b = await self.bits_q.get()
+                # print(_b,end='')
                 #UN NRZI, it's better to do it here since
                 # - easy to detect the AX25 flags decoded (they can be flipped in NRZI)
                 # - ideally done with closure
@@ -66,41 +67,37 @@ class AX25FromAFSK():
                 if b == 0 and flgcnt == 6:
                     #detected ax25 frame flag
                     if idx//8 > 2: 
-                        await self.frames_q.put((bytearray(mv[:int_div_ceil(idx,8)]), idx))
+                        # await self.frames_q.put((bytearray(mv[:int_div_ceil(idx,8)]), idx))
+                        await self.frame_to_ax25(bytearray(mv[:int_div_ceil(idx,8)]), idx)
                     mv[0] = AX25_FLAG #keep the frame flag that we detected in buffer
                     idx = 8
                 flgcnt = flgcnt + 1 if b else 0
                 if idx == inbsize:
                     idx = 0
+                self.bits_q.task_done()
         except Exception as err:
             traceback.print_exc()
 
 
-    async def frame_coro(self):
-        try:
-            while True:
-                buf,stop_bit = await self.frames_q.get()
-                mv = memoryview(buf)
-                if self.verbose:
-                    print('-found frame-')
-                    pretty_binary(mv)
+    async def frame_to_ax25(self, buf, stop_bit):
+        mv = memoryview(buf)
+        if self.verbose:
+            print('-found frame-')
+            pretty_binary(mv)
 
-                #unstuff
-                unstuff(mv, stop_bit)
-                if self.verbose:
-                    print('-un-stuffed-')
-                    pretty_binary(mv)
+        #unstuff
+        unstuff(mv, stop_bit)
+        if self.verbose:
+            print('-un-stuffed-')
+            pretty_binary(mv)
 
-                #reverse bit order
-                reverse_bit_order(mv)
-                if self.verbose:
-                    print('-un-reversed-')
-                    pretty_binary(mv)
+        #reverse bit order
+        reverse_bit_order(mv)
+        if self.verbose:
+            print('-un-reversed-')
+            pretty_binary(mv)
 
-                #decode
-                ax25 = AX25(ax25 = mv)
-                await self.ax25_q.put(ax25)
-
-        except Exception as err:
-            traceback.print_exc()
+        #decode
+        ax25 = AX25(ax25 = mv)
+        await self.ax25_q.put(ax25)
 

@@ -104,6 +104,7 @@ class AFSKDemodulator():
                 for b in bs:
                     if b == 1 or b == 0:
                         await bits_q.put(b) #bits_out_q
+                samp_q.task_done() # done
         except Exception as err:
             traceback.print_exc()
 

@@ -37,7 +37,6 @@ async def read_pipe():
         print(struct.unpack('<h', r)[0])
     return arr
 
-
 async def read_samples_from_raw(samples_q, src):
     try:
         if src[-4:] != '.raw':

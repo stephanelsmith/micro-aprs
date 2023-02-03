@@ -5,17 +5,63 @@ import math
 from pydash import py_ as _
 
 
-def parse_args(argdefs):
-    args = {}
-    for arg,argdef in argdefs.items():
-        idx = _.find_index(sys.argv, lambda arg: arg == '--'+arg or arg == '-'+argdef['short'])
-        args[arg] = argdef['default']
-        if idx >= 0:
-            if argdef['type'] == bool:
-                args[arg] = True
-            else:
-                args[arg] = argdef['type'](sys.argv[idx+1])
-    return args
+def parse_args(args):
+    r = {
+        'args' : {
+            'verbose' : False,
+        },
+        'in' : {
+            'type' : 'raw',
+            'rate' : 22050,
+            'file'  : '-', #from stdin
+        },
+        'out' : {
+            'type' : 'raw',
+            'rate' : 22050,
+            'file'  : '-', #to stdout
+        },
+    }
+    argstr = ' '.join(args)
+    spl = [x.split() for x in ' '.join(args).split('-t')]
+    try:
+        #general args
+        args = spl.pop(0)
+    except IndexError:
+        pass
+    types = ['raw']
+    rates = [22050]
+    try:
+        _in = spl.pop(0)
+        r['in']['type'] = _in[0]
+        if r['in']['type'] not in types:
+            raise Exception('unknown type {}, not in {}'.format(r['in']['type'], types))
+        r['in']['rate'] = get_arg_val(_in, '-r', int) or r['in']['rate']
+        if r['in']['rate'] not in rates:
+            raise Exception('unknown rate {}, not in {}'.format(r['in']['rate'], rates))
+        r['in']['file'] = _in[-1]
+    except IndexError:
+        pass
+    try:
+        _out = spl.pop(0)
+        r['out']['type'] = _out[0]
+        if r['out']['type'] not in types:
+            raise Exception('unknown type {}, not in {}'.format(r['out']['type'], types))
+        r['out']['rate'] = get_arg_val(_out, '-r', int) or r['out']['rate']
+        if r['out']['rate'] not in rates:
+            raise Exception('unknown rate {}, not in {}'.format(r['out']['rate'], rates))
+        r['out']['file'] = _out[-1]
+    except IndexError:
+        pass
+    return r
+
+def get_arg_val(args, arg, fn):
+    try:
+        if not fn:
+            return args[args.index(arg)+1]
+        else:
+            return fn(args[args.index(arg)+1])
+    except:
+        None
 
 # integer division + ceil operation
 # used in place of int(math.ceil(total_size/chunk_size))

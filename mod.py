@@ -24,18 +24,11 @@ async def afsk_out(afsk_q):
         traceback.print_exc()
 
 async def main():
-    args = parse_args({
-        'rate' : {
-            'short'   : 'r',
-            'type'    : int,
-            'default' : 22050,
-        },
-        'verbose' : {
-            'short'   : 'v',
-            'type'    : bool,
-            'default' : False,
-        },
-    })
+    print(sys.argv)
+    args = parse_args(sys.argv)
+    print(args)
+    return
+
     tasks = []
     afsk_q = Queue()
 
@@ -58,10 +51,13 @@ async def main():
                 ax25,stop_bit = ax25.to_afsk()
                 pretty_binary(ax25)
             else:
-                ax25,stop_bit = ax25.to_afsk()
+                ax25,stop_bit = ax25.to_afsk(flags_pre  = 1,
+                                             flags_post = 1)
                 await afsk_demod.to_samples(ax25     = ax25, 
                                             stop_bit = stop_bit,
-                                            afsk_q   = afsk_q)
+                                            afsk_q   = afsk_q,
+                                            zpad_ms  = 1,
+                                            )
                 await afsk_q.join()
     except Exception as err:
         traceback.print_exc()
@@ -71,29 +67,9 @@ async def main():
         _.for_each(tasks, lambda t: t.cancel())
         await asyncio.gather(*tasks, return_exceptions=True)
 
-
 if __name__ == '__main__':
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
         pass
 
-# afsk = AFSK(sampling_rate = args['rate'])
-
-
-# ax25 = AX25()
-# ax25.encode_ui_frame(src        = 'KI5TOF',
-                     # dst        = 'APRS',
-                     # digis      = [],
-                     # info       = '>hello world', 
-                     # flags_pre  = args['flags_pre'],
-                     # flags_post = args['flags_post'],
-                     # debug      = args['debug'])
-# if args['debug']:
-    # #we are debugging, exit early
-    # exit()
-
-# afsk.dump_ax25_raw_samples(ax25     = ax25,
-                           # zpad_ms  = args['zpad_ms'],
-                           # out_type = args['out_type'],
-                           # )

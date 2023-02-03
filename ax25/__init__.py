@@ -225,5 +225,3 @@ class AX25():
     def __repr__(self):
         return self.to_aprs()
 
-
-

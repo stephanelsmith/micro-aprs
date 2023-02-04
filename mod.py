@@ -13,6 +13,28 @@ from lib.utils import parse_args
 from lib.utils import pretty_binary
 from lib.utils import eprint
 
+async def read_pipe(ax25_q, 
+                    read_done_evt):
+    try:
+        loop = asyncio.get_event_loop()
+        reader = asyncio.StreamReader()
+        protocol = asyncio.StreamReaderProtocol(reader)
+        await loop.connect_read_pipe(lambda: protocol, sys.stdin)
+
+        while True:
+            try:
+                pass
+            except asyncio.IncompleteReadError:
+                # continue
+                break #eof break
+
+    except Exception as err:
+        traceback.print_exc()
+    except asyncio.CancelledError:
+        raise
+    finally:
+        read_done_evt.set()
+
 
 async def afsk_out(afsk_q):
     try:
@@ -24,9 +46,11 @@ async def afsk_out(afsk_q):
     except Exception as err:
         traceback.print_exc()
 
+
 async def main():
     args = parse_args(sys.argv)
 
+    ax25_q = Queue() #ax25 input queue
     afsk_q = Queue()
     tasks = []
     tasks.append(asyncio.create_task(afsk_out(afsk_q)))

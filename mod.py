@@ -11,6 +11,7 @@ from ax25 import AX25
 
 from lib.utils import parse_args
 from lib.utils import pretty_binary
+from lib.utils import eprint
 
 
 async def afsk_out(afsk_q):
@@ -33,20 +34,24 @@ async def main():
     try:
         async with AFSKModulator(sampling_rate = 22050,
                                  verbose       = args['args']['verbose']) as afsk_demod:
-            ax25 = AX25(src   = 'KI5TOF',
-                        dst   = 'APRS',
-                        digis = [],
-                        info  = 'hello world!',
+            ax25 = AX25(src     = 'KI5TOF',
+                        dst     = 'APRS',
+                        digis   = [],
+                        info    = 'hello world!',
+                        verbose = args['args']['verbose'],
                         )
             if args['args']['verbose']:
-                print(ax25)
-                print(ax25.to_aprs())
-                print('--ax25--')
+                pass
+                eprint('===== MOD >>>>>', ax25.to_aprs())
+                eprint('--ax25--')
                 pretty_binary(ax25.to_ax25())
-                print('--afsk--')
+                eprint('--afsk--')
+            if args['args']['quiet']:
+                #just show debug output
                 ax25,stop_bit = ax25.to_afsk()
-                pretty_binary(ax25)
-            else:
+                # pretty_binary(ax25)
+            if not args['args']['quiet']:
+                #actually output
                 ax25,stop_bit = ax25.to_afsk(flags_pre  = 2,
                                              flags_post = 2)
                 await afsk_demod.to_samples(ax25     = ax25, 
@@ -60,7 +65,8 @@ async def main():
     except asyncio.CancelledError:
         return
     finally:
-        _.for_each(tasks, lambda t: t.cancel())
+        for task in tasks:
+            task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
 
 if __name__ == '__main__':

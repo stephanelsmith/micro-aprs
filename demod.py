@@ -17,6 +17,7 @@ from afsk.demod import AFSKDemodulator
 from ax25.from_afsk import AX25FromAFSK
 
 from lib.utils import parse_args
+from lib.utils import eprint
 import lib.defs as defs
 
 AX25_FLAG      = 0x7e
@@ -36,12 +37,10 @@ async def read_pipe_raw(samples_q,
         while True:
             try:
                 b = await reader.readexactly(2)
-                # print(b)
             except asyncio.IncompleteReadError:
                 # continue
                 break #eof break
             arr[idx] = struct.unpack('<h', b)[0]
-            # print(arr[idx])
             idx += 1
             if idx%defs.SAMPLES_SIZE == 0:
                 await samples_q.put((arr, idx))
@@ -52,7 +51,7 @@ async def read_pipe_raw(samples_q,
     except Exception as err:
         traceback.print_exc()
     except asyncio.CancelledError:
-        return
+        raise
     finally:
         read_done_evt.set()
 
@@ -79,7 +78,7 @@ async def read_samples_from_raw(samples_q,
     except Exception as err:
         traceback.print_exc()
     except asyncio.CancelledError:
-        return
+        raise
     finally:
         read_done_evt.set()
 
@@ -90,7 +89,7 @@ async def consume_ax25(ax25_q):
             print(ax25)
             ax25_q.task_done()
     except asyncio.CancelledError:
-        return
+        raise
     except Exception as err:
         traceback.print_exc()
 
@@ -132,19 +131,19 @@ async def main():
             async with AX25FromAFSK(bits_in_q = bits_q,
                                     ax25_q    = ax25_q,
                                     verbose   = args['args']['verbose']) as bits2ax25:
+                #wait for data for work through the system
                 await read_done_evt.wait()
-                # await asyncio.sleep(0)
                 await samples_q.join()
                 await bits_q.join()
                 await ax25_q.join()
     except Exception as err:
         traceback.print_exc()
     except asyncio.CancelledError:
-        return
+        raise
     finally:
-        # print(tasks)
-        _.for_each(tasks, lambda t: t.cancel())
-        # await asyncio.gather(*[t for t in tasks if not t.done()], return_exceptions=True)
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*[t for t in tasks if not t.done()], return_exceptions=True)
 
 if __name__ == '__main__':
     try:

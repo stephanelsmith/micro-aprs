@@ -18,6 +18,7 @@ from ax25.func import do_bitstuffing
 
 from lib.crc16 import crc16_ccit
 from lib.utils import pretty_binary
+from lib.utils import eprint
 
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
@@ -28,12 +29,12 @@ AX25_CONTROLPID_LEN = 2
 AX25_CRC_LEN   = 2
 
 class AX25():
-    __slots__ = (
-        'src',
-        'dst',
-        'digis',
-        'info',
-    )
+    # __slots__ = (
+        # 'src',
+        # 'dst',
+        # 'digis',
+        # 'info',
+    # )
 
     def __init__(self, src        = '',
                        dst        = '',
@@ -43,6 +44,7 @@ class AX25():
                        ax25       = None,
                        verbose    = False,
                        ):
+        self.verbose = verbose
         # Initialize in three different ways
         #   1) The individual fields directly
         #   2) By APRS message, eg. M0XER-4>APRS64,TF3RPF,WIDE2*,qAR,TF3SUT-2:!/.(M4I^C,O `DXa/A=040849|#B>@\"v90!+|
@@ -180,7 +182,6 @@ class AX25():
 
         return ax25
 
-
     def to_afsk(self, flags_pre        = 1, # number of pre-flags
                       flags_post       = 1, # number of post-flags
                       ):
@@ -200,9 +201,9 @@ class AX25():
 
         #revese bit order
         reverse_bit_order(mv)
-        # if self.verbose:
-            # print('-reversed-')
-            # pretty_binary(mv)
+        if self.verbose:
+            eprint('-reversed-')
+            pretty_binary(mv)
 
         # stuff bits in place
         # update the total number of bits
@@ -210,16 +211,16 @@ class AX25():
                                    start_bit = flags_pre*AX25_FLAG_LEN*8, 
                                    stop_bit  = stop_bit - flags_post*AX25_FLAG_LEN*8)
         stop_bit += stuff_cnt
-        # if self.verbose:
-            # print('-bit stuffed-')
-            # pretty_binary(mv)
+        if self.verbose:
+            eprint('-bit stuffed-')
+            pretty_binary(mv)
 
         #convert to nrzi
         convert_nrzi(mv,
                      stop_bit = stop_bit)
-        # if self.verbose:
-            # print('-nrzi-', stop_bit//8)
-            # pretty_binary(mv)
+        if self.verbose:
+            eprint('-nrzi-', stop_bit//8)
+            pretty_binary(mv)
         return (ax25,stop_bit)
 
     def __repr__(self):

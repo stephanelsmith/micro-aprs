@@ -11,6 +11,7 @@ from scipy import signal
 
 from lib.utils import frange
 import lib.defs as defs
+from lib.utils import eprint
 
 from afsk.func import create_agc
 from afsk.func import create_corr
@@ -92,7 +93,7 @@ class AFSKDemodulator():
                 arr,arr_size = await samp_q.get()
 
                 if self.verbose:
-                    print('processing bits',arr_size)
+                    eprint('processing bits',arr_size)
 
                 for i in range(arr_size):
                     o[i] = arr[i]
@@ -147,6 +148,6 @@ class AFSKDemodulator():
                     booleye['r'] = False
                 if not booleye['r'] and not booleye['l']:
                     break
-        print(eye)
+        eprint(eye)
         # plt.show()
 

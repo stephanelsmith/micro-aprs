@@ -9,6 +9,7 @@ def parse_args(args):
     r = {
         'args' : {
             'verbose' : False,
+            'quiet'   : False,
         },
         'in' : {
             'type' : 'raw',
@@ -26,7 +27,7 @@ def parse_args(args):
     try:
         #general args
         args = spl.pop(0)
-        if '-v' in args:
+        if '-v' in args or '-verbose' in args:
             r['args']['verbose'] = True
     except IndexError:
         pass
@@ -71,15 +72,21 @@ def int_div_ceil(total_size, chunk_size):
     # return total_size//chunk_size + (bool(total_size%chunk_size))
     return total_size//chunk_size + (1 if total_size%chunk_size else 0)
 
-def pretty_binary(mv, cols=10):
+def pretty_binary(mv, 
+                  cols      = 10, 
+                  to_stderr = True):
+    if to_stderr:
+        _print = eprint
+    else:
+        _print = print
     for ridx in range(0,len(mv),cols):
         #byte number
-        print(str(ridx).zfill(4),' ',end='') 
+        _print(str(ridx).zfill(4),' ',end='') 
         #hex
         for idx in range(ridx,ridx+cols):
             v = hex(mv[idx])[2:].zfill(2) if idx<len(mv) else '--'
-            print(v,end=' ')
-        print('  ',end='')
+            _print(v,end=' ')
+        _print('  ',end='')
         #binary
         for idx in range(ridx,ridx+cols):
             for b in range(8):
@@ -87,14 +94,14 @@ def pretty_binary(mv, cols=10):
                     v = 1 if (0x80>>b) & mv[idx] else 0
                 else:
                     v = '-'
-                print(v,end='')
-            print(' ',end='')
-        print('  ',end='')
+                _print(v,end='')
+            _print(' ',end='')
+        _print('  ',end='')
         #string
         for idx in range(ridx,ridx+cols):
             v = chr(mv[idx]) if idx<len(mv) else '-'
-            print(v,end='')
-        print()
+            _print(v,end='')
+        _print()
 
 def format_bytes(mv):
     o = ''
@@ -129,3 +136,7 @@ def frange(start, stop, step, rnd=None):
     else:
         for i in range(n):
             yield start+i*step
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+

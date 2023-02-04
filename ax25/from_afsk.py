@@ -82,7 +82,7 @@ class AX25FromAFSK():
     async def frame_to_ax25(self, buf, stop_bit):
         mv = memoryview(buf)
         if self.verbose:
-            print('-found frame-')
+            print('===== DEMOD frame ======')
             pretty_binary(mv)
 
         #unstuff

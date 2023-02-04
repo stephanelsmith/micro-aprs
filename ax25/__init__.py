@@ -5,7 +5,7 @@ import asyncio
 import struct
 import traceback
 from array import array
-from pydash import py_ as _
+# from pydash import py_ as _
 
 import matplotlib.pyplot as plt
 
@@ -16,6 +16,7 @@ from ax25.func import reverse_bit_order
 from ax25.func import convert_nrzi
 from ax25.func import do_bitstuffing
 
+import lib.upydash as _
 from lib.crc16 import crc16_ccit
 from lib.utils import pretty_binary
 from lib.utils import eprint
@@ -49,9 +50,9 @@ class AX25():
         #   1) The individual fields directly
         #   2) By APRS message, eg. M0XER-4>APRS64,TF3RPF,WIDE2*,qAR,TF3SUT-2:!/.(M4I^C,O `DXa/A=040849|#B>@\"v90!+|
         #   3) By AX25 bytes
-        if ax25:
+        if ax25 != None:
             self.from_ax25(ax25 = ax25)
-        elif aprs:
+        elif aprs != None:
             self.from_aprs(aprs = aprs)
         else:
             self.src        = CallSSID(aprs = src)
@@ -72,7 +73,26 @@ class AX25():
         return src+'>'+dst_digis+':'+self.info
     
     def from_aprs(self, aprs):
-        pass
+        # KI5TOF>APRS,WIDE1-1,WIDE2-1:hello world!
+        if isinstance(aprs, (bytes, bytearray)):
+            aprs = aprs.decode('utf')
+        par = 0
+        i = _.find_index(aprs,'>')
+        if not i:
+            raise Exception('could not find source',aprs)
+        self.src = CallSSID(aprs = aprs[par:i])
+        par += i + 1
+
+        i = _.find_index(aprs,':')
+        if not i:
+            raise Exception('could not find digis ',aprs)
+        digis = aprs[par:i].split(',')
+        self.dst = CallSSID(aprs = digis.pop(0))
+        self.digis = [CallSSID(aprs = digi) for digi in digis]
+        par += i + 1
+
+        self.info = aprs[i+1:]
+
 
     def from_ax25(self, ax25):
         # from bytearray to ax25 structure
@@ -219,7 +239,7 @@ class AX25():
         convert_nrzi(mv,
                      stop_bit = stop_bit)
         if self.verbose:
-            eprint('-nrzi-', stop_bit//8)
+            eprint('-nrzi-', stop_bit)
             pretty_binary(mv)
         return (ax25,stop_bit)
 

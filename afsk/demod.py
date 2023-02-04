@@ -93,7 +93,8 @@ class AFSKDemodulator():
                 arr,arr_size = await samp_q.get()
 
                 if self.verbose:
-                    eprint('processing bits',arr_size)
+                    eprint('processing samples',arr_size)
+                    # eprint(arr)
 
                 for i in range(arr_size):
                     o[i] = arr[i]

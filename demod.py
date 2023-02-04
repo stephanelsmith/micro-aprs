@@ -6,7 +6,7 @@ import struct
 import traceback
 from array import array
 import signal
-from pydash import py_ as _
+#from pydash import py_ as _
 
 import matplotlib.pyplot as plt
 
@@ -16,6 +16,7 @@ from asyncio import Event
 from afsk.demod import AFSKDemodulator
 from ax25.from_afsk import AX25FromAFSK
 
+import lib.upydash as _
 from lib.utils import parse_args
 from lib.utils import eprint
 import lib.defs as defs
@@ -23,8 +24,9 @@ import lib.defs as defs
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
 
-async def read_pipe_raw(samples_q, 
-                        read_done_evt):
+async def read_raw_from_pipe(samples_q, 
+                             read_done_evt,
+                             ):
     try:
         loop = asyncio.get_event_loop()
         reader = asyncio.StreamReader()
@@ -41,11 +43,12 @@ async def read_pipe_raw(samples_q,
                 # continue
                 break #eof break
             arr[idx] = struct.unpack('<h', b)[0]
-            idx += 1
-            if idx%defs.SAMPLES_SIZE == 0:
-                await samples_q.put((arr, idx))
+            if (idx+1)%defs.SAMPLES_SIZE == 0:
+                await samples_q.put((arr, idx+1))
                 arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
                 idx = 0
+                continue
+            idx = (idx+1)%defs.SAMPLES_SIZE
         await samples_q.put((arr, idx))
 
     except Exception as err:
@@ -106,9 +109,9 @@ async def main():
 
         #from .raw file
         if args['in']['file'] == '-':
-            tasks.append(asyncio.create_task(read_pipe_raw(samples_q      = samples_q,
-                                                           read_done_evt  = read_done_evt,
-                                                           )))
+            tasks.append(asyncio.create_task(read_raw_from_pipe(samples_q      = samples_q,
+                                                                read_done_evt  = read_done_evt,
+                                                                )))
         elif args['in']['type'] == 'raw' and args['in']['file']:
             tasks.append(asyncio.create_task(read_samples_from_raw(samples_q     = samples_q, 
                                                                    file          = args['in']['file'],
@@ -136,6 +139,7 @@ async def main():
                 await samples_q.join()
                 await bits_q.join()
                 await ax25_q.join()
+                # await asyncio.sleep(1)
     except Exception as err:
         traceback.print_exc()
     except asyncio.CancelledError:

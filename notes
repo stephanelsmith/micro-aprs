@@ -16,7 +16,9 @@ python demod.py test.raw > demod.raw
 
 
 
-python mod.py  | multimon-ng -t raw -A -a AFSK1200 -
-python mod.py | python demod.py -t raw -
-
+echo "KI5TOF>APRS:hello world!" | python mod.py | multimon-ng -t raw -A -a AFSK1200 -
+echo "KI5TOF>APRS:hello world!" | python mod.py -v -quiet
+echo "KI5TOF>APRS:hello world!" | python mod.py -v | python demod.py -v -t raw -
+echo "KI5TOF>APRS,WIDE2-1,WIDE1-1:hello world!" | python mod.py -v | python demod.py -v -t raw -
+cat aprs.txt | python mod.py -v | python demod.py -v -t raw -
 

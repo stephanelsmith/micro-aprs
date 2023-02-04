@@ -29,21 +29,24 @@ def parse_args(args):
         args = spl.pop(0)
         if '-v' in args or '-verbose' in args:
             r['args']['verbose'] = True
+        if '-q' in args or '-quiet' in args:
+            r['args']['quiet'] = True
     except IndexError:
         pass
     types = ['raw']
     rates = [22050]
-    try:
-        _out = spl.pop(0)
-        r['out']['type'] = _out[0]
-        if r['out']['type'] not in types:
-            raise Exception('unknown type {}, not in {}'.format(r['out']['type'], types))
-        r['out']['rate'] = get_arg_val(_out, '-r', int) or r['out']['rate']
-        if r['out']['rate'] not in rates:
-            raise Exception('unknown rate {}, not in {}'.format(r['out']['rate'], rates))
-        r['out']['file'] = _out[-1]
-    except IndexError:
-        pass
+    if len(spl) == 2:
+        try:
+            _out = spl.pop(0)
+            r['out']['type'] = _out[0]
+            if r['out']['type'] not in types:
+                raise Exception('unknown type {}, not in {}'.format(r['out']['type'], types))
+            r['out']['rate'] = get_arg_val(_out, '-r', int) or r['out']['rate']
+            if r['out']['rate'] not in rates:
+                raise Exception('unknown rate {}, not in {}'.format(r['out']['rate'], rates))
+            r['out']['file'] = _out[-1]
+        except IndexError:
+            pass
     try:
         _in = spl.pop(0)
         r['in']['type'] = _in[0]

@@ -6,7 +6,9 @@ from pydash import py_ as _
 import struct
 
 from array import array
+
 from lib.utils import frange
+from lib.utils import eprint
 
 from afsk.func import gen_bits_from_bytes
 
@@ -88,17 +90,18 @@ class AFSKModulator():
 
             self.ts_index += 1 #increment one unit time step (ts = 1/fs)
 
-    async def to_samples(self, ax25,
+    async def to_samples(self, afsk,
                                stop_bit,
                                afsk_q,
                                zpad_ms = 0,
                                ):
         for b in range(int(zpad_ms/1000/self.ts+1)):
             await afsk_q.put(0)
-        for bit in gen_bits_from_bytes(mv       = ax25,
+        for bit in gen_bits_from_bytes(mv       = afsk,
                                        stop_bit = stop_bit):
             for sample in self.gen_baud_period_samples(bit):
                 await afsk_q.put(sample//AFSK_SCALE)
+                # eprint(sample//AFSK_SCALE, end=' ')
         for b in range(int(zpad_ms/1000/self.ts+1)):
             await afsk_q.put(0)
 

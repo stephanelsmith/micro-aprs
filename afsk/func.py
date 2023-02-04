@@ -1,7 +1,7 @@
 
 import math
 from array import array
-from scipy import signal
+# from scipy import signal
 
 # generator for iterating over the bits in bytearray
 def gen_bits_from_bytes(mv, stop_bit = None):

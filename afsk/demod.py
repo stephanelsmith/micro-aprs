@@ -6,8 +6,7 @@ from array import array
 import math
 from pydash import py_ as _
 
-import matplotlib.pyplot as plt
-from scipy import signal
+# import matplotlib.pyplot as plt
 
 from lib.utils import frange
 import lib.defs as defs

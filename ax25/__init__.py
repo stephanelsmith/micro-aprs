@@ -7,8 +7,6 @@ import traceback
 from array import array
 # from pydash import py_ as _
 
-import matplotlib.pyplot as plt
-
 from asyncio import Queue
 
 from ax25.callssid import CallSSID

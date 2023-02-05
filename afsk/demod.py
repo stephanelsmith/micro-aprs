@@ -58,7 +58,7 @@ class AFSKDemodulator():
         self.lpf = create_lpf(ncoefs = ncoefs,
                               fa     = 1200,
                               fs     = self.fs)
-        self.eye = create_sampler(fbaud = self.fbaud,
+        self.sampler = create_sampler(fbaud = self.fbaud,
                                   fs    = self.fs)
 
         self.tasks = []
@@ -78,7 +78,7 @@ class AFSKDemodulator():
             agc   = self.agc
             lpf   = self.lpf
             band  = self.band
-            eye  = self.eye
+            sampler   = self.sampler
             self.o = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
             o = self.o
             self.bs = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
@@ -98,13 +98,12 @@ class AFSKDemodulator():
                 for i in range(arr_size):
                     o[i] = arr[i]
                     # o[i] = band(o[i])
-                    # o[i] = agc(o[i])
+                    #o[i] = agc(o[i])
                     o[i] = corr(o[i])
                     o[i] = lpf(o[i])
-                    bs[i] = eye(o[i])
-                for b in bs:
-                    if b == 1 or b == 0:
-                        await bits_q.put(b) #bits_out_q
+                    bs[i] = sampler(o[i])
+                    if bs[i] != 2: # _NONE
+                        await bits_q.put(bs[i]) #bits_out_q
                 samp_q.task_done() # done
         except Exception as err:
             traceback.print_exc()

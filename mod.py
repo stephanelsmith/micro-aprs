@@ -76,13 +76,13 @@ async def core_coro(aprs_q,
                     eprint('===== MOD >>>>>', ax25.to_aprs())
                     eprint('--ax25--')
                     pretty_binary(ax25.to_ax25())
-                afsk,stop_bit = ax25.to_afsk(flags_pre  = 10,
-                                             flags_post = 10)
+                afsk,stop_bit = ax25.to_afsk(flags_pre  = 5,
+                                             flags_post = 5)
                 if not args['args']['quiet']:
                     await afsk_mod.to_samples(afsk     = afsk, 
                                               stop_bit = stop_bit,
                                               afsk_q   = afsk_q,
-                                              zpad_ms  = 0,
+                                              zpad_ms  = 10,
                                               )
                 aprs_q.task_done()
     except asyncio.CancelledError:

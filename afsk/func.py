@@ -1,7 +1,7 @@
 
 import math
 from array import array
-# from scipy import signal
+from scipy import signal
 
 # generator for iterating over the bits in bytearray
 def gen_bits_from_bytes(mv, stop_bit = None):
@@ -97,6 +97,8 @@ def create_sampler(fbaud,
         nonlocal idx,buf,lastx
         nonlocal o,oidx
         buf[idx] = v
+        # if (buf[(idx-1)%buflen] > 0) and (buf[idx] < 0) or\
+           # (buf[(idx-1)%buflen] < 0) and (buf[idx] > 0):
         if (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0):
             #detected crossing
             if lastx > ibaud_2 and lastx < ibaud*8:
@@ -104,7 +106,7 @@ def create_sampler(fbaud,
                 # o = 1 if buf[idx-1]>0 else 0
                 # the correlator inverts mark/space, invert here to mark=1, space=0
                 o = 0 if buf[idx-1]>0 else 1
-                # print(''.join([str(o)]*oidx))
+                # print('*',''.join([str(o)]*oidx))
             else:
                 oidx = 0
             lastx = 0
@@ -114,7 +116,7 @@ def create_sampler(fbaud,
         if oidx == 0:
             return _NONE
         oidx -= 1
-        #print(o,end='')
+        # print('&',o,end='')
         return o
     return inner
 

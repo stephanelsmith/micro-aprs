@@ -5,10 +5,7 @@ import asyncio
 import struct
 import traceback
 from array import array
-import signal
 #from pydash import py_ as _
-
-import matplotlib.pyplot as plt
 
 from asyncio import Queue
 from asyncio import Event

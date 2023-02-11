@@ -107,7 +107,7 @@ class AX25():
             idx+=1
         start_idx = idx
         if idx == len(mv):
-            return
+            raise DecodeError()
 
         stop_idx = idx
         while stop_idx < len(mv) and mv[stop_idx] != AX25_FLAG:
@@ -131,8 +131,12 @@ class AX25():
 
             #skip control/pid
             idx += 2
+            
+            try:
+                self.info = bytes(mv[idx:stop_idx-2]).decode('utf')
+            except UnicodeDecodeError:
+                raise DecodeError('bad payload')
 
-            self.info = bytes(mv[idx:stop_idx-2]).decode('utf')
             crc  = bytes(mv[stop_idx-2:stop_idx])
             _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
             if crc != _crc:

@@ -1,7 +1,8 @@
 
 import math
 from array import array
-from scipy import signal
+from lib.memoize import memoize_loads
+from lib.memoize import memoize_dumps
 
 # generator for iterating over the bits in bytearray
 def gen_bits_from_bytes(mv, stop_bit = None):
@@ -64,7 +65,7 @@ def create_corr(ts, shift):
         return o
     return inner
 
-def create_fir(coefs,scale):
+def create_fir(coefs, scale):
     ncoefs = len(coefs)
     coefs = array('i', (coefs[i] for i in range(ncoefs)))
     bufin = array('i', (0 for x in range(ncoefs)))
@@ -81,26 +82,38 @@ def create_fir(coefs,scale):
 
 def create_lpf(ncoefs, fa, fs):
     wid = 400
-    coefs = signal.firls(ncoefs,
-                        (0, fa-wid, fa+wid, fs/2),
-                        (1, 1,  0,      0), 
-                        fs=fs)
-    coefs = [round(x*10000) for x in coefs]
-    g = sum([coefs[i] for i in range(len(coefs))])
+    try:
+        coefs,g = memoize_loads('lowpass', fa, fs, wid)
+    except:
+        from scipy import signal
+        coefs = signal.firls(ncoefs,
+                            (0, fa-wid, fa+wid, fs/2),
+                            (1, 1,  0,      0), 
+                            fs=fs)
+        coefs = [round(x*10000) for x in coefs]
+        g = sum([coefs[i] for i in range(len(coefs))])
+        memoize_dumps('lowpass', (coefs,g), fa, fs, wid)
+
     return create_fir(coefs = coefs,
                       scale = g,
                       )
 
 def create_bandpass(ncoefs, fmark, fspace, fs):
     wid = 600
-    coefs = signal.firls(ncoefs,
-                        (0, fmark-wid, fmark, fspace, fspace+wid, fs/2),
-                        (0, 0,         1,     1,      0,          0), 
-                        fs=fs)
-    coefs = [round(x*10000) for x in coefs]
-    g1 = sum([coefs[i]*math.cos(2*math.pi*fmark/fs*i) for i in range(len(coefs))])
-    g2 = sum([coefs[i]*math.sin(2*math.pi*fspace/fs*i) for i in range(len(coefs))])
-    g = int((abs(g1)+abs(g2))/2)
+    try:
+        coefs,g = memoize_loads('bandpass', fmark, fspace, fs, wid)
+    except:
+        from scipy import signal
+        coefs = signal.firls(ncoefs,
+                            (0, fmark-wid, fmark, fspace, fspace+wid, fs/2),
+                            (0, 0,         1,     1,      0,          0), 
+                            fs=fs)
+
+        coefs = [round(x*10000) for x in coefs]
+        g1 = sum([coefs[i]*math.cos(2*math.pi*fmark/fs*i) for i in range(len(coefs))])
+        g2 = sum([coefs[i]*math.sin(2*math.pi*fspace/fs*i) for i in range(len(coefs))])
+        g = int((abs(g1)+abs(g2))/2)
+        memoize_dumps('bandpass', (coefs,g), fmark, fspace, fs, wid)
     return create_fir(coefs = coefs,
                       scale = g,
                       )

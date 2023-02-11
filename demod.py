@@ -129,6 +129,7 @@ async def main():
                                    samples_in_q  = samples_q,
                                    bits_out_q    = bits_q,
                                    verbose       = args['args']['verbose']) as afsk_demod:
+            # AX25FromAFSK accepts demodulated bits and generates ax25
             #bits_q consumer
             #ax25_q producer
             async with AX25FromAFSK(bits_in_q = bits_q,
@@ -136,6 +137,10 @@ async def main():
                                     verbose   = args['args']['verbose']) as bits2ax25:
                 #wait for data for work through the system
                 await read_done_evt.wait()
+
+                #flush afsk_demod filters
+                await samples_q.put((array('i',(0 for x in range(afsk_demod.flush_size))),afsk_demod.flush_size))
+
                 await samples_q.join()
                 await bits_q.join()
                 await ax25_q.join()

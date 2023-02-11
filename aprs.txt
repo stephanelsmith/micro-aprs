@@ -1,0 +1,5 @@
+KI5TOF>APRS:hello world!
+KI5TOF>APRS,WIDE2-1,WIDE1-1:hello world!
+KI5TOF>APRS,WIDE2-1,WIDE1-1:hello world!
+KI5TOF>APRS,WIDE2-1,WIDE1-1:hello world!
+

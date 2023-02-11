@@ -24,3 +24,9 @@ cat aprs.txt | python mod.py -v | python demod.py -v -t raw -
 
 echo "KI5TOF>APRS:hello world!" | python mod.py -v | sox -t raw -b 16 -e signed-integer -c 1 -v 7 -r 22050 -  -t wav test.wav
 
+#ISS
+sox -t wav ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python demod.py -t raw -
+sox -t wav ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
+atest ISSpkt.wav
+
+

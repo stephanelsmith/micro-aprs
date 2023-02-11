@@ -1,5 +1,6 @@
 
-
+class DecodeError(Exception):
+    pass
 
 class CallSSID():
     __slots__ = (
@@ -42,7 +43,7 @@ class CallSSID():
     def from_ax25(self, mv):
         #read from encoded ax25 format 
         if len(mv) != 7:
-            raise Exception('callsign unable to read from bytes, bad length ' +str(len(mv)))
+            raise DecodeError('callsign bad len {} != {}'.format(len(mv),7))
         for call_len in range(6):
             if mv[call_len] == 0x40: #searching for ' ' character (still left shifted one)
                 break

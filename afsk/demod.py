@@ -12,13 +12,12 @@ from lib.utils import frange
 import lib.defs as defs
 from lib.utils import eprint
 
+from afsk.func import create_unnrzi
 from afsk.func import create_agc
 from afsk.func import create_corr
 from afsk.func import create_lpf
 from afsk.func import create_bandpass
 from afsk.func import create_sampler
-
-
 
 class AFSKDemodulator():
     def __init__(self, samples_in_q,
@@ -41,8 +40,8 @@ class AFSKDemodulator():
 
         nmark = int(self.tmark/self.ts)
         ncoefsbaud = 4
-        ncoefs = int(nmark*ncoefsbaud) if int(nmark*ncoefsbaud)%2==1 else int(nmark*ncoefsbaud)+1
-        self.band = create_bandpass(ncoefs = ncoefs,
+        band_ncoefs = int(nmark*ncoefsbaud) if int(nmark*ncoefsbaud)%2==1 else int(nmark*ncoefsbaud)+1
+        self.band = create_bandpass(ncoefs = band_ncoefs,
                                     fmark  = self.fmark,
                                     fspace = self.fspace,
                                     fs     = self.fs)
@@ -54,12 +53,16 @@ class AFSKDemodulator():
 
         nmark = int(self.tmark/self.ts)
         ncoefsbaud = 2
-        ncoefs = int(nmark*ncoefsbaud) if int(nmark*ncoefsbaud)%2==1 else int(nmark*ncoefsbaud)+1
-        self.lpf = create_lpf(ncoefs = ncoefs,
+        lpf_ncoefs = int(nmark*ncoefsbaud) if int(nmark*ncoefsbaud)%2==1 else int(nmark*ncoefsbaud)+1
+        self.lpf = create_lpf(ncoefs = lpf_ncoefs,
                               fa     = 1200,
                               fs     = self.fs)
         self.sampler = create_sampler(fbaud = self.fbaud,
                                   fs    = self.fs)
+        self.unnrzi = create_unnrzi()
+
+        #how much we need to flush internal filters to process all sampled data
+        self.flush_size = int((lpf_ncoefs+band_ncoefs)*(self.tbaud/self.ts))
 
         self.tasks = []
 
@@ -74,11 +77,12 @@ class AFSKDemodulator():
     async def process_samples(self):
         try:
             # Process a chunk of samples
-            corr  = self.corr
-            agc   = self.agc
-            lpf   = self.lpf
-            band  = self.band
-            sampler   = self.sampler
+            corr    = self.corr
+            agc     = self.agc
+            lpf     = self.lpf
+            band    = self.band
+            sampler = self.sampler
+            unnrzi  = self.unnrzi
             self.o = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
             o = self.o
             self.bs = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
@@ -93,17 +97,18 @@ class AFSKDemodulator():
 
                 if self.verbose:
                     eprint('processing samples',arr_size)
-                    # eprint(arr)
 
                 for i in range(arr_size):
                     o[i] = arr[i]
-                    # o[i] = band(o[i])
-                    #o[i] = agc(o[i])
+                    o[i] = band(o[i])
+                    # o[i] = agc(o[i])
                     o[i] = corr(o[i])
                     o[i] = lpf(o[i])
                     bs[i] = sampler(o[i])
                     if bs[i] != 2: # _NONE
-                        await bits_q.put(bs[i]) #bits_out_q
+                        b = unnrzi(bs[i])
+                        # eprint(b,end='')
+                        await bits_q.put(b) #bits_out_q
                 samp_q.task_done() # done
         except Exception as err:
             traceback.print_exc()

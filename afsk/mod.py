@@ -9,10 +9,13 @@ from array import array
 
 from lib.utils import frange
 from lib.utils import eprint
+from lib.utils import int_div_ceil
 
 from afsk.func import gen_bits_from_bytes
+from afsk.func import create_nrzi
 
 AFSK_SCALE     = 50
+
 
 class AFSKModulator():
 
@@ -55,6 +58,9 @@ class AFSKModulator():
         self.baud_index = 0
         self.markspace_index = 0
 
+        #nrzi converter
+        self.nrzi = create_nrzi()
+
         self.tasks = []
 
     async def __aenter__(self):
@@ -95,13 +101,36 @@ class AFSKModulator():
                                afsk_q,
                                zpad_ms = 0,
                                ):
-        for b in range(int(zpad_ms/1000/self.ts+1)):
-            await afsk_q.put(0)
-        for bit in gen_bits_from_bytes(mv       = afsk,
-                                       stop_bit = stop_bit):
-            for sample in self.gen_baud_period_samples(bit):
-                await afsk_q.put(sample//AFSK_SCALE)
-                # eprint(sample//AFSK_SCALE, end=' ')
-        for b in range(int(zpad_ms/1000/self.ts+1)):
-            await afsk_q.put(0)
+        try:
+            nrzi = self.nrzi
+            afsk_q_put = afsk_q.put
+            gen_samples = self.gen_baud_period_samples
+            verbose = self.verbose
+            i = 0
+
+            if verbose:
+                eprint('--nrzi--', 'bits',stop_bit, 'bytes',stop_bit//8,'remain',stop_bit%8)
+            for b in range(int(zpad_ms/1000/self.ts)):
+                await afsk_q_put(0)
+            for b in gen_bits_from_bytes(mv       = afsk,
+                                        stop_bit = stop_bit):
+
+                #convert nrzi
+                b = nrzi(b)
+                if verbose:
+                    i+=1
+                    eprint(b,end=' ' if i%8==0 else '')
+                    if i%80==0:
+                        eprint('')
+
+                for sample in gen_samples(b):
+                    await afsk_q_put(sample//AFSK_SCALE)
+                    # eprint(sample//AFSK_SCALE, end=' ')
+
+            for b in range(int(zpad_ms/1000/self.ts)):
+                await afsk_q_put(0)
+            if verbose:
+                eprint('\n')
+        except Exception as err:
+            traceback.print_exc()
 

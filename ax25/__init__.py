@@ -10,6 +10,7 @@ from array import array
 from asyncio import Queue
 
 from ax25.callssid import CallSSID
+from ax25.callssid import DecodeError
 from ax25.func import reverse_bit_order
 from ax25.func import convert_nrzi
 from ax25.func import do_bitstuffing
@@ -102,36 +103,44 @@ class AX25():
 
         idx = 0
         #flags
-        while mv[idx] == AX25_FLAG and idx < len(mv):
+        while idx < len(mv) and mv[idx] == AX25_FLAG:
             idx+=1
         start_idx = idx
+        if idx == len(mv):
+            return
 
         stop_idx = idx
-        while mv[stop_idx] != AX25_FLAG and stop_idx < len(mv):
+        while stop_idx < len(mv) and mv[stop_idx] != AX25_FLAG:
             stop_idx+=1
 
-        #destination
-        self.dst = CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN])
-        idx += AX25_ADDR_LEN
-
-        #source
-        self.src = CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN])
-        idx += AX25_ADDR_LEN
-       
-        #digis
-        self.digis = []
-        while not mv[idx-1]&0x01:
-            self.digis.append(CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN]))
+        try:
+        
+            #destination
+            self.dst = CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN])
             idx += AX25_ADDR_LEN
 
-        #skip control/pid
-        idx += 2
+            #source
+            self.src = CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN])
+            idx += AX25_ADDR_LEN
+        
+            #digis
+            self.digis = []
+            while not mv[idx-1]&0x01:
+                self.digis.append(CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN]))
+                idx += AX25_ADDR_LEN
 
-        self.info = bytes(mv[idx:stop_idx-2]).decode('utf')
-        crc  = bytes(mv[stop_idx-2:stop_idx])
-        _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
-        if crc != _crc:
-            raise Exception('crc error '+str(crc)+' != '+str(_crc))
+            #skip control/pid
+            idx += 2
+
+            self.info = bytes(mv[idx:stop_idx-2]).decode('utf')
+            crc  = bytes(mv[stop_idx-2:stop_idx])
+            _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
+            if crc != _crc:
+                raise DecodeError('crc error {} != {}'.format(crc, _crc))
+
+        except DecodeError as err:
+            # eprint(err)
+            raise
 
     def to_ax25(self, bit_stuff_margin = 0, # the number of additional bytes, placeholder for stuffing
                       flags_pre        = 1, # number of pre-flags
@@ -234,11 +243,11 @@ class AX25():
             pretty_binary(mv)
 
         #convert to nrzi
-        convert_nrzi(mv,
-                     stop_bit = stop_bit)
-        if self.verbose:
-            eprint('-nrzi-', stop_bit)
-            pretty_binary(mv)
+        # convert_nrzi(mv,
+                     # stop_bit = stop_bit)
+        # if self.verbose:
+            # eprint('-nrzi-', stop_bit)
+            # pretty_binary(mv)
         return (ax25,stop_bit)
 
     def __repr__(self):

@@ -114,7 +114,6 @@ def shift_bytes_left(mv, start_byte):
 
 
 
-
 def convert_nrzi(mv, stop_bit):
     #https://en.wikipedia.org/wiki/Non-return-to-zero
     #The HDLC a logical 0 is transmitted as a transition, and a logical 1 is transmitted as no transition.
@@ -126,18 +125,5 @@ def convert_nrzi(mv, stop_bit):
             #toggle
             c ^= 0x01
         mv[idx//8] = assign_bit(mv[idx//8], idx, c)
-
-def create_unnrzi():
-    #process the bit stream bit-by-bit with closure
-    c = 1
-    def inner(b):
-        nonlocal c
-        if b != c:
-            c = b
-            return 0
-        else:
-            c = b
-            return 1
-    return inner
 
 

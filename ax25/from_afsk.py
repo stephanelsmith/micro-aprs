@@ -14,15 +14,15 @@ from asyncio import Queue
 from ax25 import AX25
 from ax25.func import reverse_bit_order
 from ax25.func import unstuff
-from ax25.func import create_unnrzi
+from ax25.callssid import DecodeError
 
 from lib.utils import pretty_binary
 from lib.utils import int_div_ceil
 from lib.utils import assign_bit
+from lib.utils import eprint
 
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
-
 
 class AX25FromAFSK():
     def __init__(self, bits_in_q,
@@ -54,21 +54,16 @@ class AX25FromAFSK():
             mv = memoryview(inb)
             idx = 0
             flgcnt = 0
-            unnrzi = create_unnrzi()
             while True:
-                _b = await self.bits_q.get()
-                # print(_b,end='')
-                #UN NRZI, it's better to do it here since
-                # - easy to detect the AX25 flags decoded (they can be flipped in NRZI)
-                # - ideally done with closure
-                b = unnrzi(_b)
+                b = await self.bits_q.get()
                 inb[idx//8] = assign_bit(inb[idx//8], idx, b)
                 idx += 1
                 if b == 0 and flgcnt == 6:
                     #detected ax25 frame flag
-                    if idx//8 > 2: 
-                        # await self.frames_q.put((bytearray(mv[:int_div_ceil(idx,8)]), idx))
-                        await self.frame_to_ax25(bytearray(mv[:int_div_ceil(idx,8)]), idx)
+                    if self.verbose:
+                        eprint('frame')
+                    # await self.frames_q.put((bytearray(mv[:int_div_ceil(idx,8)]), idx))
+                    await self.frame_to_ax25(bytearray(mv[:int_div_ceil(idx,8)]), idx)
                     mv[0] = AX25_FLAG #keep the frame flag that we detected in buffer
                     idx = 8
                 flgcnt = flgcnt + 1 if b else 0
@@ -98,6 +93,14 @@ class AX25FromAFSK():
             pretty_binary(mv)
 
         #decode
-        ax25 = AX25(ax25 = mv)
+        try:
+            ax25 = AX25(ax25 = mv)
+        except DecodeError as err:
+            if self.verbose:
+                eprint(str(err))
+            return
+        except:
+            traceback.print_exc()
+            return
         await self.ax25_q.put(ax25)
 

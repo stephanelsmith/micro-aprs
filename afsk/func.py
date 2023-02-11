@@ -11,6 +11,30 @@ def gen_bits_from_bytes(mv, stop_bit = None):
         yield mv[idx//8]&(0x80>>(idx%8))
 
 
+def create_nrzi():
+    #process the bit stream bit-by-bit with closure
+    c = 0
+    def inner(b):
+        nonlocal c
+        if b == 0:
+            c ^= 1 #toggle
+        return c
+    return inner
+
+def create_unnrzi():
+    #process the bit stream bit-by-bit with closure
+    c = 1
+    def inner(b):
+        nonlocal c
+        if b != c:
+            c = b
+            return 0
+        else:
+            c = b
+            return 1
+    return inner
+
+
 def create_agc(sp,depth):
     bufin = array('i', (0 for x in range(depth)))
     idx = 0

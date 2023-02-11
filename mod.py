@@ -46,12 +46,15 @@ async def read_aprs_from_pipe(aprs_q,
     finally:
         read_done_evt.set()
 
-async def afsk_out(afsk_q):
+async def afsk_out(afsk_q,
+                   args,
+                   ):
     try:
         while True:
             samp = await afsk_q.get()
             x = struct.pack('<h', samp)
-            sys.stdout.buffer.write(x)
+            if not args['args']['quiet']:
+                sys.stdout.buffer.write(x)
             afsk_q.task_done()
     except asyncio.CancelledError:
         raise
@@ -70,21 +73,21 @@ async def core_coro(aprs_q,
                 try:
                     ax25 = AX25(aprs    = aprs,
                                 verbose = args['args']['verbose'])
-                except:
-                    continue
-                if args['args']['verbose']:
-                    eprint('===== MOD >>>>>', ax25.to_aprs())
-                    eprint('--ax25--')
-                    pretty_binary(ax25.to_ax25())
-                afsk,stop_bit = ax25.to_afsk(flags_pre  = 5,
-                                             flags_post = 5)
-                if not args['args']['quiet']:
+                    if args['args']['verbose']:
+                        eprint('===== MOD >>>>>', ax25.to_aprs())
+                        eprint('--ax25--')
+                        pretty_binary(ax25.to_ax25())
+                    afsk,stop_bit = ax25.to_afsk(flags_pre  = 1,
+                                                 flags_post = 1)
                     await afsk_mod.to_samples(afsk     = afsk, 
                                               stop_bit = stop_bit,
                                               afsk_q   = afsk_q,
-                                              zpad_ms  = 10,
+                                              zpad_ms  = 0,
                                               )
-                aprs_q.task_done()
+                except:
+                    continue
+                finally:
+                    aprs_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:
@@ -99,7 +102,9 @@ async def main():
 
     tasks = []
     try:
-        tasks.append(asyncio.create_task(afsk_out(afsk_q)))
+        tasks.append(asyncio.create_task(afsk_out(afsk_q,
+                                                  args,
+                                                  )))
 
         if args['in']['file'] == '-':
             tasks.append(asyncio.create_task(read_aprs_from_pipe(aprs_q         = aprs_q,

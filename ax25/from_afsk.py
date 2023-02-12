@@ -20,7 +20,7 @@ from lib.utils import assign_bit
 from lib.utils import eprint
 
 AX25_FLAG      = 0x7e
-AX25_ADDR_LEN  = 7
+AX25_MIN_BITS  = 160
 
 class AX25FromAFSK():
     def __init__(self, bits_in_q,
@@ -35,7 +35,6 @@ class AX25FromAFSK():
 
     async def __aenter__(self):
         self.tasks.append(asyncio.create_task(self.delimin_coro()))
-        # self.tasks.append(asyncio.create_task(self.frame_coro()))
         return self
 
     async def __aexit__(self, *args):
@@ -58,10 +57,11 @@ class AX25FromAFSK():
                 idx += 1
                 if b == 0 and flgcnt == 6:
                     #detected ax25 frame flag
-                    if self.verbose:
-                        eprint('frame')
-                    # await self.frames_q.put((bytearray(mv[:int_div_ceil(idx,8)]), idx))
-                    await self.frame_to_ax25(bytearray(mv[:int_div_ceil(idx,8)]), idx)
+                    #a valid AX25 frame is at minimum 160 bites (20 bytes) long
+                    if idx >= AX25_MIN_BITS:
+                        if self.verbose:
+                            eprint('frame')
+                        await self.frame_to_ax25(bytearray(mv[:int_div_ceil(idx,8)]), idx)
                     mv[0] = AX25_FLAG #keep the frame flag that we detected in buffer
                     idx = 8
                 flgcnt = flgcnt + 1 if b else 0

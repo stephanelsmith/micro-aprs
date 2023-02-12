@@ -72,7 +72,7 @@ async def core_coro(aprs_q,
                                  verbose       = args['args']['verbose']) as afsk_mod:
             
             # initial flags
-            flags = bytearray(2)
+            flags = bytearray(1)
             for i in range(len(flags)):
                 flags[i] = AX25_FLAG
             await afsk_mod.to_samples(afsk     = flags,

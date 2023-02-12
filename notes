@@ -10,10 +10,9 @@ sox -t wav test.wav -t raw - | python bin2num.py
 
 #demodulation
 sox -t wav test.wav -t raw - | python demod.py -
-python demod.py test.raw
 python demod.py test.raw  | sox -t raw -b 16 -e signed-integer -c 1 -r 22050 - -t wav demod.wav
-python demod.py test.raw > demod.raw
 
+python demod.py -t raw test/test.raw
 
 
 echo "KI5TOF>APRS:hello world!" | python mod.py | multimon-ng -t raw -A -a AFSK1200 -

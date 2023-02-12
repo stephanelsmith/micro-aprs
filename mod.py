@@ -9,6 +9,7 @@ from asyncio import Event
 
 from afsk.mod import AFSKModulator
 from ax25 import AX25
+from ax25 import AX25_FLAG
 
 import lib.upydash as _
 from lib.utils import parse_args
@@ -67,7 +68,16 @@ async def core_coro(aprs_q,
                     ):
     try:
         async with AFSKModulator(sampling_rate = 22050,
+                                 afsk_q        = afsk_q,
                                  verbose       = args['args']['verbose']) as afsk_mod:
+            
+            # initial flags
+            flags = bytearray(2)
+            for i in range(len(flags)):
+                flags[i] = AX25_FLAG
+            await afsk_mod.to_samples(afsk     = flags,
+                                      stop_bit = len(flags)*8)
+
             while True:
                 aprs = await aprs_q.get()
                 try:
@@ -77,12 +87,10 @@ async def core_coro(aprs_q,
                         eprint('===== MOD >>>>>', ax25.to_aprs())
                         eprint('--ax25--')
                         pretty_binary(ax25.to_ax25())
-                    afsk,stop_bit = ax25.to_afsk(flags_pre  = 1,
-                                                 flags_post = 1)
+                    afsk,stop_bit = ax25.to_afsk()
                     await afsk_mod.to_samples(afsk     = afsk, 
                                               stop_bit = stop_bit,
-                                              afsk_q   = afsk_q,
-                                              zpad_ms  = 0,
+                                              # zpad_ms  = 0,
                                               )
                 except:
                     continue

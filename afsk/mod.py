@@ -3,25 +3,25 @@ import sys
 import math
 import asyncio
 from pydash import py_ as _
-import struct
 
 from array import array
 
-from lib.utils import frange
 from lib.utils import eprint
-from lib.utils import int_div_ceil
 
+from afsk.func import get_sin_table
 from afsk.func import gen_bits_from_bytes
 from afsk.func import create_nrzi
 
-AFSK_SCALE     = 50
+AFSK_SCALE     = 25
 
 
 class AFSKModulator():
 
     def __init__(self, sampling_rate = 22050,
+                       afsk_q        = None,
                        verbose       = False,):
         self.verbose = verbose 
+        self.afsk_q = afsk_q
 
         self.fmark = 1200
         self.tmark = 1/self.fmark
@@ -33,17 +33,16 @@ class AFSKModulator():
         self.tbaud = 1/self.fbaud
         self.residue_size = 10000
 
-        #pre-compute sine lookup table
-        self.lookup_size = 1024
-
-        self.sin_array = array('i', (int((2**15-1)*math.sin(x)) for x in frange(0,2*math.pi,2*math.pi/self.lookup_size)))
+        #pre-compute sine table
+        self.sintbl_sz = 1024
+        self.sintbl = get_sin_table(size = self.sintbl_sz)
 
         #get step sizes (integer and residue)
-        mark_step     = self.lookup_size / (self.tmark/self.ts)
+        mark_step     = self.sintbl_sz / (self.tmark/self.ts)
         self.mark_step_int = int(mark_step)
         self.mark_residue  = int((mark_step%1)*self.residue_size)
 
-        space_step     = self.lookup_size / (self.tspace/self.ts)
+        space_step     = self.sintbl_sz / (self.tspace/self.ts)
         self.space_step_int = int(space_step)
         self.space_residue  = int((space_step%1)*self.residue_size)
 
@@ -64,6 +63,10 @@ class AFSKModulator():
         self.tasks = []
 
     async def __aenter__(self):
+        zpad_ms = 1
+        afsk_q_put = self.afsk_q.put
+        for b in range(int(zpad_ms/1000/self.ts)):
+            await afsk_q_put(0)
         return self
 
     async def __aexit__(self, *args):
@@ -92,26 +95,25 @@ class AFSKModulator():
             self.markspace_residue_accumulator = self.markspace_residue_accumulator % self.residue_size
             
             #push the next point to the waveform
-            yield self.sin_array[self.markspace_index%self.lookup_size]
+            yield self.sintbl[self.markspace_index%self.sintbl_sz]
 
             self.ts_index += 1 #increment one unit time step (ts = 1/fs)
 
-    async def to_samples(self, afsk,
+    async def to_samples(self, afsk, #bytes
                                stop_bit,
-                               afsk_q,
-                               zpad_ms = 0,
+                               # zpad_ms = 0,
                                ):
         try:
             nrzi = self.nrzi
-            afsk_q_put = afsk_q.put
+            afsk_q_put = self.afsk_q.put
             gen_samples = self.gen_baud_period_samples
             verbose = self.verbose
             i = 0
 
             if verbose:
                 eprint('--nrzi--', 'bits',stop_bit, 'bytes',stop_bit//8,'remain',stop_bit%8)
-            for b in range(int(zpad_ms/1000/self.ts)):
-                await afsk_q_put(0)
+            # for b in range(int(zpad_ms/1000/self.ts)):
+                # await afsk_q_put(0)
             for b in gen_bits_from_bytes(mv       = afsk,
                                         stop_bit = stop_bit):
 
@@ -127,8 +129,8 @@ class AFSKModulator():
                     await afsk_q_put(sample//AFSK_SCALE)
                     # eprint(sample//AFSK_SCALE, end=' ')
 
-            for b in range(int(zpad_ms/1000/self.ts)):
-                await afsk_q_put(0)
+            # for b in range(int(zpad_ms/1000/self.ts)):
+                # await afsk_q_put(0)
             if verbose:
                 eprint('\n')
         except Exception as err:

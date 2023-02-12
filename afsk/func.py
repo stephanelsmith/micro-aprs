@@ -1,8 +1,23 @@
 
 import math
 from array import array
+
+from lib.utils import eprint
+from lib.utils import frange
 from lib.memoize import memoize_loads
 from lib.memoize import memoize_dumps
+
+
+def get_sin_table(size):
+    return array('i', (int((2**15-1)*math.sin(x)) for x in frange(0,2*math.pi,2*math.pi/size)))
+    # try:
+        # # tbl = memoize_loads('sin_table', size)
+        # return tbl
+    # except:
+        # tbl = array('i', (int((2**15-1)*math.sin(x)) for x in frange(0,2*math.pi,2*math.pi/size)))
+        # # eprint(tbl)
+        # # memoize_dumps('sin_table', tbl, size)
+    # return tbl
 
 # generator for iterating over the bits in bytearray
 def gen_bits_from_bytes(mv, stop_bit = None):
@@ -10,7 +25,6 @@ def gen_bits_from_bytes(mv, stop_bit = None):
         stop_bit = len(mv)*8
     for idx in range(stop_bit):
         yield mv[idx//8]&(0x80>>(idx%8))
-
 
 def create_nrzi():
     #process the bit stream bit-by-bit with closure
@@ -34,7 +48,6 @@ def create_unnrzi():
             c = b
             return 1
     return inner
-
 
 def create_agc(sp,depth):
     bufin = array('i', (0 for x in range(depth)))

@@ -13,6 +13,7 @@ from afsk.func import gen_bits_from_bytes
 from afsk.func import create_nrzi
 
 AFSK_SCALE     = 25
+AX25_FLAG      = 0x7e
 
 
 class AFSKModulator():
@@ -98,6 +99,14 @@ class AFSKModulator():
             yield self.sintbl[self.markspace_index%self.sintbl_sz]
 
             self.ts_index += 1 #increment one unit time step (ts = 1/fs)
+
+    async def send_flags(self, count):
+        # initial flags
+        flags = bytearray(count)
+        for i in range(count):
+            flags[i] = AX25_FLAG
+        await self.to_samples(afsk     = flags,
+                              stop_bit = count*8)
 
     async def to_samples(self, afsk, #bytes
                                stop_bit,

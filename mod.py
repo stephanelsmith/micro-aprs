@@ -9,7 +9,6 @@ from asyncio import Event
 
 from afsk.mod import AFSKModulator
 from ax25 import AX25
-from ax25 import AX25_FLAG
 
 import lib.upydash as _
 from lib.utils import parse_args
@@ -62,44 +61,6 @@ async def afsk_out(afsk_q,
     except Exception as err:
         traceback.print_exc()
 
-async def core_coro(aprs_q,
-                    afsk_q,
-                    args,
-                    ):
-    try:
-        async with AFSKModulator(sampling_rate = 22050,
-                                 afsk_q        = afsk_q,
-                                 verbose       = args['args']['verbose']) as afsk_mod:
-            
-            # initial flags
-            flags = bytearray(1)
-            for i in range(len(flags)):
-                flags[i] = AX25_FLAG
-            await afsk_mod.to_samples(afsk     = flags,
-                                      stop_bit = len(flags)*8)
-
-            while True:
-                aprs = await aprs_q.get()
-                try:
-                    ax25 = AX25(aprs    = aprs,
-                                verbose = args['args']['verbose'])
-                    if args['args']['verbose']:
-                        eprint('===== MOD >>>>>', ax25.to_aprs())
-                        eprint('--ax25--')
-                        pretty_binary(ax25.to_ax25())
-                    afsk,stop_bit = ax25.to_afsk()
-                    await afsk_mod.to_samples(afsk     = afsk, 
-                                              stop_bit = stop_bit,
-                                              # zpad_ms  = 0,
-                                              )
-                except:
-                    continue
-                finally:
-                    aprs_q.task_done()
-    except asyncio.CancelledError:
-        raise
-    except Exception as err:
-        traceback.print_exc()
 
 async def main():
     args = parse_args(sys.argv)
@@ -116,15 +77,41 @@ async def main():
 
         if args['in']['file'] == '-':
             tasks.append(asyncio.create_task(read_aprs_from_pipe(aprs_q         = aprs_q,
-                                                                read_done_evt  = read_done_evt,
-                                                                )))
+                                                                 read_done_evt  = read_done_evt,
+                                                                 )))
 
-        tasks.append(asyncio.create_task(core_coro(aprs_q = aprs_q,
-                                                   afsk_q = afsk_q,
-                                                   args   = args,
-                                                   )))
+        async with AFSKModulator(sampling_rate = 22050,
+                                 afsk_q        = afsk_q,
+                                 verbose       = args['args']['verbose']) as afsk_mod:
 
-        await read_done_evt.wait()
+            #queue up aprs messages to send
+            await read_done_evt.wait()
+            aprss = []
+            while not aprs_q.empty():
+                aprss.append(await aprs_q.get())
+                aprs_q.task_done()
+
+            #pre-message flags 
+            #we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
+            #increasing this number for vox
+            await afsk_mod.send_flags(1)
+
+            for aprs in aprss:
+                ax25 = AX25(aprs    = aprs,
+                            verbose = args['args']['verbose'])
+                if args['args']['verbose']:
+                    eprint('===== MOD >>>>>', ax25.to_aprs())
+                    eprint('--ax25--')
+                    pretty_binary(ax25.to_ax25())
+                afsk,stop_bit = ax25.to_afsk()
+                await afsk_mod.to_samples(afsk     = afsk, 
+                                          stop_bit = stop_bit,
+                                          )
+            #send post message flags
+            #multimon-ng and direwolf want one additional post flag in addition to the one at the end
+            #of the message
+            await afsk_mod.send_flags(1)
+
         await aprs_q.join()
         await afsk_q.join()
     except Exception as err:

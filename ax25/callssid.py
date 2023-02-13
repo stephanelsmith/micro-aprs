@@ -2,6 +2,8 @@
 class DecodeError(Exception):
     pass
 
+AX25_ADDR_LEN  = 7
+
 class CallSSID():
     __slots__ = (
         'call',
@@ -59,19 +61,20 @@ class CallSSID():
         #optional mv, write in place if provided
         #callsign exactly 6 characters
         if not mv:
-            ax25 = bytearray(7)
+            ax25 = bytearray(7)# AX25_ADDR_LEN
             mv = memoryview(ax25)
         for i in range(len(self.call)):
             mv[i] = ord(self.call[i])
             if i == 6:
                 break
-        #shift left in place
         for i in range(6):
+            mv[i] = ord(self.call[i]) if i < len(self.call) else ord(' ')
+            #shift left in place
             mv[i] = mv[i]<<1
         #SSID is is the 6th bit, shift left by one
         #the right most bit is used to indicate last address
-        mv[6]  = self.ssid<<1
-        mv[6]  |= 0x60
+        mv[6] = self.ssid<<1
+        mv[6] |= 0x60
         return mv
 
     def __repr__(self):

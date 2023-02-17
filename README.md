@@ -10,11 +10,10 @@ The purpose of this library is to thread-the-needle of both enabling APRS/AX.25/
 
 In practice this means we:
 * Avoid floating point and math libraries and dependencies in critical sections.  
-	* :+1: Integer math
+	* :+1: Integer math only
 	* :+1: Lookup tables 
-	* :-1: Floating point math
-	* :-1: Basic math (sin/cos/etc...) or advanced math (FFT) libraries 
-* Avoid memory allocation in critical sections.
+	* :+1: No external libraries or especially advanced math libraries (numpy/scipy/pandas).
+* Special care for memory allocation
 	* :+1: Pre-computing buffer/array sizes and modifying in place
 	* :+1: Using memoryview objects to pass slices to functions and modifying those slices in place
 	* :-1: Dynamically appending items to a list
@@ -36,6 +35,12 @@ The standards tested against are:
 	* NRZI encoding continuity between adjacent APRS messages
 	* Verbose mode for complete, step-by-step modulation results
 	* Programmable number of lead flags before first message (vox activation or assisting with demodulation).
+
+* mod.py arguments and usage
+	* -v, verbose mode.  Debugging information printed to stderr
+	* -q, quiet mode. Stdout suppressed
+	* -r, data rate. Default is 22050
+	* -t <type> <source>, input format.  Currently only 'aprs' type is supported with input via stdin '-' or file.  Default is aprs strings from stdin.
 
 * Mod with Multimon-ng Decode Example
 ```
@@ -99,6 +104,11 @@ echo "KI5TOF>APRS:hello world!" | python mod.py -v -q
 * demod.py reads in raw 16 bit signed integers from standard input or file and output detected APRS strings:
 	* Verbose mode for complete, step-by-step modulation resultsdemodulation).
 
+* demod arguments and usage:
+	* -v, verbose mode.  Debugging information printed to stderr
+	* -r, data rate. Default is 22050
+	* -t <type> <source>, input format.  Currently only 'raw' type is supported with input via stdin '-' or file.  Default is raw from stdin.
+	
 * Demodulation in verbose step-by-step mode
 ```
 echo "KI5TOF>APRS:hello world!" | python mod.py | python demod.py -v -t raw -

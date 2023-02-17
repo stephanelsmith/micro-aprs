@@ -76,7 +76,8 @@ def split_shift_byte(mv, idx):
 def unstuff(mv, stop_bit):
     #look for 111110, remove the 0
     c = 0
-    for idx in range(stop_bit):
+    idx = 0
+    while idx < stop_bit:
         mask = (0x80>>(idx%8))
         b = (mv[idx//8] & mask) >> ((8-idx-1)%8) #pick bit
         if b == 0 and c == 5:
@@ -84,7 +85,9 @@ def unstuff(mv, stop_bit):
             shift_in = shift_bytes_left(mv, idx//8+1)
             remove_bit_shift_from_right(mv, idx, shift_in)
             c = 0
+            continue
         c = c+b if b==1 else 0
+        idx += 1
 
 def remove_bit_shift_from_right(mv, idx, shift_in=0):
     if idx%8 == 7:

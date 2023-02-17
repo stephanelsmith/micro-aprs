@@ -19,6 +19,7 @@ import lib.upydash as _
 from lib.crc16 import crc16_ccit
 from lib.utils import pretty_binary
 from lib.utils import eprint
+from lib.utils import format_bytes
 
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
@@ -109,9 +110,9 @@ class AX25():
         if idx == len(mv):
             raise DecodeError()
 
-        stop_idx = idx
-        while stop_idx < len(mv) and mv[stop_idx] != AX25_FLAG:
-            stop_idx+=1
+        stop_idx = len(mv)-1
+        while stop_idx > 0 and mv[stop_idx] != AX25_FLAG:
+            stop_idx-=1
 
         try:
         
@@ -135,10 +136,11 @@ class AX25():
             try:
                 self.info = bytes(mv[idx:stop_idx-2]).decode('utf')
             except UnicodeDecodeError:
-                raise DecodeError('bad payload')
+                raise DecodeError('bad payload {} '.format(bytes(mv[idx:stop_idx-2])))
 
             crc  = bytes(mv[stop_idx-2:stop_idx])
             _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
+            # eprint('{} {}'.format(format_bytes(crc),format_bytes(_crc)))
             if crc != _crc:
                 raise DecodeError('crc error {} != {}'.format(crc, _crc))
 

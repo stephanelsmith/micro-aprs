@@ -28,16 +28,25 @@ cat aprs.txt | python mod.py -v | python demod.py -v -t raw -
 gen_packets -r 22050 -o x.wav
 sox -t wav x.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python demod.py -t raw -
 
+#ISS TESTs
+wget https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav
+#TNC TESTs
+wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip
+sudo apt-get install bchunk
+bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
+
+#convert wav->raw
+find -name "*wav" | xargs basename -s .wav | xargs -i sox -t wav {}.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 {}.raw
 
 #ISS
 sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python demod.py -t raw -
+python demod.py -t raw test/ISSpkt.raw
 
 #TNC
 wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip
 sudo apt-get install bchunk
 bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
 
-
-sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python demod.py -t raw -
+python demod.py -t raw test/tnc_test02.raw
 
 

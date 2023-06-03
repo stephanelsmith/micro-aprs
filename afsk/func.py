@@ -93,32 +93,30 @@ def create_fir(coefs, scale):
         return o
     return inner
 
-def create_lpf(ncoefs, fa, fs):
-    wid = 400
+def create_lpf(ncoefs, fa, fs, width = 400):
     try:
-        coefs,g = memoize_loads('lowpass', fa, fs, wid)
+        coefs,g = memoize_loads('lowpass', fa, fs, width)
     except:
         from scipy import signal
         coefs = signal.firls(ncoefs,
-                            (0, fa-wid, fa+wid, fs/2),
+                            (0, fa-width, fa+width, fs/2),
                             (1, 1,  0,      0), 
                             fs=fs)
         coefs = [round(x*10000) for x in coefs]
         g = sum([coefs[i] for i in range(len(coefs))])
-        memoize_dumps('lowpass', (coefs,g), fa, fs, wid)
+        memoize_dumps('lowpass', (coefs,g), fa, fs, width)
 
     return create_fir(coefs = coefs,
                       scale = g,
                       )
 
-def create_bandpass(ncoefs, fmark, fspace, fs):
-    wid = 600
+def create_bandpass(ncoefs, fmark, fspace, fs, width=600):
     try:
-        coefs,g = memoize_loads('bandpass', fmark, fspace, fs, wid)
+        coefs,g = memoize_loads('bandpass', fmark, fspace, fs, width)
     except:
         from scipy import signal
         coefs = signal.firls(ncoefs,
-                            (0, fmark-wid, fmark, fspace, fspace+wid, fs/2),
+                            (0, fmark-width, fmark, fspace, fspace+width, fs/2),
                             (0, 0,         1,     1,      0,          0), 
                             fs=fs)
 
@@ -126,7 +124,7 @@ def create_bandpass(ncoefs, fmark, fspace, fs):
         g1 = sum([coefs[i]*math.cos(2*math.pi*fmark/fs*i) for i in range(len(coefs))])
         g2 = sum([coefs[i]*math.sin(2*math.pi*fspace/fs*i) for i in range(len(coefs))])
         g = int((abs(g1)+abs(g2))/2)
-        memoize_dumps('bandpass', (coefs,g), fmark, fspace, fs, wid)
+        memoize_dumps('bandpass', (coefs,g), fmark, fspace, fs, width)
     return create_fir(coefs = coefs,
                       scale = g,
                       )

@@ -23,7 +23,9 @@ class AFSKDemodulator():
     def __init__(self, samples_in_q,
                        bits_out_q,
                        sampling_rate = 22050,
-                       verbose       = False):
+                       verbose       = False,
+                       options       = {},
+                       ):
 
         self.samples_q  = samples_in_q
         self.bits_q = bits_out_q
@@ -41,10 +43,13 @@ class AFSKDemodulator():
         nmark = int(self.tmark/self.ts)
         ncoefsbaud = 4
         band_ncoefs = int(nmark*ncoefsbaud) if int(nmark*ncoefsbaud)%2==1 else int(nmark*ncoefsbaud)+1
+
+        bandpass_width = options['bandpass_width'] if 'bandpass_width' in options else 600
         self.band = create_bandpass(ncoefs = band_ncoefs,
                                     fmark  = self.fmark,
                                     fspace = self.fspace,
-                                    fs     = self.fs)
+                                    fs     = self.fs,
+                                    width  = bandpass_width)
         self.agc = create_agc(sp = 2**12,
                               depth = int(self.tbaud/self.ts),
                               )
@@ -54,11 +59,14 @@ class AFSKDemodulator():
         nmark = int(self.tmark/self.ts)
         ncoefsbaud = 2
         lpf_ncoefs = int(nmark*ncoefsbaud) if int(nmark*ncoefsbaud)%2==1 else int(nmark*ncoefsbaud)+1
+        lpf_width = options['lpf_width'] if 'lpf_width' in options else 400
         self.lpf = create_lpf(ncoefs = lpf_ncoefs,
                               fa     = 1200,
-                              fs     = self.fs)
+                              fs     = self.fs,
+                              width  = lpf_width,
+                              )
         self.sampler = create_sampler(fbaud = self.fbaud,
-                                  fs    = self.fs)
+                                      fs    = self.fs)
         self.unnrzi = create_unnrzi()
 
         #how much we need to flush internal filters to process all sampled data
@@ -95,8 +103,8 @@ class AFSKDemodulator():
                 #fetch next chunk of samples (array)
                 arr,arr_size = await samp_q.get()
 
-                # if self.verbose:
-                    # eprint('processing samples',arr_size)
+                if self.verbose:
+                    eprint('processing samples',arr_size)
 
                 for i in range(arr_size):
                     o[i] = arr[i]

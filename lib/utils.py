@@ -3,6 +3,7 @@
 import sys
 import math
 from pydash import py_ as _
+from json import loads
 
 
 def parse_args(args):
@@ -10,6 +11,7 @@ def parse_args(args):
         'args' : {
             'verbose' : False,
             'quiet'   : False,
+            'options' : {},
         },
         'in' : {
             'type' : 'raw',
@@ -31,6 +33,10 @@ def parse_args(args):
             r['args']['verbose'] = True
         if '-q' in args or '-quiet' in args:
             r['args']['quiet'] = True
+        if '-o' in args:
+            r['args']['options'] = loads(args[args.index('-o')+1])
+        if '-options' in args:
+            r['args']['options'] = loads(args[args.index('-options')+1])
     except IndexError:
         pass
     types = ['raw']

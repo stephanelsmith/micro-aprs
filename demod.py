@@ -63,15 +63,27 @@ async def read_samples_from_raw(samples_q,
             raise Exception('uknown file type', file)
         arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
         idx = 0
-        with open(file, 'rb') as o:
-            while True:
-                b = o.read(2) # TODO, READ INTO
+        with open(file, 'rb') as f:
+            f.seek(0, 2)#SEEK_END = 2 
+            size = f.tell()
+            f.seek(0)
+            i = 0
+            while i < size:
+                b = f.read(2) # TODO, READ INTO
                 if not b:
                     break
                 arr[idx] = struct.unpack('<h', b)[0]
+                i += len(b)
+                # if i%(1024*1000) == 0:
+                    # eprint('{} {}% processed...'.format(
+                            # file,
+                            # round(i/size*100)
+                        # ),
+                    # )
                 idx += 1
                 if idx%defs.SAMPLES_SIZE == 0:
                     await samples_q.put((arr, idx))
+                    await asyncio.sleep(0)
                     arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
                     idx = 0
             await samples_q.put((arr, idx))
@@ -87,7 +99,7 @@ async def consume_ax25(ax25_q):
         count = 1
         while True:
             ax25 = await ax25_q.get()
-            print('{}: {}'.format(count, ax25))
+            print('{}: {}'.format(count, ax25), flush=True)
             count += 1
             ax25_q.task_done()
     except asyncio.CancelledError:
@@ -96,7 +108,9 @@ async def consume_ax25(ax25_q):
         traceback.print_exc()
 
 async def main():
+    print(sys.argv)
     args = parse_args(sys.argv)
+    print(args)
 
     read_done_evt = Event()
     samples_q = Queue()
@@ -127,7 +141,9 @@ async def main():
         async with AFSKDemodulator(sampling_rate = 22050,
                                    samples_in_q  = samples_q,
                                    bits_out_q    = bits_q,
-                                   verbose       = args['args']['verbose']) as afsk_demod:
+                                   verbose       = args['args']['verbose'],
+                                   options       = args['args']['options'],
+                                   ) as afsk_demod:
             # AX25FromAFSK accepts demodulated bits and generates ax25
             #bits_q consumer
             #ax25_q producer

@@ -70,7 +70,7 @@ class AX25():
         src = self.callssid_to_str(self.src)
         dst = self.callssid_to_str(self.dst)
         dst_digis = ','.join([dst]+[self.callssid_to_str(digi) for digi in self.digis])
-        return src+'>'+dst_digis+':'+self.info
+        return src+'>'+dst_digis+':'+self.info.strip()
     
     def from_aprs(self, aprs):
         # KI5TOF>APRS,WIDE1-1,WIDE2-1:hello world!

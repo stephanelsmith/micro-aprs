@@ -153,6 +153,18 @@ sox -t wav ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python de
 RS0ISS>CQ:>ARISS - International Space Station
 ```
 
+* Decode [TNC Test CD](http://wa8lmf.net/TNCtest/)
+    * Download and convert TNC tests to .wav/.flac files
+```
+wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip
+sudo apt-get install bchunk
+bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
+```
+    * Run track 2 test
+```
+sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python demod.py -t raw -
+```
+
 
 
 ## References and Acknowledgments

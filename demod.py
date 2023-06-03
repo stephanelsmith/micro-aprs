@@ -84,9 +84,11 @@ async def read_samples_from_raw(samples_q,
 
 async def consume_ax25(ax25_q):
     try:
+        count = 1
         while True:
             ax25 = await ax25_q.get()
-            print(ax25)
+            print('{}: {}'.format(count, ax25))
+            count += 1
             ax25_q.task_done()
     except asyncio.CancelledError:
         raise

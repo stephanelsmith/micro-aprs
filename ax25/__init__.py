@@ -126,9 +126,12 @@ class AX25():
         
             #digis
             self.digis = []
-            while not mv[idx-1]&0x01:
+            while not mv[idx-1]&0x01 and idx<stop_idx-1:
                 self.digis.append(CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN]))
                 idx += AX25_ADDR_LEN
+
+            if idx==stop_idx-1:
+                raise DecodeError('err decoding digis, {}'.format(ax25))
 
             #skip control/pid
             idx += 2

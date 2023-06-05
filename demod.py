@@ -108,9 +108,9 @@ async def consume_ax25(ax25_q):
         traceback.print_exc()
 
 async def main():
-    print(sys.argv)
+    # print(sys.argv)
     args = parse_args(sys.argv)
-    print(args)
+    # print(args)
 
     read_done_evt = Event()
     samples_q = Queue()

@@ -93,44 +93,53 @@ def create_fir(coefs, scale):
         return o
     return inner
 
-def create_lpf(ncoefs, fa, fs, width = 400):
+def create_lpf(ncoefs,       # filter size
+               fa,           # cut-off f
+               fs,           # fs
+               width  = 400, #transition band size
+               aboost = 1,   #gain at on-set of cut-off
+               ):
     try:
-        coefs,g = memoize_loads('lowpass', fa, fs, width)
+        coefs,g = memoize_loads('lowpass', fa, fs, width, aboost)
     except:
         from scipy import signal
         coefs = signal.firls(ncoefs,
-                            (0, fa-width, fa+width, fs/2),
-                            (1, 1,  0,      0), 
+                            (0, fa,       fa+width, fs/2),
+                            (1, aboost,   0,        0), 
                             fs=fs)
         coefs = [round(x*10000) for x in coefs]
         g = sum([coefs[i] for i in range(len(coefs))])
-        memoize_dumps('lowpass', (coefs,g), fa, fs, width)
-
+        memoize_dumps('lowpass', (coefs,g), fa, fs, width, aboost)
     return create_fir(coefs = coefs,
                       scale = g,
                       )
 
-def create_bandpass(ncoefs, fmark, fspace, fs, width=600):
+def create_bandpass(ncoefs,            # filter size
+                    fmark, fspace,     # mark/space frequencies
+                    fs,                # fs
+                    width=600,         # transition freqency begin/end
+                    amark=1, aspace=1, # mark/space gain
+                    ):
     try:
-        coefs,g = memoize_loads('bandpass', fmark, fspace, fs, width)
+        coefs,g = memoize_loads('bandpass', fmark, fspace, fs, width, amark, aspace)
     except:
         from scipy import signal
         coefs = signal.firls(ncoefs,
                             (0, fmark-width, fmark, fspace, fspace+width, fs/2),
-                            (0, 0,         1,     1,      0,          0), 
+                            (0, 0,           amark, aspace, 0,            0), 
                             fs=fs)
 
         coefs = [round(x*10000) for x in coefs]
         g1 = sum([coefs[i]*math.cos(2*math.pi*fmark/fs*i) for i in range(len(coefs))])
         g2 = sum([coefs[i]*math.sin(2*math.pi*fspace/fs*i) for i in range(len(coefs))])
         g = int((abs(g1)+abs(g2))/2)
-        memoize_dumps('bandpass', (coefs,g), fmark, fspace, fs, width)
+        memoize_dumps('bandpass', (coefs,g), fmark, fspace, fs, width, amark, aspace)
     return create_fir(coefs = coefs,
                       scale = g,
                       )
 
 def create_sampler(fbaud, 
-               fs, ):
+                   fs, ):
     tbaud = fs/fbaud #inverted for t
     ibaud = round(tbaud) #integer step
     ibaud_2 = round(tbaud/2)

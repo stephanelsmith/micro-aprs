@@ -45,11 +45,16 @@ class AFSKDemodulator():
         band_ncoefs = int(nmark*ncoefsbaud) if int(nmark*ncoefsbaud)%2==1 else int(nmark*ncoefsbaud)+1
 
         bandpass_width = options['bandpass_width'] if 'bandpass_width' in options else 600
+        bandpass_amark = options['bandpass_amark'] if 'bandpass_amark' in options else 1
+        bandpass_aspace = options['bandpass_aspace'] if 'bandpass_aspace' in options else 1
         self.band = create_bandpass(ncoefs = band_ncoefs,
                                     fmark  = self.fmark,
                                     fspace = self.fspace,
                                     fs     = self.fs,
-                                    width  = bandpass_width)
+                                    width  = bandpass_width,
+                                    amark  = bandpass_amark,
+                                    aspace = bandpass_aspace,
+                                    )
         self.agc = create_agc(sp = 2**12,
                               depth = int(self.tbaud/self.ts),
                               )
@@ -60,10 +65,12 @@ class AFSKDemodulator():
         ncoefsbaud = 2
         lpf_ncoefs = int(nmark*ncoefsbaud) if int(nmark*ncoefsbaud)%2==1 else int(nmark*ncoefsbaud)+1
         lpf_width = options['lpf_width'] if 'lpf_width' in options else 400
+        lpf_aboost = options['lpf_aboost'] if 'lpf_aboost' in options else 1
         self.lpf = create_lpf(ncoefs = lpf_ncoefs,
                               fa     = 1200,
                               fs     = self.fs,
                               width  = lpf_width,
+                              aboost = lpf_aboost,
                               )
         self.sampler = create_sampler(fbaud = self.fbaud,
                                       fs    = self.fs)

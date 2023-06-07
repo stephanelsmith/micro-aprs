@@ -4,6 +4,7 @@ from json import dumps
 
 
 def memoize_loads(name, *args):
+    raise Exception('skip')
     j = {}
 
     try:

@@ -1,3 +1,4 @@
+#!env/bin/python
 
 import re
 import asyncio
@@ -5,9 +6,12 @@ from subprocess import Popen, PIPE
 from multiprocessing import Pool
 from multiprocessing import cpu_count
 from json import dumps
+from copy import deepcopy
+import lib.upydash as _
 
 async def decode_async(raw_file = 'test/ISSpkt.raw', 
-                       options = {}):
+                       options = {},
+                       ):
     cmd = 'python demod.py -o {} -t raw {}'.format(
         dumps(options).replace(' ',''),
         raw_file,
@@ -32,7 +36,8 @@ async def decode_async(raw_file = 'test/ISSpkt.raw',
     return count
 
 def decode_sync(raw_file = 'test/ISSpkt.raw', 
-                options = {}):
+                options = {},
+                ):
     cmd = 'python demod.py -o {} -t raw {}'.format(
         dumps(options).replace(' ',''),
         raw_file,
@@ -59,24 +64,43 @@ def f(x,y):
     return x+y
 
 async def main():
-    options = {
-            'bandpass_width'  : 600,
-            'bandpass_amark'  : 1,
-            'bandpass_aspace' : 1,
-            'lpf_width'       : 400,
-            'lpf_aboost'      : 1,
+    testdefs = {
+            'bandpass_ncoefsbaud' : [4,8],
+            'bandpass_width'      : [200,400,600,800],
+            'bandpass_amark'      : range(1,10+1,2),
+            'bandpass_aspace'     : range(1,10+1,2),
+            'lpf_ncoefsbaud'      : [2,6],
+            'lpf_width'           : [200,400,600],
+            'lpf_aboost'          : range(1,10+1,2),
     }
     # raw_file = 'test/ISSpkt.raw'
     raw_file = 'test/tnc_test02.raw'
-    # await decode_async(raw_file = raw_file,
-                       # options = options)
-    # decode_sync(raw_file = raw_file,
-                # options = options)
+    
+    #generate tests
+    tests = []
+    for k,vs in testdefs.items():
+        _tests   = deepcopy(tests)
+        tests = []
+        for v in vs:
+            p = deepcopy(_tests) if len(_tests)>0 else [{}]
+            for test in p:
+                test.update({k:v})
+                tests.append(test)
 
-    tests = [(raw_file, options) for x in range(10)]
+    print(len(tests))
+    
+    argss = _.map(tests, lambda options: (raw_file, options))
     with Pool(cpu_count()) as p:
-        rs = p.starmap(decode_sync, tests)
-    print(rs)
+        rs = p.starmap(decode_sync, argss)
+
+    os = []
+    for r,test in zip(rs,tests):
+        os.append((r,test))
+    os = _.sort_by(os, lambda o:-o[0])
+    with open('optimizer_out.txt','w') as f:
+        for o in os:
+            print(o)
+            f.write('{} - {}\n'.format(o[0],o[1]))
 
 if __name__ == '__main__':
     try:

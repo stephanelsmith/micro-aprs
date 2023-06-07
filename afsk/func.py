@@ -83,6 +83,7 @@ def create_fir(coefs, scale):
     coefs = array('i', (coefs[i] for i in range(ncoefs)))
     bufin = array('i', (0 for x in range(ncoefs)))
     idx = 0
+    scale = scale or 1
     def inner(v:int)->int:
         nonlocal ncoefs, coefs, bufin, idx, scale
         bufin[idx] = v

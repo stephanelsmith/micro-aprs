@@ -41,13 +41,13 @@ class AFSKDemodulator():
         self.tbaud = 1/self.fbaud
 
         nmark = int(self.tmark/self.ts)
-        ncoefsbaud = 4
-        band_ncoefs = int(nmark*ncoefsbaud) if int(nmark*ncoefsbaud)%2==1 else int(nmark*ncoefsbaud)+1
+        bandpass_ncoefsbaud = options['bandpass_ncoefsbaud'] if 'bandpass_ncoefsbaud' in options else 4
+        bandpass_ncoefs = int(nmark*bandpass_ncoefsbaud) if int(nmark*bandpass_ncoefsbaud)%2==1 else int(nmark*bandpass_ncoefsbaud)+1
 
         bandpass_width = options['bandpass_width'] if 'bandpass_width' in options else 600
         bandpass_amark = options['bandpass_amark'] if 'bandpass_amark' in options else 1
         bandpass_aspace = options['bandpass_aspace'] if 'bandpass_aspace' in options else 1
-        self.band = create_bandpass(ncoefs = band_ncoefs,
+        self.band = create_bandpass(ncoefs = bandpass_ncoefs,
                                     fmark  = self.fmark,
                                     fspace = self.fspace,
                                     fs     = self.fs,
@@ -62,8 +62,8 @@ class AFSKDemodulator():
                                 shift = 1)
 
         nmark = int(self.tmark/self.ts)
-        ncoefsbaud = 2
-        lpf_ncoefs = int(nmark*ncoefsbaud) if int(nmark*ncoefsbaud)%2==1 else int(nmark*ncoefsbaud)+1
+        lpf_ncoefsbaud = options['lpf_ncoefsbaud'] if 'lpf_ncoefsbaud' in options else 2
+        lpf_ncoefs = int(nmark*lpf_ncoefsbaud) if int(nmark*lpf_ncoefsbaud)%2==1 else int(nmark*lpf_ncoefsbaud)+1
         lpf_width = options['lpf_width'] if 'lpf_width' in options else 400
         lpf_aboost = options['lpf_aboost'] if 'lpf_aboost' in options else 1
         self.lpf = create_lpf(ncoefs = lpf_ncoefs,
@@ -77,7 +77,7 @@ class AFSKDemodulator():
         self.unnrzi = create_unnrzi()
 
         #how much we need to flush internal filters to process all sampled data
-        self.flush_size = int((lpf_ncoefs+band_ncoefs)*(self.tbaud/self.ts))
+        self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(self.tbaud/self.ts))
 
         self.tasks = []
 

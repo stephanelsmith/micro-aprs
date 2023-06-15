@@ -4,7 +4,7 @@ import asyncio
 import traceback
 from array import array
 import math
-from pydash import py_ as _
+import lib.upydash as _
 
 # import matplotlib.pyplot as plt
 
@@ -40,20 +40,34 @@ class AFSKDemodulator():
         self.fbaud = 1200
         self.tbaud = 1/self.fbaud
 
+        options = {
+            'bandpass_ncoefsbaud' : 6,
+            'bandpass_width'      : 400,
+            'bandpass_amark'      : 7,
+            'bandpass_aspace'     : 20,
+            'bandpass_aboost'     : None,
+            'lpf_ncoefsbaud'      : 6,
+            'lpf_f'               : 1000,
+            'lpf_width'           : 400,
+            'lpf_aboost'          : 4,
+        }
+        # print(options)
+
         nmark = int(self.tmark/self.ts)
-        bandpass_ncoefsbaud = options['bandpass_ncoefsbaud'] if 'bandpass_ncoefsbaud' in options else 4
+        bandpass_ncoefsbaud = options['bandpass_ncoefsbaud']
         bandpass_ncoefs = int(nmark*bandpass_ncoefsbaud) if int(nmark*bandpass_ncoefsbaud)%2==1 else int(nmark*bandpass_ncoefsbaud)+1
 
-        bandpass_width = options['bandpass_width'] if 'bandpass_width' in options else 600
-        bandpass_amark = options['bandpass_amark'] if 'bandpass_amark' in options else 1
-        bandpass_aspace = options['bandpass_aspace'] if 'bandpass_aspace' in options else 1
+        bandpass_width = options['bandpass_width']
+        bandpass_amark = options['bandpass_amark']
+        bandpass_aspace = options['bandpass_aspace']
+        bandpass_aboost = options['bandpass_aboost']
         self.band = create_bandpass(ncoefs = bandpass_ncoefs,
                                     fmark  = self.fmark,
                                     fspace = self.fspace,
                                     fs     = self.fs,
                                     width  = bandpass_width,
-                                    amark  = bandpass_amark,
-                                    aspace = bandpass_aspace,
+                                    amark  = bandpass_amark or bandpass_aboost,
+                                    aspace = bandpass_aspace or bandpass_aboost,
                                     )
         self.agc = create_agc(sp = 2**12,
                               depth = int(self.tbaud/self.ts),
@@ -62,12 +76,13 @@ class AFSKDemodulator():
                                 shift = 1)
 
         nmark = int(self.tmark/self.ts)
-        lpf_ncoefsbaud = options['lpf_ncoefsbaud'] if 'lpf_ncoefsbaud' in options else 2
+        lpf_ncoefsbaud = options['lpf_ncoefsbaud']
         lpf_ncoefs = int(nmark*lpf_ncoefsbaud) if int(nmark*lpf_ncoefsbaud)%2==1 else int(nmark*lpf_ncoefsbaud)+1
-        lpf_width = options['lpf_width'] if 'lpf_width' in options else 400
-        lpf_aboost = options['lpf_aboost'] if 'lpf_aboost' in options else 1
+        lpf_width = options['lpf_width']
+        lpf_aboost = options['lpf_aboost']
+        lpf_f = options['lpf_f']
         self.lpf = create_lpf(ncoefs = lpf_ncoefs,
-                              fa     = 1200,
+                              fa     = lpf_f,
                               fs     = self.fs,
                               width  = lpf_width,
                               aboost = lpf_aboost,
@@ -98,10 +113,10 @@ class AFSKDemodulator():
             band    = self.band
             sampler = self.sampler
             unnrzi  = self.unnrzi
-            self.o = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
-            o = self.o
-            self.bs = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
-            bs = self.bs
+            # self.o = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
+            # o = self.o
+            # self.bs = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
+            # bs = self.bs
 
             bits_q = self.bits_q
             samp_q = self.samples_q
@@ -114,14 +129,14 @@ class AFSKDemodulator():
                     eprint('processing samples',arr_size)
 
                 for i in range(arr_size):
-                    o[i] = arr[i]
-                    o[i] = band(o[i])
-                    # o[i] = agc(o[i])
-                    o[i] = corr(o[i])
-                    o[i] = lpf(o[i])
-                    bs[i] = sampler(o[i])
-                    if bs[i] != 2: # _NONE
-                        b = unnrzi(bs[i])
+                    o = arr[i]
+                    o = band(o)
+                    # o = agc(o)
+                    o = corr(o)
+                    o = lpf(o)
+                    bs = sampler(o)
+                    if bs != 2: # _NONE
+                        b = unnrzi(bs)
                         # eprint(b,end='')
                         await bits_q.put(b) #bits_out_q
                 samp_q.task_done() # done

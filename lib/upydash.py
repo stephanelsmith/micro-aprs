@@ -75,6 +75,15 @@ def map(coll, itertee):
     return [itertee(el) for el in coll]
 
 # @micropython.native
+def each(coll, itertee):
+    for el in coll:
+        itertee(el)
+# @micropython.native
+def for_each(coll, itertee):
+    for el in coll:
+        itertee(el)
+
+# @micropython.native
 def uniq(coll):
     return uniq_by(coll)
 

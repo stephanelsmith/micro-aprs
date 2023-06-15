@@ -12,16 +12,16 @@ class CallSSID():
     def __init__(self, call = None,
                        ssid = None,
                        aprs = None,
-                       ax25 = None,
+                       frame = None,
                        ):
         # Initialize a callsign ssid in three ways
         #   1) By specifying call and ssid explicitly
         #   2) By specifying aprs formatted string/bytes, eg. KI5TOF-5
-        #   3) By specifying ax25 bytes to be decoded
+        #   3) By specifying frame bytes to be decoded
         self.call = call 
         self.ssid = ssid
-        if ax25:
-            self.from_ax25(ax25)
+        if frame:
+            self.from_ax25_frame(frame)
         elif aprs:
             self.from_aprs(aprs)
 
@@ -42,7 +42,7 @@ class CallSSID():
         else:
             return str(self.call)
 
-    def from_ax25(self, mv):
+    def from_ax25_frame(self, mv):
         #read from encoded ax25 format 
         if len(mv) != 7:
             raise DecodeError('callsign bad len {} != {}'.format(len(mv),7))

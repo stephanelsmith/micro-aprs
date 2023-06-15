@@ -5,7 +5,6 @@ import asyncio
 import struct
 import traceback
 from array import array
-from pydash import py_ as _
 
 from asyncio import Queue
 
@@ -14,6 +13,7 @@ from ax25.func import reverse_bit_order
 from ax25.func import unstuff
 from ax25.callssid import DecodeError
 
+import lib.upydash as _
 from lib.utils import pretty_binary
 from lib.utils import int_div_ceil
 from lib.utils import assign_bit
@@ -92,7 +92,7 @@ class AX25FromAFSK():
 
         #decode
         try:
-            ax25 = AX25(ax25 = mv)
+            ax25 = AX25(frame = mv)
         except DecodeError as err:
             if self.verbose:
                 eprint(str(err))

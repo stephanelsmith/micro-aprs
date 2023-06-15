@@ -42,16 +42,16 @@ class AX25():
                        digis      = [],
                        info       = '',
                        aprs       = None,
-                       ax25       = None,
+                       frame      = None,
                        verbose    = False,
                        ):
         self.verbose = verbose
         # Initialize in three different ways
         #   1) The individual fields directly
         #   2) By APRS message, eg. M0XER-4>APRS64,TF3RPF,WIDE2*,qAR,TF3SUT-2:!/.(M4I^C,O `DXa/A=040849|#B>@\"v90!+|
-        #   3) By AX25 bytes
-        if ax25 != None:
-            self.from_ax25(ax25 = ax25)
+        #   3) By ax25 frame bytes
+        if frame != None:
+            self.from_ax25_frame(frame = frame)
         elif aprs != None:
             self.from_aprs(aprs = aprs)
         else:
@@ -70,7 +70,13 @@ class AX25():
         src = self.callssid_to_str(self.src)
         dst = self.callssid_to_str(self.dst)
         dst_digis = ','.join([dst]+[self.callssid_to_str(digi) for digi in self.digis])
-        return src+'>'+dst_digis+':'+self.info.strip()
+        if isinstance(self.info, (bytes, bytearray)):
+            info = self.info.decode().strip()
+        elif isinstance(self.info, (bytes, bytearray)):
+            info = self.info.strip()
+        else:
+            info = str(self.info).strip()
+        return src+'>'+dst_digis+':'+info
     
     def from_aprs(self, aprs):
         # KI5TOF>APRS,WIDE1-1,WIDE2-1:hello world!
@@ -94,50 +100,54 @@ class AX25():
         self.info = aprs[i+1:]
 
 
-    def from_ax25(self, ax25):
+    def from_ax25_frame(self, frame):
         # from bytearray to ax25 structure
         # this function is AFTER unNRZI, unstuffing, reversed
         # the BitStreamToAX25 handles that, this  function
         # only maps bytes to their field structure
 
-        mv = memoryview(ax25)
-
-        idx = 0
-        #flags
-        while idx < len(mv) and mv[idx] == AX25_FLAG:
-            idx+=1
-        start_idx = idx
-        if idx == len(mv):
-            raise DecodeError()
-
-        stop_idx = len(mv)-1
-        while stop_idx > 0 and mv[stop_idx] != AX25_FLAG:
-            stop_idx-=1
+        mv = memoryview(frame)
 
         try:
+
+            idx = 0
+            #flags
+            while idx < len(mv) and mv[idx] == AX25_FLAG:
+                idx+=1
+            start_idx = idx
+            if idx == len(mv):
+                raise DecodeError()
+
+            stop_idx = len(mv)-1
+            while stop_idx > 0 and mv[stop_idx] != AX25_FLAG:
+                stop_idx-=1
+
+            if start_idx == stop_idx:
+                raise DecodeError('no frame found')
         
             #destination
-            self.dst = CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN])
+            self.dst = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
             idx += AX25_ADDR_LEN
 
             #source
-            self.src = CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN])
+            self.src = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
             idx += AX25_ADDR_LEN
         
             #digis
             self.digis = []
             while not mv[idx-1]&0x01 and idx<stop_idx-1:
-                self.digis.append(CallSSID(ax25 = mv[idx:idx+AX25_ADDR_LEN]))
+                self.digis.append(CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN]))
                 idx += AX25_ADDR_LEN
 
             if idx==stop_idx-1:
-                raise DecodeError('err decoding digis, {}'.format(ax25))
+                raise DecodeError('err decoding digis, {}'.format(frame))
 
             #skip control/pid
             idx += 2
             
             try:
-                self.info = bytes(mv[idx:stop_idx-2]).decode('utf')
+                # self.info = bytes(mv[idx:stop_idx-2]).decode('utf')
+                self.info = bytes(mv[idx:stop_idx-2])
             except UnicodeDecodeError:
                 raise DecodeError('bad payload {} '.format(bytes(mv[idx:stop_idx-2])))
 
@@ -145,6 +155,7 @@ class AX25():
             _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
             # eprint('{} {}'.format(format_bytes(crc),format_bytes(_crc)))
             if crc != _crc:
+                eprint('crc err: {}'.format(bytes(mv[:stop_idx])))
                 raise DecodeError('crc error {} != {}'.format(crc, _crc))
 
         except DecodeError as err:

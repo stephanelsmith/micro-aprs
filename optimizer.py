@@ -42,6 +42,7 @@ def decode_sync(raw_file = 'test/ISSpkt.raw',
         dumps(options).replace(' ',''),
         raw_file,
     )
+    print(cmd)
     p = Popen(cmd.split(),
               stdout = PIPE,
               )
@@ -60,18 +61,16 @@ def decode_sync(raw_file = 'test/ISSpkt.raw',
     print(' === DECODED {} FRAMES === '.format(count))
     return count
 
-def f(x,y):
-    return x+y
-
 async def main():
     testdefs = {
-            'bandpass_ncoefsbaud' : [4,8],
-            'bandpass_width'      : [200,400,600,800],
-            'bandpass_amark'      : range(1,10+1,2),
-            'bandpass_aspace'     : range(1,10+1,2),
-            'lpf_ncoefsbaud'      : [2,6],
-            'lpf_width'           : [200,400,600],
-            'lpf_aboost'          : range(1,10+1,2),
+            'bandpass_ncoefsbaud' : [6],
+            'bandpass_width'      : [400],
+            'bandpass_amark'      : [7],
+            'bandpass_aspace'     : [20],
+            'lpf_ncoefsbaud'      : [6],
+            'lpf_f'               : [1000],
+            'lpf_width'           : [400],
+            'lpf_aboost'          : [4],
     }
     # raw_file = 'test/ISSpkt.raw'
     raw_file = 'test/tnc_test02.raw'
@@ -96,8 +95,8 @@ async def main():
     os = []
     for r,test in zip(rs,tests):
         os.append((r,test))
-    os = _.sort_by(os, lambda o:-o[0])
-    with open('optimizer_out.txt','w') as f:
+    os = _.sort_by(os, lambda o:o[0])
+    with open('r.txt','w') as f:
         for o in os:
             print(o)
             f.write('{} - {}\n'.format(o[0],o[1]))

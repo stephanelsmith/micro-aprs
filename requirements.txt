@@ -1,4 +1,0 @@
-numpy==1.24.3
-pydash==7.0.4
-scipy==1.10.1
-typing_extensions==4.6.3

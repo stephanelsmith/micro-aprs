@@ -106,3 +106,5 @@ class AX25FromAFSK():
         except:
             traceback.print_exc()
             return
+        await self.ax25_q.put(ax25)
+

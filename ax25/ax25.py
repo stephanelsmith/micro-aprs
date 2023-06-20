@@ -77,12 +77,14 @@ class AX25():
             try:
                 info = self.info.decode().strip()
             except UnicodeDecodeError:
-                info = self.info
+                info = str(self.info)
         elif isinstance(self.info, (bytes, bytearray)):
             info = self.info.strip()
         else:
             info = str(self.info).strip()
-        return src+'>'+dst_digis+':'+info
+        return '{}>{}:{}'.format(src,
+                                 dst_digis,
+                                 info)
     
     def from_aprs(self, aprs):
         # KI5TOF>APRS,WIDE1-1,WIDE2-1:hello world!

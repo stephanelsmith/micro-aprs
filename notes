@@ -41,6 +41,7 @@ find -name "*wav" | xargs basename -s .wav | xargs -i sox -t wav {}.wav -t raw -
 #ISS
 sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python demod.py -t raw -
 python demod.py -t raw test/ISSpkt.raw
+:!clear && python % -t raw test/ISSpkt.raw
 
 #TNC
 wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip

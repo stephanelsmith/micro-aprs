@@ -33,9 +33,11 @@ def parse_args(args):
         if '-q' in args or '-quiet' in args:
             r['args']['quiet'] = True
         if '-o' in args:
-            r['args']['options'] = loads(args[args.index('-o')+1])
+            #r['args']['options'] = loads(args[args.index('-o')+1])
+            r['args']['options'] = loads(get_arg_val(args, '-o'))
         if '-options' in args:
-            r['args']['options'] = loads(args[args.index('-options')+1])
+            #r['args']['options'] = loads(args[args.index('-options')+1])
+            r['args']['options'] = loads(get_arg_val(args, '-options'))
     except IndexError:
         pass
     types = ['raw']
@@ -65,7 +67,7 @@ def parse_args(args):
         pass
     return r
 
-def get_arg_val(args, arg, fn):
+def get_arg_val(args, arg, fn=None):
     try:
         if not fn:
             return args[args.index(arg)+1]

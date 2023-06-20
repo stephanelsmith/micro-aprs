@@ -1,3 +1,4 @@
+#! env/bin/python
 
 import sys
 import io
@@ -5,6 +6,7 @@ import asyncio
 import struct
 import traceback
 from array import array
+from json import dumps
 
 from asyncio import Queue
 from asyncio import Event
@@ -95,12 +97,41 @@ async def read_samples_from_raw(samples_q,
 
 async def consume_ax25(ax25_q):
     try:
-        count = 1
-        while True:
-            ax25 = await ax25_q.get()
-            print('{}: {}'.format(count, ax25), flush=True)
-            count += 1
-            ax25_q.task_done()
+        with open('r_demod.txt', 'w') as f:
+            count = 1
+            while True:
+                ax25 = await ax25_q.get()
+                print('{}: {}'.format(count, ax25), flush=True)
+                f.write('{}\n'.format(ax25))
+                count += 1
+                ax25_q.task_done()
+    except asyncio.CancelledError:
+        raise
+    except Exception as err:
+        traceback.print_exc()
+
+async def consume_ax25_crc_err(ax25_crc_err_q):
+    try:
+        with open('r_crc_err.txt', 'w') as f:
+            count = 1
+            while True:
+                ax25 = await ax25_crc_err_q.get()
+                print(count,'crcerr',ax25.frame)
+                # print('{}: CRC ERR | SRC:{} DST:{} DIGIS:{} INFO:{}'.format(count, 
+                                                                            # ax25.src,
+                                                                            # ax25.dst,
+                                                                            # ax25.digis,
+                                                                            # ax25.info), flush=True)
+                # f.write('{}\n'.format(dumps(
+                        # {
+                            # 'frame' : str(ax25.frame),
+                        # }
+                        # )
+                    # )
+                # )
+                f.write('{}\n'.format( str(ax25.frame)))
+                count += 1
+                ax25_crc_err_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:
@@ -108,6 +139,8 @@ async def consume_ax25(ax25_q):
 
 async def main():
     # print(sys.argv)
+    if len(sys.argv) == 1:
+        print('args missing...')
     args = parse_args(sys.argv)
     # print(args)
 
@@ -115,6 +148,7 @@ async def main():
     samples_q = Queue()
     bits_q = Queue()
     ax25_q = Queue()
+    ax25_crc_err_q = Queue()
 
     try:
         tasks = []
@@ -134,7 +168,9 @@ async def main():
 
         #create ax25 consumer
         tasks.append(asyncio.create_task(consume_ax25(ax25_q = ax25_q)))
+        tasks.append(asyncio.create_task(consume_ax25_crc_err(ax25_crc_err_q = ax25_crc_err_q)))
 
+        #AFSK Demodulation - convert analog samples to bits
         #samples_q consumer
         #bits_q producer
         async with AFSKDemodulator(sampling_rate = 22050,
@@ -143,12 +179,13 @@ async def main():
                                    verbose       = args['args']['verbose'],
                                    options       = args['args']['options'],
                                    ) as afsk_demod:
-            # AX25FromAFSK accepts demodulated bits and generates ax25
+            # AX25FromAFSK - convert bits to ax25 objects
             #bits_q consumer
             #ax25_q producer
-            async with AX25FromAFSK(bits_in_q = bits_q,
-                                    ax25_q    = ax25_q,
-                                    verbose   = args['args']['verbose']) as bits2ax25:
+            async with AX25FromAFSK(bits_in_q      = bits_q,
+                                    ax25_q         = ax25_q,
+                                    ax25_crc_err_q = ax25_crc_err_q,
+                                    verbose        = args['args']['verbose']) as bits2ax25:
                 #wait for data for work through the system
                 await read_done_evt.wait()
 
@@ -158,6 +195,7 @@ async def main():
                 await samples_q.join()
                 await bits_q.join()
                 await ax25_q.join()
+                await ax25_crc_err_q.join()
                 # await asyncio.sleep(1)
     except Exception as err:
         traceback.print_exc()

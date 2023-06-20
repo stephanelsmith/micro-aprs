@@ -147,6 +147,7 @@ WB2OSZ-11>TEST:,The quick brown fox jumps over the lazy dog!  4 of 4
 
 * Decode [International Space Station flyby recording](https://inst.eecs.berkeley.edu/~ee123/sp15/lab/lab6/Lab6_Part_B-APRS.html)
 ```
+wget https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav
 sox -t wav ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python demod.py -t raw -
 ```
 ```
@@ -155,14 +156,16 @@ RS0ISS>CQ:>ARISS - International Space Station
 
 * Decode [TNC Test CD](http://wa8lmf.net/TNCtest/)
     * Download and convert TNC tests to .wav/.flac files
+    * Using bchunk (apt-get install bchunk)
 ```
 wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip
-sudo apt-get install bchunk
 bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
+find -name "*wav" | xargs basename -s .wav | xargs -i sox -t wav {}.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 {}.raw
 ```
     * Run track 2 test
 ```
 sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python demod.py -t raw -
+python demod.py -t raw test/tnc_test02.raw
 ```
 
 

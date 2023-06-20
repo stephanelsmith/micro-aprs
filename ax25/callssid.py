@@ -1,6 +1,5 @@
 
-class DecodeError(Exception):
-    pass
+from ax25.defs import DecodeError
 
 AX25_ADDR_LEN  = 7
 
@@ -8,6 +7,7 @@ class CallSSID():
     __slots__ = (
         'call',
         'ssid',
+        '_frame',
     )
     def __init__(self, call = None,
                        ssid = None,
@@ -20,7 +20,9 @@ class CallSSID():
         #   3) By specifying frame bytes to be decoded
         self.call = call 
         self.ssid = ssid
+        self._frame = None
         if frame:
+            self._frame = bytes(frame)
             self.from_ax25_frame(frame)
         elif aprs:
             self.from_aprs(aprs)
@@ -56,8 +58,13 @@ class CallSSID():
         self.call = self.call.decode('utf')
         self.ssid = (mv[6] & 0x17)>>1
 
-    def to_ax25(self, mv = None,
-                      ):
+    @property
+    def frame(self):
+        if self._frame:
+            return self._frame
+        return self.to_bytes()
+
+    def to_bytes(self, mv = None,):
         #optional mv, write in place if provided
         #callsign exactly 6 characters
         if not mv:

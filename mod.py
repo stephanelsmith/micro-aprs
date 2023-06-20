@@ -1,3 +1,4 @@
+#!env/bin/python
 
 import sys
 import asyncio
@@ -8,7 +9,7 @@ from asyncio import Queue
 from asyncio import Event
 
 from afsk.mod import AFSKModulator
-from ax25 import AX25
+from ax25.ax25 import AX25
 
 import lib.upydash as _
 from lib.utils import parse_args
@@ -102,7 +103,7 @@ async def main():
                 if args['args']['verbose']:
                     eprint('===== MOD >>>>>', ax25.to_aprs())
                     eprint('--ax25--')
-                    pretty_binary(ax25.to_ax25())
+                    pretty_binary(ax25.to_frame())
                 afsk,stop_bit = ax25.to_afsk()
                 await afsk_mod.to_samples(afsk     = afsk, 
                                           stop_bit = stop_bit,

@@ -8,10 +8,11 @@ from array import array
 
 from asyncio import Queue
 
-from ax25 import AX25
+from ax25.ax25 import AX25
 from ax25.func import reverse_bit_order
 from ax25.func import unstuff
-from ax25.callssid import DecodeError
+from ax25.defs import DecodeError
+from ax25.defs import CRCError
 
 import lib.upydash as _
 from lib.utils import pretty_binary
@@ -25,9 +26,11 @@ AX25_MIN_BITS  = 160
 class AX25FromAFSK():
     def __init__(self, bits_in_q,
                        ax25_q,
-                       verbose = False):
+                       ax25_crc_err_q = None,
+                       verbose        = False):
         self.bits_q = bits_in_q
         self.ax25_q = ax25_q
+        self.ax25_crc_err_q = ax25_crc_err_q
         self.verbose = verbose
 
         self.frames_q = Queue()
@@ -97,8 +100,9 @@ class AX25FromAFSK():
             if self.verbose:
                 eprint(str(err))
             return
+        except CRCError as err:
+            await self.ax25_crc_err_q.put(err.ax25)
+            return
         except:
             traceback.print_exc()
             return
-        await self.ax25_q.put(ax25)
-

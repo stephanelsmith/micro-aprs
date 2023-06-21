@@ -5,12 +5,12 @@ import asyncio
 import struct
 import traceback
 from array import array
-# from pydash import py_ as _
 
 from asyncio import Queue
 
 from ax25.defs import DecodeError
 from ax25.defs import CRCError
+
 from ax25.callssid import CallSSID
 from ax25.func import reverse_bit_order
 from ax25.func import convert_nrzi
@@ -24,9 +24,7 @@ from lib.utils import format_bytes
 
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
-AX25_FLAG      = 0x7e
 AX25_FLAG_LEN  = 1
-AX25_ADDR_LEN  = 7
 AX25_CONTROLPID_LEN = 2
 AX25_CRC_LEN   = 2
 
@@ -44,9 +42,12 @@ class AX25():
                        info       = '',
                        aprs       = None,
                        frame      = None,
+                       suppress_errors = False,
                        verbose    = False,
                        ):
         self.verbose = verbose
+        self.suppress_errors = False
+
         # Initialize in three different ways
         #   1) The individual fields directly
         #   2) By APRS message, eg. M0XER-4>APRS64,TF3RPF,WIDE2*,qAR,TF3SUT-2:!/.(M4I^C,O `DXa/A=040849|#B>@\"v90!+|
@@ -164,7 +165,8 @@ class AX25():
             # eprint('{} {}'.format(format_bytes(crc),format_bytes(_crc)))
             if crc != _crc:
                 #eprint('crc err: {}'.format(bytes(mv[:stop_idx])))
-                raise CRCError(ax25=self)
+                if not self.suppress_errors:
+                    raise CRCError(ax25=self)
 
         except DecodeError as err:
             # eprint(err)

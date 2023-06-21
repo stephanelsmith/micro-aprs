@@ -1,4 +1,4 @@
-#!env/bin/python
+#!python
 
 import re
 import asyncio

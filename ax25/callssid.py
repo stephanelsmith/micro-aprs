@@ -1,13 +1,19 @@
 
-from ax25.defs import DecodeError
+from ax25.defs import CallSSIDError
 
 AX25_ADDR_LEN  = 7
+
+ORD_0 = 48
+ORD_9 = 57
+ORD_A = 65
+ORD_Z = 90
+ORD_COLON = 58
 
 class CallSSID():
     __slots__ = (
         'call',
         'ssid',
-        '_frame',
+        #'_frame',
     )
     def __init__(self, call = None,
                        ssid = None,
@@ -20,9 +26,9 @@ class CallSSID():
         #   3) By specifying frame bytes to be decoded
         self.call = call 
         self.ssid = ssid
-        self._frame = None
+        #self._frame = None
         if frame:
-            self._frame = bytes(frame)
+            #self._frame = bytes(frame)
             self.from_ax25_frame(frame)
         elif aprs:
             self.from_aprs(aprs)
@@ -47,7 +53,7 @@ class CallSSID():
     def from_ax25_frame(self, mv):
         #read from encoded ax25 format 
         if len(mv) != 7:
-            raise DecodeError('callsign bad len {} != {}'.format(len(mv),7))
+            raise CallSSIDError('callsign bad len {} != {}'.format(len(mv),7))
         for call_len in range(6):
             if mv[call_len] == 0x40: #searching for ' ' character (still left shifted one)
                 break
@@ -55,14 +61,23 @@ class CallSSID():
         self.call = bytearray(mv[:call_len]) #make bytearray copy, don't modify in place
         for i in range(call_len):
             self.call[i] = self.call[i]>>1
-        self.call = self.call.decode('utf')
+
+        #call sanity check
+        # for x in self.call:
+            # if x >= ORD_0 and x <= ORD_9 or\
+                    # x >= ORD_A and x <= ORD_Z:
+                # pass
+            # else:
+                # raise CallSSIDError('bad call')
+
+        self.call = self.call.decode()
         self.ssid = (mv[6] & 0x17)>>1
 
-    @property
-    def frame(self):
-        if self._frame:
-            return self._frame
-        return self.to_bytes()
+    # @property
+    # def frame(self):
+        # if self._frame:
+            # return self._frame
+        # return self.to_bytes()
 
     def to_bytes(self, mv = None,):
         #optional mv, write in place if provided

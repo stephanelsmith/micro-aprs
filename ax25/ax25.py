@@ -1,4 +1,3 @@
-
 import sys
 import io
 import asyncio
@@ -42,11 +41,11 @@ class AX25():
                        info       = '',
                        aprs       = None,
                        frame      = None,
-                       suppress_errors = False,
+                       force      = False,
                        verbose    = False,
                        ):
         self.verbose = verbose
-        self.suppress_errors = False
+        self.force = False
 
         # Initialize in three different ways
         #   1) The individual fields directly
@@ -54,7 +53,6 @@ class AX25():
         #   3) By ax25 frame bytes
         self._frame = None
         if frame != None:
-            self._frame = bytes(frame)
             self.from_frame(frame = frame)
         elif aprs != None:
             self.from_aprs(aprs = aprs)
@@ -117,60 +115,47 @@ class AX25():
 
         mv = memoryview(frame)
 
-        try:
+        idx = 0
+        #flags
+        while idx < len(mv) and mv[idx] == AX25_FLAG:
+            idx+=1
+        start_idx = idx
+        if idx == len(mv):
+            raise DecodeError('no flags')
 
-            idx = 0
-            #flags
-            while idx < len(mv) and mv[idx] == AX25_FLAG:
-                idx+=1
-            start_idx = idx
-            if idx == len(mv):
-                raise DecodeError('no flags')
+        stop_idx = len(mv)-1
+        while stop_idx > 0 and mv[stop_idx] != AX25_FLAG:
+            stop_idx-=1
 
-            stop_idx = len(mv)-1
-            while stop_idx > 0 and mv[stop_idx] != AX25_FLAG:
-                stop_idx-=1
+        if start_idx == stop_idx:
+            raise DecodeError('no frame found')
 
-            if start_idx == stop_idx:
-                raise DecodeError('no frame found')
-        
-            #destination
-            self.dst = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
+        #destination
+        self.dst = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
+        idx += AX25_ADDR_LEN
+
+        #source
+        self.src = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
+        idx += AX25_ADDR_LEN
+    
+        #digis
+        self.digis = []
+        while not mv[idx-1]&0x01 and idx<stop_idx-1:
+            self.digis.append(CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN]))
             idx += AX25_ADDR_LEN
 
-            #source
-            self.src = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
-            idx += AX25_ADDR_LEN
+        if idx==stop_idx-1:
+            raise DecodeError('err decoding digis, {}'.format(frame))
+
+        #skip control/pid
+        idx += 2
         
-            #digis
-            self.digis = []
-            while not mv[idx-1]&0x01 and idx<stop_idx-1:
-                self.digis.append(CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN]))
-                idx += AX25_ADDR_LEN
+        self.info = bytes(mv[idx:stop_idx-2])
 
-            if idx==stop_idx-1:
-                raise DecodeError('err decoding digis, {}'.format(frame))
-
-            #skip control/pid
-            idx += 2
-            
-            try:
-                # self.info = bytes(mv[idx:stop_idx-2]).decode('utf')
-                self.info = bytes(mv[idx:stop_idx-2])
-            except UnicodeDecodeError:
-                raise DecodeError('bad payload {} '.format(bytes(mv[idx:stop_idx-2])))
-
-            crc  = bytes(mv[stop_idx-2:stop_idx])
-            _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
-            # eprint('{} {}'.format(format_bytes(crc),format_bytes(_crc)))
-            if crc != _crc:
-                #eprint('crc err: {}'.format(bytes(mv[:stop_idx])))
-                if not self.suppress_errors:
-                    raise CRCError(ax25=self)
-
-        except DecodeError as err:
-            # eprint(err)
-            raise
+        crc  = bytes(mv[stop_idx-2:stop_idx])
+        _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
+        if crc != _crc and not self.force:
+            raise DecodeError('crc err')
 
     @property
     def frame(self):
@@ -193,10 +178,10 @@ class AX25():
                     len(self.info)+\
                     AX25_CRC_LEN +\
                     AX25_FLAG_LEN*flags_post
-        ax25 = bytearray(ax25_len + bit_stuff_margin)
+        self._frame = bytearray(ax25_len + bit_stuff_margin)
 
         #create slices without copying
-        mv    = memoryview(ax25)
+        mv    = memoryview(self._frame)
         idx = 0
 
         #pre-flags
@@ -243,7 +228,7 @@ class AX25():
         if idx != ax25_len:
             raise Exception('ax25 len error: idx ({}) != ax25_len ({})'.format(idx, ax25_len))
 
-        return ax25
+        return self._frame
 
     def to_afsk(self, flags_pre        = 1, # number of pre-flags
                       flags_post       = 1, # number of post-flags

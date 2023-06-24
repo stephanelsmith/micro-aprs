@@ -95,16 +95,23 @@ class AX25FromAFSK():
 
         #decode
         try:
-            ax25 = AX25(frame = mv)
+            ax25 = AX25(frame = mv,
+                        force = True)
         except DecodeError as err:
-            if self.verbose:
-                eprint(str(err))
             return
-        except CRCError as err:
-            await self.ax25_crc_err_q.put(err.ax25)
-            return
-        except:
-            traceback.print_exc()
-            return
+        # try:
+            # ax25 = AX25(frame = mv)
+        # except DecodeError as err:
+            # if self.verbose:
+                # eprint(str(err))
+            # return
+        # except CRCError as err:
+            # await self.ax25_crc_err_q.put(err.ax25)
+            # return
+        # except:
+            # traceback.print_exc()
+            # return
+
+
         await self.ax25_q.put(ax25)
 

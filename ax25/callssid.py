@@ -9,6 +9,8 @@ ORD_A = 65
 ORD_Z = 90
 ORD_COLON = 58
 
+
+
 class CallSSID():
     __slots__ = (
         'call',
@@ -62,16 +64,20 @@ class CallSSID():
         for i in range(call_len):
             self.call[i] = self.call[i]>>1
 
-        #call sanity check
-        # for x in self.call:
-            # if x >= ORD_0 and x <= ORD_9 or\
-                    # x >= ORD_A and x <= ORD_Z:
-                # pass
-            # else:
-                # raise CallSSIDError('bad call')
-
         self.call = self.call.decode()
         self.ssid = (mv[6] & 0x17)>>1
+
+    def is_valid(self):
+        if not self.call:
+            return False
+        for x in self.call:
+            x = ord(x)
+            if x >= ORD_0 and x <= ORD_9 or\
+               x >= ORD_A and x <= ORD_Z:
+                pass
+            else:
+                return False
+        return True
 
     # @property
     # def frame(self):

@@ -3,8 +3,11 @@
 
 class DecodeError(Exception):
     pass
-
-class CRCError(Exception):
+class DecodeError(Exception):
+    pass
+class DecodeErrorNoFix(Exception):
+    pass
+class DecodeErrorFix(Exception):
     def __init__(self, ax25=None):
         self.ax25=ax25
 

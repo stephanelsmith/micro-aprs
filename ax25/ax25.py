@@ -8,7 +8,8 @@ from array import array
 from asyncio import Queue
 
 from ax25.defs import DecodeError
-from ax25.defs import CRCError
+from ax25.defs import DecodeErrorFix
+from ax25.defs import CallSSIDError
 
 from ax25.callssid import CallSSID
 from ax25.func import reverse_bit_order
@@ -41,17 +42,17 @@ class AX25():
                        info       = '',
                        aprs       = None,
                        frame      = None,
-                       force      = False,
                        verbose    = False,
                        ):
         self.verbose = verbose
-        self.force = False
 
         # Initialize in three different ways
         #   1) The individual fields directly
         #   2) By APRS message, eg. M0XER-4>APRS64,TF3RPF,WIDE2*,qAR,TF3SUT-2:!/.(M4I^C,O `DXa/A=040849|#B>@\"v90!+|
         #   3) By ax25 frame bytes
         self._frame = None
+        self.src = None
+        self.dst = None
         if frame != None:
             self.from_frame(frame = frame)
         elif aprs != None:
@@ -114,48 +115,50 @@ class AX25():
         # only maps bytes to their field structure
 
         mv = memoryview(frame)
-
-        idx = 0
-        #flags
-        while idx < len(mv) and mv[idx] == AX25_FLAG:
-            idx+=1
-        start_idx = idx
-        if idx == len(mv):
-            raise DecodeError('no flags')
-
-        stop_idx = len(mv)-1
-        while stop_idx > 0 and mv[stop_idx] != AX25_FLAG:
-            stop_idx-=1
-
-        if start_idx == stop_idx:
-            raise DecodeError('no frame found')
-
-        #destination
-        self.dst = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
-        idx += AX25_ADDR_LEN
-
-        #source
-        self.src = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
-        idx += AX25_ADDR_LEN
-    
-        #digis
-        self.digis = []
-        while not mv[idx-1]&0x01 and idx<stop_idx-1:
-            self.digis.append(CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN]))
+        if len(mv) < 3:
+            raise DecodeErrorFix(ax25=self)
+        start_idx = 1
+        idx = 1
+        stop_idx = 2
+        while mv[stop_idx] != AX25_FLAG:
+            stop_idx += 1
+            if stop_idx >= len(mv):
+                raise DecodeErrorFix(ax25=self)
+        
+        try:
+            #destination
+            self.dst = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
             idx += AX25_ADDR_LEN
 
-        if idx==stop_idx-1:
-            raise DecodeError('err decoding digis, {}'.format(frame))
+            #source
+            self.src = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
+            idx += AX25_ADDR_LEN
+        
+            #digis
+            self.digis = []
+            while not mv[idx-1]&0x01 and idx<stop_idx-1-AX25_ADDR_LEN:
+                self.digis.append(CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN]))
+                idx += AX25_ADDR_LEN
+        except IndexError:
+            raise DecodeErrorFix(ax25=self)
+        except CallSSIDError:
+            raise DecodeErrorFix(ax25=self)
+
+        if idx>=stop_idx-1:
+            raise DecodeErrorFix(ax25=self)
 
         #skip control/pid
         idx += 2
-        
-        self.info = bytes(mv[idx:stop_idx-2])
 
+        #crc
         crc  = bytes(mv[stop_idx-2:stop_idx])
         _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
-        if crc != _crc and not self.force:
-            raise DecodeError('crc err')
+        if crc != _crc:
+            raise DecodeErrorFix(ax25=self)
+
+        #if crc passes assign info, minimize assignment
+        if crc == _crc:
+            self.info = bytes(mv[idx:stop_idx-2])
 
     @property
     def frame(self):
@@ -199,7 +202,7 @@ class AX25():
 
         # 0-8 Digipeater Addresses
         for digi in self.digis[:8]:
-            digi.to_ax25(mv = mv[idx:idx+AX25_ADDR_LEN])
+            digi.to_bytes(mv = mv[idx:idx+AX25_ADDR_LEN])
             idx += AX25_ADDR_LEN
 
         #LAST BIT OF ADDRESS, SET LSB TO 1

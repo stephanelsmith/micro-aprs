@@ -10,9 +10,11 @@ from asyncio import Queue
 
 from ax25.ax25 import AX25
 from ax25.func import reverse_bit_order
+from ax25.func import trim_frame
 from ax25.func import unstuff
 from ax25.defs import DecodeError
-from ax25.defs import CRCError
+from ax25.defs import DecodeErrorNoFix
+from ax25.defs import DecodeErrorFix
 
 import lib.upydash as _
 from lib.utils import pretty_binary
@@ -21,6 +23,7 @@ from lib.utils import assign_bit
 from lib.utils import eprint
 
 AX25_FLAG      = 0x7e
+AX25_ADDR_LEN  = 7
 AX25_MIN_BITS  = 160
 
 class AX25FromAFSK():
@@ -74,7 +77,6 @@ class AX25FromAFSK():
         except Exception as err:
             traceback.print_exc()
 
-
     async def frame_to_ax25(self, buf, stop_bit):
         mv = memoryview(buf)
         if self.verbose:
@@ -89,29 +91,90 @@ class AX25FromAFSK():
 
         #reverse bit order
         reverse_bit_order(mv)
+        # mv = trim_frame(mv)
         if self.verbose:
             print('-un-reversed-')
             pretty_binary(mv)
 
         #decode
         try:
-            ax25 = AX25(frame = mv,
-                        force = True)
-        except DecodeError as err:
+            ax25 = AX25(frame = mv)
+            await self.ax25_q.put(ax25)
             return
-        # try:
-            # ax25 = AX25(frame = mv)
-        # except DecodeError as err:
-            # if self.verbose:
-                # eprint(str(err))
-            # return
-        # except CRCError as err:
-            # await self.ax25_crc_err_q.put(err.ax25)
-            # return
-        # except:
-            # traceback.print_exc()
-            # return
+        except DecodeErrorNoFix as err:
+            return
+        except DecodeErrorFix as err:
+            _ax25 = err.ax25
+
+        #try fixing src/dst
+        ax25 = self.fixer_src_dst(mv = mv)
+        if ax25:
+            await self.ax25_q.put(ax25)
+            return
+
+        #no src/dst, don't bother additional fixing
+        #this way we avoid trying to fix messages that have no chance of fixing
+        if not (_ax25.src and _ax25.src.is_valid()) or\
+           not (_ax25.dst and _ax25.dst.is_valid()):
+            return
+
+        #try fixing info/rest of message
+        ax25 = self.fixer_info(mv = mv)
+        if ax25:
+            await self.ax25_q.put(ax25)
+            return
+
+        return
+
+    def fixer_src_dst(self, mv):
+
+        flip = self.flip
+        lbits = 8*len(mv)
+
+        #try fixing src/dst
+        # print(1)
+        for flip_a in range(8,8+8*(AX25_ADDR_LEN*2)):
+            for flip_b in range(flip_a,8+8*(AX25_ADDR_LEN*2)):
+                if flip_a >= lbits or flip_b >= lbits:
+                    continue
+                try:
+                    flip(mv, flip_a, flip_b)
+                    ax25 = AX25(frame = mv)
+                    if ax25.src.is_valid() and ax25.dst.is_valid():
+                        print('FIXED src/dst')
+                        return ax25
+                    else:
+                        flip(mv, flip_a, flip_b)
+                except DecodeErrorFix as err:
+                    pass
+                flip(mv, flip_a, flip_b)
 
 
-        await self.ax25_q.put(ax25)
+    def fixer_info(self, mv):
+
+        flip = self.flip
+        lbits = 8*len(mv)
+
+        #try fixing rest of message
+        for flip_a in range(8+8*(AX25_ADDR_LEN*2), 8*(len(mv)-3)):
+            for flip_b in range(flip_a,8*(len(mv)-3)):
+                if flip_a >= lbits or flip_b >= lbits:
+                    continue
+                try:
+                    flip(mv, flip_a, flip_b)
+                    ax25 = AX25(frame = mv)
+                    print('FIXED info')
+                    return ax25
+                except DecodeErrorFix as err:
+                    pass
+                flip(mv, flip_a, flip_b)
+
+    def flip(self, frame, flip_a, flip_b):
+        idx = flip_a//8
+        bit = flip_a%8
+        frame[idx] = frame[idx] ^ (0x80>>bit)
+        if flip_a != flip_b:
+            idx = flip_b//8
+            bit = flip_b%8
+            frame[idx] = frame[idx] ^ (0x80>>bit)
 

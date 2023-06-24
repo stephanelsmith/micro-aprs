@@ -110,6 +110,7 @@ def pretty_binary(mv,
         #string
         for idx in range(ridx,ridx+cols):
             v = chr(mv[idx]) if idx<len(mv) else '-'
+            v = v if v.isprintable() else '-'
             _print(v,end='')
         _print()
 

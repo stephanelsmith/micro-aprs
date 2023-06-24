@@ -1,4 +1,6 @@
 
+AX25_FLAG      = 0x7e
+
 def assign_bit(byte, idx, value):
     mask = (0x80>>(idx%8))
     if value:
@@ -15,6 +17,14 @@ def reverse_byte(_byte):
     _byte = ((_byte & 0x33) << 2) | ((_byte & 0xCC) >> 2);
     _byte = ((_byte & 0x0F) << 4) | ((_byte & 0xF0) >> 4);
     return _byte
+
+def trim_frame(mv):
+    lmv = len(mv)
+    for idx in range(lmv):
+        if mv[lmv-idx-1] == AX25_FLAG:
+            return mv[:lmv-idx]
+    return mv
+
 
 def reverse_bit_order(mv):
     for idx in range(len(mv)):

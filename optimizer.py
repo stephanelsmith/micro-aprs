@@ -63,30 +63,38 @@ def decode_sync(raw_file = 'test/ISSpkt.raw',
 
 async def main():
     testdefs = {
-            'bandpass_ncoefsbaud' : [6],
-            'bandpass_width'      : [400],
-            'bandpass_amark'      : [7],
-            'bandpass_aspace'     : [20],
-            'lpf_ncoefsbaud'      : [6],
+            'bandpass_ncoefsbaud' : [4,6],
+            'bandpass_width'      : [400,600],
+            'bandpass_amark'      : range(1,10,2),
+            'bandpass_aspace'     : range(1,10,2),
+            'lpf_ncoefsbaud'      : [4,6],
             'lpf_f'               : [1000],
             'lpf_width'           : [400],
-            'lpf_aboost'          : [4],
+            'lpf_aboost'          : [1,4,6],
     }
     # raw_file = 'test/ISSpkt.raw'
     raw_file = 'test/tnc_test02.raw'
     
-    #generate tests
     tests = []
-    for k,vs in testdefs.items():
-        _tests   = deepcopy(tests)
-        tests = []
-        for v in vs:
-            p = deepcopy(_tests) if len(_tests)>0 else [{}]
-            for test in p:
-                test.update({k:v})
-                tests.append(test)
 
-    print(len(tests))
+    # #generate tests, all premutations
+    # for k,vs in testdefs.items():
+        # _tests   = deepcopy(tests)
+        # tests = []
+        # for v in vs:
+            # p = deepcopy(_tests) if len(_tests)>0 else [{}]
+            # for test in p:
+                # test.update({k:v})
+                # tests.append(test)
+
+    #generate tests, item-by-item
+    for k,vs in testdefs.items():
+        for v in vs:
+            tests.append({k:v})
+
+    # 1029 - {'bandpass_ncoefsbaud': 6, 'bandpass_width': 400, 'bandpass_amark': 7, 'bandpass_aspace': 20, 'lpf_ncoefsbaud': 6, 'lpf_f': 1000, 'lpf_width': 400, 'lpf_aboost': 4}
+
+    # print(len(tests))
     
     argss = _.map(tests, lambda options: (raw_file, options))
     with Pool(cpu_count()) as p:

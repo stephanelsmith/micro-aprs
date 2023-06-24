@@ -168,7 +168,7 @@ async def main():
 
         #create ax25 consumer
         tasks.append(asyncio.create_task(consume_ax25(ax25_q = ax25_q)))
-        tasks.append(asyncio.create_task(consume_ax25_crc_err(ax25_crc_err_q = ax25_crc_err_q)))
+        # tasks.append(asyncio.create_task(consume_ax25_crc_err(ax25_crc_err_q = ax25_crc_err_q)))
 
         #AFSK Demodulation - convert analog samples to bits
         #samples_q consumer

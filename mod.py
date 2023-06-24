@@ -105,6 +105,10 @@ async def main():
                     eprint('--ax25--')
                     pretty_binary(ax25.to_frame())
                 afsk,stop_bit = ax25.to_afsk()
+
+                #corrupt bit
+                # afsk[41] ^= 0x8
+
                 await afsk_mod.to_samples(afsk     = afsk, 
                                           stop_bit = stop_bit,
                                           )

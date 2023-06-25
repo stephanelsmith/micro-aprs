@@ -51,7 +51,6 @@ class AFSKDemodulator():
             'lpf_width'           : 400,
             'lpf_aboost'          : 3,
         }, **options)
-        print(options)
 
         nmark = int(self.tmark/self.ts)
         bandpass_ncoefsbaud = options['bandpass_ncoefsbaud']

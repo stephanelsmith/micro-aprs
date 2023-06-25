@@ -40,7 +40,7 @@ class AFSKDemodulator():
         self.fbaud = 1200
         self.tbaud = 1/self.fbaud
 
-        options = {
+        options = dict({
             'bandpass_ncoefsbaud' : 4,
             'bandpass_width'      : 400,
             'bandpass_amark'      : 1,
@@ -48,10 +48,10 @@ class AFSKDemodulator():
             'bandpass_aboost'     : None,
             'lpf_ncoefsbaud'      : 6,
             'lpf_f'               : 1000,
-            'lpf_width'           : 200,
+            'lpf_width'           : 400,
             'lpf_aboost'          : 3,
-        }
-        # print(options)
+        }, **options)
+        print(options)
 
         nmark = int(self.tmark/self.ts)
         bandpass_ncoefsbaud = options['bandpass_ncoefsbaud']

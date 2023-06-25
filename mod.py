@@ -81,7 +81,7 @@ async def main():
                                                                  read_done_evt  = read_done_evt,
                                                                  )))
 
-        async with AFSKModulator(sampling_rate = 22050,
+        async with AFSKModulator(sampling_rate = args['args']['rate'],
                                  afsk_q        = afsk_q,
                                  verbose       = args['args']['verbose']) as afsk_mod:
 

@@ -10,16 +10,15 @@ def parse_args(args):
         'args' : {
             'verbose' : False,
             'quiet'   : False,
+            'rate'    : 22050,
             'options' : {},
         },
         'in' : {
             'type' : 'raw',
-            'rate' : 22050,
             'file'  : '-', #from stdin
         },
         'out' : {
             'type' : 'raw',
-            'rate' : 22050,
             'file'  : '-', #to stdout
         },
     }
@@ -28,29 +27,27 @@ def parse_args(args):
     try:
         #general args
         args = spl.pop(0)
+        if '-rate' in args:
+            r['args']['rate'] = get_arg_val(args, '-rate', int)
+        if '-r' in args:
+            r['args']['rate'] = get_arg_val(args, '-r', int)
         if '-v' in args or '-verbose' in args:
             r['args']['verbose'] = True
         if '-q' in args or '-quiet' in args:
             r['args']['quiet'] = True
         if '-o' in args:
-            #r['args']['options'] = loads(args[args.index('-o')+1])
             r['args']['options'] = loads(get_arg_val(args, '-o'))
         if '-options' in args:
-            #r['args']['options'] = loads(args[args.index('-options')+1])
             r['args']['options'] = loads(get_arg_val(args, '-options'))
     except IndexError:
         pass
     types = ['raw']
-    rates = [22050]
     if len(spl) == 2:
         try:
             _out = spl.pop(0)
             r['out']['type'] = _out[0]
             if r['out']['type'] not in types:
                 raise Exception('unknown type {}, not in {}'.format(r['out']['type'], types))
-            r['out']['rate'] = get_arg_val(_out, '-r', int) or r['out']['rate']
-            if r['out']['rate'] not in rates:
-                raise Exception('unknown rate {}, not in {}'.format(r['out']['rate'], rates))
             r['out']['file'] = _out[-1]
         except IndexError:
             pass
@@ -59,9 +56,6 @@ def parse_args(args):
         r['in']['type'] = _in[0]
         if r['in']['type'] not in types:
             raise Exception('unknown type {}, not in {}'.format(r['in']['type'], types))
-        r['in']['rate'] = get_arg_val(_in, '-r', int) or r['in']['rate']
-        if r['in']['rate'] not in rates:
-            raise Exception('unknown rate {}, not in {}'.format(r['in']['rate'], rates))
         r['in']['file'] = _in[-1]
     except IndexError:
         pass

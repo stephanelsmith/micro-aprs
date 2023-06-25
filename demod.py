@@ -173,7 +173,7 @@ async def main():
         #AFSK Demodulation - convert analog samples to bits
         #samples_q consumer
         #bits_q producer
-        async with AFSKDemodulator(sampling_rate = 22050,
+        async with AFSKDemodulator(sampling_rate = args['args']['rate'],
                                    samples_in_q  = samples_q,
                                    bits_out_q    = bits_q,
                                    verbose       = args['args']['verbose'],

@@ -18,6 +18,18 @@ APRS_IS_FILTER_PORT = 14580
 #position: KI5TOF>APRS:=2941.97N/09545.01WChello world
 #status:   KI5TOF>APRS:>QTH
 
+#https://aprs.fi/doc/guide/aprsfi-telemetry.html
+#https://github.com/PhirePhly/aprs_notes/blob/master/telemetry_format.md
+#specify parameter names and units
+#telem:    KI5TOF>APRS::KI5TOF   :PARM.Title_A1,Title_B2,Title_C3,Title_D4,Title_E5,BIT_A1,BIT_B2,BIT_C3,BIT_D4,BIT_E5,BIT_F6,BIT_G7,BIT_H8
+#telem:    KI5TOF>APRS::KI5TOF   :UNIT.Volt,Volt,Volt,Volt,Volt,B,B,B,B,B,B,B,B
+#specify scaling ax^2+bx+c             a,b,c|a,b,c|a,b,c|a,b,c|a,b,c
+#telem:    KI5TOF>APRS::KI5TOF   :EQNS.0,1,0,0,1,0,0,1,0,0,1,0,0,1,0
+# sending data
+#telem:    KI5TOF>APRS:T#000,1,2,3,4,5,01010101
+#telem:    KI5TOF>APRS:T#002,10.12,20.23,30.45,40.67,50.89,10101010
+#telem:    KI5TOF>APRS:T#003,110.12,120.23,130.45,140.67,150.89,10101010comment
+
 async def ingress(reader):
     try:
         while True:

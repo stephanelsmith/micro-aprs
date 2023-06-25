@@ -63,14 +63,14 @@ def decode_sync(raw_file = 'test/ISSpkt.raw',
 
 async def main():
     testdefs = {
-            'bandpass_ncoefsbaud' : [4,6],
-            'bandpass_width'      : [400,600],
-            'bandpass_amark'      : range(1,20,4),
-            'bandpass_aspace'     : range(1,20,4),
-            'lpf_ncoefsbaud'      : [4,6],
+            'bandpass_ncoefsbaud' : [4],
+            'bandpass_width'      : [400],
+            'bandpass_amark'      : [6],
+            'bandpass_aspace'     : [3],
+            'lpf_ncoefsbaud'      : [6],
             'lpf_f'               : [1000],
-            'lpf_width'           : [400,600],
-            'lpf_aboost'          : [1,4,6],
+            'lpf_width'           : [200],
+            'lpf_aboost'          : [3],
     }
     # raw_file = 'test/ISSpkt.raw'
     raw_file = 'test/tnc_test02.raw'

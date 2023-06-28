@@ -56,4 +56,7 @@ sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | 
 sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 44100 - | python demod.py -r 44100 -t raw -
 python demod.py -t raw test/tnc_test02.raw
 
+#RTL-SDR
+rtl_fm -f 144.390M -s 22050 -p -2 -g 40 - | multimon-ng -t raw -A -a AFSK1200 -
+
 

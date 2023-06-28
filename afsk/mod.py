@@ -2,7 +2,7 @@
 import sys
 import math
 import asyncio
-from pydash import py_ as _
+import lib.upydash as _
 
 from array import array
 

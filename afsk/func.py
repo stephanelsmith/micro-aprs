@@ -101,7 +101,7 @@ def create_lpf(ncoefs,       # filter size
                aboost = 1,   #gain at on-set of cut-off
                ):
     try:
-        raise Exception('')
+        # raise Exception('')
         coefs,g = memoize_loads('lowpass', fa, fs, width, aboost)
     except:
         from scipy import signal
@@ -123,7 +123,7 @@ def create_bandpass(ncoefs,            # filter size
                     amark=1, aspace=1, # mark/space gain
                     ):
     try:
-        raise Exception('')
+        # raise Exception('')
         coefs,g = memoize_loads('bandpass', fmark, fspace, fs, width, amark, aspace)
     except:
         from scipy import signal

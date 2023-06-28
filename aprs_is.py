@@ -17,6 +17,7 @@ APRS_IS_FILTER_PORT = 14580
 
 #position: KI5TOF>APRS:=2941.97N/09545.01WChello world
 #status:   KI5TOF>APRS:>QTH
+#message:  KI5TOF>APRS::KI5TOF   :hello world
 
 #https://aprs.fi/doc/guide/aprsfi-telemetry.html
 #https://github.com/PhirePhly/aprs_notes/blob/master/telemetry_format.md

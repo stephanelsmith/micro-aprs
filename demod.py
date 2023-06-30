@@ -43,6 +43,7 @@ async def read_raw_from_pipe(samples_q,
             arr[idx] = struct.unpack('<h', b)[0]
             if (idx+1)%defs.SAMPLES_SIZE == 0:
                 await samples_q.put((arr, idx+1))
+                print('*')
                 arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
                 idx = 0
                 continue

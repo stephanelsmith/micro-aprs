@@ -79,6 +79,7 @@ def create_corr(ts, shift):
     return inner
 
 def create_fir(coefs, scale):
+    #value-by-value fir
     ncoefs = len(coefs)
     coefs = array('i', (coefs[i] for i in range(ncoefs)))
     bufin = array('i', (0 for x in range(ncoefs)))
@@ -94,6 +95,23 @@ def create_fir(coefs, scale):
         return o
     return inner
 
+def create_fir_arr(coefs, scale):
+    #arr in-place
+    ncoefs = len(coefs)
+    coefs = array('i', (coefs[i] for i in range(ncoefs)))
+    bufin = array('i', (0 for x in range(ncoefs)))
+    idx = 0
+    scale = scale or 1
+    def inner(arr,arr_size):
+        nonlocal ncoefs, coefs, bufin, idx, scale
+        for x in range(arr_size):
+            bufin[idx] = arr[x]
+            arr[x] = 0
+            for i in range(ncoefs):
+                arr[x] += (coefs[i] * bufin[(idx-i)%ncoefs]) // scale
+            idx = (idx+1)%ncoefs
+    return inner
+
 def create_lpf(ncoefs,       # filter size
                fa,           # cut-off f
                fs,           # fs
@@ -102,7 +120,7 @@ def create_lpf(ncoefs,       # filter size
                ):
     try:
         # raise Exception('')
-        coefs,g = memoize_loads('lowpass', fa, fs, width, aboost)
+        coefs,g = memoize_loads('lowpass', fa, fs, ncoefs, width, aboost)
     except:
         from scipy import signal
         coefs = signal.firls(ncoefs,
@@ -111,10 +129,11 @@ def create_lpf(ncoefs,       # filter size
                             fs=fs)
         coefs = [round(x*10000) for x in coefs]
         g = sum([coefs[i] for i in range(len(coefs))])
-        memoize_dumps('lowpass', (coefs,g), fa, fs, width, aboost)
-    return create_fir(coefs = coefs,
-                      scale = g,
-                      )
+        memoize_dumps('lowpass', (coefs,g), fa, fs, ncoefs, width, aboost)
+    return coefs,g
+    # return create_fir(coefs = coefs,
+                      # scale = g,
+                      # )
 
 def create_bandpass(ncoefs,            # filter size
                     fmark, fspace,     # mark/space frequencies
@@ -124,7 +143,7 @@ def create_bandpass(ncoefs,            # filter size
                     ):
     try:
         # raise Exception('')
-        coefs,g = memoize_loads('bandpass', fmark, fspace, fs, width, amark, aspace)
+        coefs,g = memoize_loads('bandpass', fmark, fspace, fs, ncoefs, width, amark, aspace)
     except:
         from scipy import signal
         coefs = signal.firls(ncoefs,
@@ -136,10 +155,11 @@ def create_bandpass(ncoefs,            # filter size
         g1 = sum([coefs[i]*math.cos(2*math.pi*fmark/fs*i) for i in range(len(coefs))])
         g2 = sum([coefs[i]*math.sin(2*math.pi*fspace/fs*i) for i in range(len(coefs))])
         g = int((abs(g1)+abs(g2))/2)
-        memoize_dumps('bandpass', (coefs,g), fmark, fspace, fs, width, amark, aspace)
-    return create_fir(coefs = coefs,
-                      scale = g,
-                      )
+        memoize_dumps('bandpass', (coefs,g), fmark, fspace, fs, ncoefs, width, amark, aspace)
+    return coefs,g
+    # return create_fir(coefs = coefs,
+                      # scale = g,
+                      # )
 
 def create_sampler(fbaud, 
                    fs, ):

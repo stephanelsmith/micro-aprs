@@ -106,23 +106,23 @@ class AX25FromAFSK():
         except DecodeErrorFix as err:
             _ax25 = err.ax25
 
-        # #try fixing src/dst
-        # ax25 = self.fixer_src_dst(mv = mv)
-        # if ax25:
-            # await self.ax25_q.put(ax25)
-            # return
+        #try fixing src/dst
+        ax25 = self.fixer_src_dst(mv = mv)
+        if ax25:
+            await self.ax25_q.put(ax25)
+            return
 
-        # #no src/dst, don't bother additional fixing
-        # #this way we avoid trying to fix messages that have no chance of fixing
-        # if not (_ax25.src and _ax25.src.is_valid()) or\
-           # not (_ax25.dst and _ax25.dst.is_valid()):
-            # return
+        #no src/dst, don't bother additional fixing
+        #this way we avoid trying to fix messages that have no chance of fixing
+        if not (_ax25.src and _ax25.src.is_valid()) or\
+           not (_ax25.dst and _ax25.dst.is_valid()):
+            return
 
-        # #try fixing info/rest of message
-        # ax25 = self.fixer_info(mv = mv)
-        # if ax25:
-            # await self.ax25_q.put(ax25)
-            # return
+        #try fixing info/rest of message
+        ax25 = self.fixer_info(mv = mv)
+        if ax25:
+            await self.ax25_q.put(ax25)
+            return
 
         return
 

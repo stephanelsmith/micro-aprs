@@ -40,7 +40,6 @@ sudo apt-get install bchunk
 bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
 
 #convert wav->raw
-sox -t wav ISSpkt.wav -t ogg -r 22050 ISSpkt.ogg
 find -name "*wav" | xargs basename -s .wav | xargs -i sox -t wav {}.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 {}.raw
 
 #ISS

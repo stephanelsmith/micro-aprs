@@ -8,7 +8,7 @@ from array import array
 
 from lib.utils import eprint
 
-from afsk.func import get_sin_table
+from afsk.sin_table import get_sin_table
 from afsk.func import gen_bits_from_bytes
 from afsk.func import create_nrzi
 

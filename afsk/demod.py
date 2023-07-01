@@ -15,6 +15,7 @@ from lib.utils import eprint
 from afsk.func import create_unnrzi
 from afsk.func import create_agc
 from afsk.func import create_corr
+from afsk.func import create_squelch
 from afsk.func import create_lpf
 from afsk.func import create_bandpass
 from afsk.func import create_sampler
@@ -43,14 +44,14 @@ class AFSKDemodulator():
         self.tbaud = 1/self.fbaud
 
         options = dict({
-            'bandpass_ncoefsbaud' : 2,
-            #'bandpass_ncoefsbaud' : 6,
+            #'bandpass_ncoefsbaud' : 2,
+            'bandpass_ncoefsbaud' : 6,
             'bandpass_width'      : 460,
             'bandpass_amark'      : 7,
             'bandpass_aspace'     : 24,
             'bandpass_aboost'     : None,
-            'lpf_ncoefsbaud'      : 2,
-            #'lpf_ncoefsbaud'      : 6,
+            #'lpf_ncoefsbaud'      : 2,
+            'lpf_ncoefsbaud'      : 6,
             'lpf_f'               : 1000,
             'lpf_width'           : 240,
             'lpf_aboost'          : 3,
@@ -72,11 +73,12 @@ class AFSKDemodulator():
                                         amark  = bandpass_amark or bandpass_aboost,
                                         aspace = bandpass_aspace or bandpass_aboost,
                                         )
-        # self.bandpass = create_fir(coefs = coefs, scale = scale)
-        self.bandpass = create_fir_arr(coefs = coefs, scale = scale)
+        self.bandpass = create_fir(coefs = coefs, scale = scale)
+        #self.bandpass = create_fir_arr(coefs = coefs, scale = scale)
         # self.agc = create_agc(sp = 2**12,
                               # depth = int(self.tbaud/self.ts),
                               # )
+        self.squelch = create_squelch()
         self.corr = create_corr(ts    = self.ts,
                                 shift = 1)
 
@@ -87,11 +89,11 @@ class AFSKDemodulator():
         lpf_aboost = options['lpf_aboost']
         lpf_f = options['lpf_f']
         coefs,scale = create_lpf(ncoefs = lpf_ncoefs,
-                              fa     = lpf_f,
-                              fs     = self.fs,
-                              width  = lpf_width,
-                              aboost = lpf_aboost,
-                              )
+                                 fa     = lpf_f,
+                                 fs     = self.fs,
+                                 width  = lpf_width,
+                                 aboost = lpf_aboost,
+                                 )
         self.lpf = create_fir(coefs = coefs, scale = scale)
         self.sampler = create_sampler(fbaud = self.fbaud,
                                       fs    = self.fs)
@@ -113,6 +115,7 @@ class AFSKDemodulator():
     async def process_samples(self):
         try:
             # Process a chunk of samples
+            squelch  = self.squelch
             corr     = self.corr
             # agc     = self.agc
             lpf      = self.lpf
@@ -134,19 +137,21 @@ class AFSKDemodulator():
                 if self.verbose:
                     eprint('processing samples',arr_size)
 
-                #for i in range(arr_size):
-                #    o = arr[i]
-                #    o = bandpass(o)
-                #    # o = agc(o)
-                #    o = corr(o)
-                #    o = lpf(o)
-                #    bs = sampler(o)
-                #    if bs != 2: # _NONE
-                #        b = unnrzi(bs)
-                #        # eprint(b,end='')
-                #        await bits_q.put(b) #bits_out_q
-
-                o = bandpass(arr, arr_size)
+                if squelch(arr, arr_size):
+                    continue
+                
+                for i in range(arr_size):
+                    o = arr[i]
+                    o = bandpass(o)
+                    # o = agc(o)
+                    o = corr(o)
+                    o = lpf(o)
+                    bs = sampler(o)
+                    if bs != 2: # _NONE
+                        b = unnrzi(bs)
+                        # eprint(b,end='')
+                        await bits_q.put(b) #bits_out_q
+                #bandpass(arr, arr_size)
 
                 samp_q.task_done() # done
         except Exception as err:

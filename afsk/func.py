@@ -8,16 +8,6 @@ from lib.memoize import memoize_loads
 from lib.memoize import memoize_dumps
 
 
-def get_sin_table(size):
-    return array('i', (int((2**15-1)*math.sin(x)) for x in frange(0,2*math.pi,2*math.pi/size)))
-    # try:
-        # # tbl = memoize_loads('sin_table', size)
-        # return tbl
-    # except:
-        # tbl = array('i', (int((2**15-1)*math.sin(x)) for x in frange(0,2*math.pi,2*math.pi/size)))
-        # # eprint(tbl)
-        # # memoize_dumps('sin_table', tbl, size)
-    # return tbl
 
 # generator for iterating over the bits in bytearray
 def gen_bits_from_bytes(mv, stop_bit = None):
@@ -63,6 +53,19 @@ def create_agc(sp,depth):
             scale = 1
         idx = (idx+1)%depth
         return scale*v
+    return inner
+
+def create_squelch():
+    def inner(arr, arr_size)->int:
+        m = 0
+        for x in range(arr_size):
+            m = max(m,abs(arr[x]))
+            #print(arr[x],end=' ')
+        #print(m)
+        if m>16000:
+            return True  #squelched, skip this arr
+        else:
+            return False #process this arr
     return inner
 
 CORRELATOR_DELAY = 446e-6

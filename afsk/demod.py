@@ -137,8 +137,8 @@ class AFSKDemodulator():
                 if self.verbose:
                     eprint('processing samples',arr_size)
 
-                if squelch(arr, arr_size):
-                    continue
+                # if squelch(arr, arr_size):
+                    # continue
                 
                 for i in range(arr_size):
                     o = arr[i]

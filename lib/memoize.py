@@ -4,8 +4,8 @@ from json import dumps
 
 
 def memoize_loads(name, *args):
-
     j = {}
+    raise Exception('failed to memoize')
 
     try:
         with open('memoize.json', 'r') as f:
@@ -22,6 +22,7 @@ def memoize_loads(name, *args):
 
 def memoize_dumps(name, res, *args):
     j = {}
+    return
 
     try:
         with open('memoize.json', 'r') as f:

@@ -63,7 +63,7 @@ def decode_sync(raw_file = 'test/ISSpkt.raw',
 
 async def main():
     testdefs = {
-            'bandpass_ncoefsbaud' : [6],
+            'bandpass_ncoefsbaud' : [5],#[6],
             'bandpass_width'      : [460],
             'bandpass_amark'      : [7],
             'bandpass_aspace'     : [24],

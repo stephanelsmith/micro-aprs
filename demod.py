@@ -82,12 +82,12 @@ async def read_samples_from_raw(samples_q,
             f.seek(0)
             i = 0
             while i < size:
-                b = f.read(2) # TODO, USE READINTO
-                if not b:
+                a = f.read(2) # TODO, USE READINTO
+                i += 2 
+                if not a:
                     break
-                #arr[idx] = struct.unpack('<h', b)[0]
+                #arr[idx] = struct.unpack('<h', a)[0]
                 arr[idx] = int.from_bytes(a,'little',signed=True)
-                i += 2#len(b)
                 siz = idx+1
                 rst = siz%defs.SAMPLES_SIZE == 0
                 s = sigdet(arr[idx],rst) #afsk signal detector

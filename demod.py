@@ -51,6 +51,7 @@ async def read_raw_from_pipe(samples_q,
             rst = siz%defs.SAMPLES_SIZE == 0
             s = sigdet(arr[idx],rst) #afsk signal detector
             if rst:
+                #print('*')
                 if s:
                     await samples_q.put((arr, siz))
                     arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))

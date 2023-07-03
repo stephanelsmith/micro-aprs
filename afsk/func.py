@@ -8,6 +8,33 @@ from lib.memoize import memoize_loads
 from lib.memoize import memoize_dumps
 
 
+# detect afsk signal with minimal possible computation requirements
+def create_afsk_detector():
+    pol = True #polarity of the run we are currently tracking
+    run = 0    #current run count (number of consecutive pos/neg samples)
+    act = 0   #count of the number of runs we've seen above a threshold
+    def inner(v,rst):
+        nonlocal pol, run, act
+        if pol and v > 0:
+            run += 1
+        elif pol and v <= 0:
+            if run > 6:  ## single run length constant
+                act += 1
+            pol = not pol
+            run = 1
+        elif not pol and v < 0:
+            run += 1
+        elif not pol and v >= 0:
+            if run > 6: ## single run length constant
+                act += 1
+            pol = not pol
+            run = 1
+        _act = act 
+        if rst:
+            act = 0
+        return 1 if _act > 10 else 0 # 10 - minimum number of run we need to declare signal detected
+    return inner
+
 
 # generator for iterating over the bits in bytearray
 def gen_bits_from_bytes(mv, stop_bit = None):

@@ -13,6 +13,7 @@ from asyncio import Event
 
 from afsk.demod import AFSKDemodulator
 from ax25.from_afsk import AX25FromAFSK
+from afsk.func import create_afsk_detector
 
 import lib.upydash as _
 from lib.utils import parse_args
@@ -32,22 +33,31 @@ async def read_raw_from_pipe(samples_q,
         await loop.connect_read_pipe(lambda: protocol, sys.stdin)
 
         arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
+        # mv = memoryview(arr)
+        sigdet = create_afsk_detector()
         idx = 0
 
         while True:
             try:
-                b = await reader.readexactly(2)
+                a = await reader.readexactly(2)
+                # TODO: MICROPYTHON, use READINTO
+                # mv[idx:idx+2] = await reader.readexactly(2)
             except asyncio.IncompleteReadError:
                 # continue
                 break #eof break
-            arr[idx] = struct.unpack('<h', b)[0]
-            if (idx+1)%defs.SAMPLES_SIZE == 0:
-                await samples_q.put((arr, idx+1))
-                print('*')
-                arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
+            #arr[idx] = struct.unpack('<h', a)[0]
+            arr[idx] = int.from_bytes(a,'little',signed=True)
+            siz = idx+1
+            rst = siz%defs.SAMPLES_SIZE == 0
+            s = sigdet(arr[idx],rst) #afsk signal detector
+            if rst:
+                if s:
+                    await samples_q.put((arr, siz))
+                    arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
+                    # mv = memoryview(arr)
                 idx = 0
                 continue
-            idx = (idx+1)%defs.SAMPLES_SIZE
+            idx = siz%defs.SAMPLES_SIZE
         await samples_q.put((arr, idx))
 
     except Exception as err:
@@ -64,6 +74,7 @@ async def read_samples_from_raw(samples_q,
         if file[-4:] != '.raw':
             raise Exception('uknown file type', file)
         arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
+        sigdet = create_afsk_detector()
         idx = 0
         with open(file, 'rb') as f:
             f.seek(0, 2)#SEEK_END = 2 
@@ -71,23 +82,23 @@ async def read_samples_from_raw(samples_q,
             f.seek(0)
             i = 0
             while i < size:
-                b = f.read(2) # TODO, READ INTO
+                b = f.read(2) # TODO, USE READINTO
                 if not b:
                     break
-                arr[idx] = struct.unpack('<h', b)[0]
-                i += len(b)
-                # if i%(1024*1000) == 0:
-                    # eprint('{} {}% processed...'.format(
-                            # file,
-                            # round(i/size*100)
-                        # ),
-                    # )
-                idx += 1
-                if idx%defs.SAMPLES_SIZE == 0:
-                    await samples_q.put((arr, idx))
-                    await asyncio.sleep(0)
-                    arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
+                #arr[idx] = struct.unpack('<h', b)[0]
+                arr[idx] = int.from_bytes(a,'little',signed=True)
+                i += 2#len(b)
+                siz = idx+1
+                rst = siz%defs.SAMPLES_SIZE == 0
+                s = sigdet(arr[idx],rst) #afsk signal detector
+                if rst:
+                    if s:
+                        await samples_q.put((arr, siz))
+                        await asyncio.sleep(0)
+                        arr = array('i',(0 for x in range(defs.SAMPLES_SIZE)))
                     idx = 0
+                    continue
+                idx = siz%defs.SAMPLES_SIZE
             await samples_q.put((arr, idx))
     except Exception as err:
         traceback.print_exc()

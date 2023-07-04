@@ -46,11 +46,11 @@ class AFSKDemodulator():
         self.tbaud = 1/self.fbaud
 
         options = dict({
-            'bandpass_ncoefsbaud' : 3,
+            'bandpass_ncoefsbaud' : 3, #6
             'bandpass_width'      : 460,
             'bandpass_amark'      : 7,
             'bandpass_aspace'     : 24,
-            'lpf_ncoefsbaud'      : 3,
+            'lpf_ncoefsbaud'      : 4, #6
             'lpf_f'               : 1000,
             'lpf_width'           : 240,
             'lpf_aboost'          : 3,

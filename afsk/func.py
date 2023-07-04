@@ -4,8 +4,6 @@ from array import array
 
 from lib.utils import eprint
 from lib.utils import frange
-from lib.memoize import memoize_loads
-from lib.memoize import memoize_dumps
 
 
 # detect afsk signal with minimal possible computation requirements
@@ -145,54 +143,38 @@ def create_fir_arr(coefs, scale):
             idx = (idx+1)%ncoefs
     return inner
 
-def create_lpf(ncoefs,       # filter size
-               fa,           # cut-off f
-               fs,           # fs
-               width  = 400, #transition band size
-               aboost = 1,   #gain at on-set of cut-off
-               ):
-    try:
-        # raise Exception('')
-        coefs,g = memoize_loads('lowpass', fa, fs, ncoefs, width, aboost)
-    except:
-        from scipy import signal
-        coefs = signal.firls(ncoefs,
-                            (0, fa,       fa+width, fs/2),
-                            (1, aboost,   0,        0), 
-                            fs=fs)
-        coefs = [round(x*10000) for x in coefs]
-        g = sum([coefs[i] for i in range(len(coefs))])
-        memoize_dumps('lowpass', (coefs,g), fa, fs, ncoefs, width, aboost)
+def lpf_fir_design(ncoefs,       # filter size
+                   fa,           # cut-off f
+                   fs,           # fs
+                   width  = 400, #transition band size
+                   aboost = 1,   #gain at on-set of cut-off
+                   ):
+    from scipy import signal
+    coefs = signal.firls(ncoefs,
+                        (0, fa,       fa+width, fs/2),
+                        (1, aboost,   0,        0), 
+                        fs=fs)
+    coefs = [round(x*10000) for x in coefs]
+    g = sum([coefs[i] for i in range(len(coefs))])
     return coefs,g
-    # return create_fir(coefs = coefs,
-                      # scale = g,
-                      # )
 
-def create_bandpass(ncoefs,            # filter size
-                    fmark, fspace,     # mark/space frequencies
-                    fs,                # fs
-                    width=600,         # transition freqency begin/end
-                    amark=1, aspace=1, # mark/space gain
-                    ):
-    try:
-        # raise Exception('')
-        coefs,g = memoize_loads('bandpass', fmark, fspace, fs, ncoefs, width, amark, aspace)
-    except:
-        from scipy import signal
-        coefs = signal.firls(ncoefs,
-                            (0, fmark-width, fmark, fspace, fspace+width, fs/2),
-                            (0, 0,           amark, aspace, 0,            0), 
-                            fs=fs)
+def bandpass_fir_design(ncoefs,            # filter size
+                        fmark, fspace,     # mark/space frequencies
+                        fs,                # fs
+                        width=600,         # transition freqency begin/end
+                        amark=1, aspace=1, # mark/space gain
+                        ):
+    from scipy import signal
+    coefs = signal.firls(ncoefs,
+                        (0, fmark-width, fmark, fspace, fspace+width, fs/2),
+                        (0, 0,           amark, aspace, 0,            0), 
+                        fs=fs)
 
-        coefs = [round(x*10000) for x in coefs]
-        g1 = sum([coefs[i]*math.cos(2*math.pi*fmark/fs*i) for i in range(len(coefs))])
-        g2 = sum([coefs[i]*math.sin(2*math.pi*fspace/fs*i) for i in range(len(coefs))])
-        g = int((abs(g1)+abs(g2))/2)
-        memoize_dumps('bandpass', (coefs,g), fmark, fspace, fs, ncoefs, width, amark, aspace)
+    coefs = [round(x*10000) for x in coefs]
+    g1 = sum([coefs[i]*math.cos(2*math.pi*fmark/fs*i) for i in range(len(coefs))])
+    g2 = sum([coefs[i]*math.sin(2*math.pi*fspace/fs*i) for i in range(len(coefs))])
+    g = int((abs(g1)+abs(g2))/2)
     return coefs,g
-    # return create_fir(coefs = coefs,
-                      # scale = g,
-                      # )
 
 def create_sampler(fbaud, 
                    fs, ):

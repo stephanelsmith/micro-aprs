@@ -11,13 +11,14 @@ import lib.upydash as _
 from lib.utils import frange
 import lib.defs as defs
 from lib.utils import eprint
+from lib.memoize import memoize_loads
+from lib.memoize import memoize_dumps
 
 from afsk.func import create_unnrzi
 from afsk.func import create_agc
 from afsk.func import create_corr
-from afsk.func import create_squelch
-from afsk.func import create_lpf
-from afsk.func import create_bandpass
+from afsk.func import lpf_fir_design
+from afsk.func import bandpass_fir_design
 from afsk.func import create_sampler
 from afsk.func import create_fir
 from afsk.func import create_fir_arr
@@ -28,6 +29,7 @@ class AFSKDemodulator():
                        sampling_rate = 22050,
                        verbose       = False,
                        options       = {},
+                       do_memoize    = True,
                        ):
 
         self.samples_q  = samples_in_q
@@ -44,14 +46,11 @@ class AFSKDemodulator():
         self.tbaud = 1/self.fbaud
 
         options = dict({
-            #'bandpass_ncoefsbaud' : 2,
-            'bandpass_ncoefsbaud' : 5,#6,
+            'bandpass_ncoefsbaud' : 3,
             'bandpass_width'      : 460,
             'bandpass_amark'      : 7,
             'bandpass_aspace'     : 24,
-            'bandpass_aboost'     : None,
-            #'lpf_ncoefsbaud'      : 2,
-            'lpf_ncoefsbaud'      : 6,
+            'lpf_ncoefsbaud'      : 3,
             'lpf_f'               : 1000,
             'lpf_width'           : 240,
             'lpf_aboost'          : 3,
@@ -64,21 +63,34 @@ class AFSKDemodulator():
         bandpass_width = options['bandpass_width']
         bandpass_amark = options['bandpass_amark']
         bandpass_aspace = options['bandpass_aspace']
-        bandpass_aboost = options['bandpass_aboost']
-        coefs,scale = create_bandpass(ncoefs = bandpass_ncoefs,
-                                        fmark  = self.fmark,
-                                        fspace = self.fspace,
-                                        fs     = self.fs,
-                                        width  = bandpass_width,
-                                        amark  = bandpass_amark or bandpass_aboost,
-                                        aspace = bandpass_aspace or bandpass_aboost,
-                                        )
-        self.bandpass = create_fir(coefs = coefs, scale = scale)
+        if do_memoize:
+            coefs_g = memoize_loads('bpf', self.fmark, self.fspace, self.fs, 
+                                           bandpass_ncoefs,
+                                           bandpass_width, 
+                                           bandpass_amark, 
+                                           bandpass_aspace)
+        else:
+            coefs_g = None
+        if coefs_g:
+            coefs,g = coefs_g
+        else: 
+            coefs,g = bandpass_fir_design(ncoefs = bandpass_ncoefs,
+                                          fmark  = self.fmark,
+                                          fspace = self.fspace,
+                                          fs     = self.fs,
+                                          width  = bandpass_width,
+                                          amark  = bandpass_amark,
+                                          aspace = bandpass_aspace,
+                                          )
+            memoize_dumps('bpf', (coefs,g), self.fmark, self.fspace, self.fs,
+                                           bandpass_ncoefs,
+                                           bandpass_width, 
+                                           bandpass_amark, 
+                                           bandpass_aspace)
+        self.bandpass = create_fir(coefs = coefs, scale = g)
         #self.bandpass = create_fir_arr(coefs = coefs, scale = scale)
-        # self.agc = create_agc(sp = 2**12,
-                              # depth = int(self.tbaud/self.ts),
-                              # )
-        self.squelch = create_squelch()
+
+
         self.corr = create_corr(ts    = self.ts,
                                 shift = 1)
 
@@ -88,13 +100,28 @@ class AFSKDemodulator():
         lpf_width = options['lpf_width']
         lpf_aboost = options['lpf_aboost']
         lpf_f = options['lpf_f']
-        coefs,scale = create_lpf(ncoefs = lpf_ncoefs,
-                                 fa     = lpf_f,
-                                 fs     = self.fs,
-                                 width  = lpf_width,
-                                 aboost = lpf_aboost,
-                                 )
-        self.lpf = create_fir(coefs = coefs, scale = scale)
+
+        if do_memoize:
+            coefs_g = memoize_loads('lpf', lpf_f, self.fs, 
+                                           lpf_ncoefs, 
+                                           lpf_width, 
+                                           lpf_aboost)
+        else:
+            coefs_g = None
+        if coefs_g:
+            coefs,g = coefs_g
+        else: 
+            coefs,g = lpf_fir_design(ncoefs = lpf_ncoefs,
+                                     fa     = lpf_f,
+                                     fs     = self.fs,
+                                     width  = lpf_width,
+                                     aboost = lpf_aboost,
+                                     )
+            memoize_dumps('lpf', (coefs,g), lpf_f, self.fs,
+                                           lpf_ncoefs, 
+                                           lpf_width, 
+                                           lpf_aboost)
+        self.lpf = create_fir(coefs = coefs, scale = g)
         self.sampler = create_sampler(fbaud = self.fbaud,
                                       fs    = self.fs)
         self.unnrzi = create_unnrzi()
@@ -115,7 +142,6 @@ class AFSKDemodulator():
     async def process_samples(self):
         try:
             # Process a chunk of samples
-            squelch  = self.squelch
             corr     = self.corr
             # agc     = self.agc
             lpf      = self.lpf
@@ -134,12 +160,6 @@ class AFSKDemodulator():
                 #fetch next chunk of samples (array)
                 arr,arr_size = await samp_q.get()
 
-                if self.verbose:
-                    eprint('processing samples',arr_size)
-
-                # if squelch(arr, arr_size):
-                    # continue
-                
                 for i in range(arr_size):
                     o = arr[i]
                     o = bandpass(o)

@@ -5,24 +5,24 @@ from json import dumps
 
 def memoize_loads(name, *args):
     j = {}
-    raise Exception('failed to memoize')
+    # raise Exception('failed to memoize')
 
     try:
         with open('memoize.json', 'r') as f:
             j = loads(f.read())
     except:
-        raise Exception('failed to memoize')
+        return None
 
     if name in j:
         for r in j[name]:
             if len(r['args'])==len(args) and all([a==b for a,b in zip(r['args'], args)]):
                 return r['res']
 
-    raise Exception('failed to memoize')
+    return None
 
 def memoize_dumps(name, res, *args):
     j = {}
-    return
+    # return
 
     try:
         with open('memoize.json', 'r') as f:

@@ -45,7 +45,7 @@ class AFSKDemodulator():
 
         options = dict({
             #'bandpass_ncoefsbaud' : 2,
-            'bandpass_ncoefsbaud' : 6,
+            'bandpass_ncoefsbaud' : 5,#6,
             'bandpass_width'      : 460,
             'bandpass_amark'      : 7,
             'bandpass_aspace'     : 24,

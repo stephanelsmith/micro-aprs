@@ -117,7 +117,10 @@ def create_fir(coefs, scale):
     scale = scale or 1
     def inner(v:int)->int:
         nonlocal ncoefs, coefs, bufin, idx, scale
-        bufin[idx] = v
+        try:
+            bufin[idx] = v
+        except OverflowError:
+            bufin[idx] = 2147483647 if v > 0 else -2147483648
         o = 0
         for i in range(ncoefs):
             o += (coefs[i] * bufin[(idx-i)%ncoefs]) // scale

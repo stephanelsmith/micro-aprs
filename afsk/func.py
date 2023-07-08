@@ -3,8 +3,15 @@ import math
 from array import array
 
 from lib.utils import eprint
-from lib.utils import frange
 
+def frange(start, stop, step, rnd=None):
+    n = int(math.ceil((stop - start) / step))
+    if isinstance(rnd,int):
+        for i in range(n):
+            yield round(start+i*step,rnd)
+    else:
+        for i in range(n):
+            yield start+i*step
 
 # detect afsk signal with minimal possible computation requirements
 def create_afsk_detector():

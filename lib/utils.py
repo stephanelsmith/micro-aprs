@@ -180,14 +180,6 @@ def get_bit(byte, idx):
     mask = (0x80)>>(idx%8)
     return (byte & mask) >> ((8-idx-1)%8)
 
-def frange(start, stop, step, rnd=None):
-    n = int(math.ceil((stop - start) / step))
-    if isinstance(rnd,int):
-        for i in range(n):
-            yield round(start+i*step,rnd)
-    else:
-        for i in range(n):
-            yield start+i*step
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)

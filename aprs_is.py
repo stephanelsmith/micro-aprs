@@ -1,8 +1,11 @@
-
+#!env/bin/python
 
 import asyncio
+from asyncio import Event
 import traceback
 import sys
+
+from lib.utils import is_parse_args
 
 CALL = 'KI5TOF'
 PASSCODE = '17081'
@@ -31,44 +34,91 @@ APRS_IS_FILTER_PORT = 14580
 #telem:    KI5TOF>APRS:T#002,10.12,20.23,30.45,40.67,50.89,10101010
 #telem:    KI5TOF>APRS:T#003,110.12,120.23,130.45,140.67,150.89,10101010comment
 
-async def ingress(reader):
+async def ingress(reader, login_evt, call):
     try:
+        login_resp = 'logresp {} verified'.format(call)
         while True:
             data = await reader.read(1024)
             if data:
-                print('<<<',data)
+                # print('<<<',data)
+                line = data.decode()
+                if len(line) > 0:
+                    if line[:7] != '# aprsc':
+                        print(line.rstrip())
+                    if line.find(login_resp) != -1:
+                        login_evt.set()
     except asyncio.CancelledError:
         raise
     except Exception as err:
         traceback.print_exc()
 
-async def egress(writer):
+async def egress(writer, 
+                 call,
+                 passcode,
+                 login_evt,
+                 ):
     login_str = 'user {} pass {} vers microax25afsk 0.0 filter p/{}'.format(
-            CALL, PASSCODE, CALL)
-    print(login_str)
+            call, passcode, call)
+    # print(login_str)
     try:
         loop = asyncio.get_event_loop()
         reader = asyncio.StreamReader()
         protocol = asyncio.StreamReaderProtocol(reader)
         await loop.connect_read_pipe(lambda: protocol, sys.stdin)
-        while True:
-            line = await reader.readline()
-            line = line.decode().strip().encode()
-            print('>>>',line)
-            writer.write(line)
-            writer.write(b'\r\n')
+
+        #login
+        writer.write(login_str.encode())
+        writer.write(b'\r\n')
+        await writer.drain()
+        eol = ord('\n')
+        done = False
+        buf = bytearray(512)
+       
+        #wait for login response
+        await login_evt.wait()
+
+        while not done:
+            i = 0
+            while True:
+                try:
+                    b = await reader.readexactly(1)
+                except asyncio.IncompleteReadError:
+                    done = True
+                    break
+                if ord(b) == eol:
+                    break
+                buf[i] = ord(b)
+                i = (i+1)%512
+            line = buf[:i].decode().strip()
+            if line:
+                print('>',line)
+                # writer.write(line.encode())
+                # writer.write(b'\r\n')
             await writer.drain()
+    except asyncio.CancelledError:
+        raise
     except asyncio.CancelledError:
         raise
     except Exception as err:
         traceback.print_exc()
 
 async def main():
+    args = is_parse_args(sys.argv)
     try:
         reader, writer = await asyncio.open_connection(APRS_IS_HOST, APRS_IS_FILTER_PORT)
         tasks = []
-        tasks.append(asyncio.create_task(ingress(reader = reader)))
-        tasks.append(asyncio.create_task(egress(writer = writer)))
+        call = args['args']['call'].upper()
+        passcode = args['args']['passcode']
+        login_evt = Event()
+        tasks.append(asyncio.create_task(ingress(reader    = reader,
+                                                 call      = call,
+                                                 login_evt = login_evt,
+                                                 )))
+        tasks.append(asyncio.create_task(egress(writer    = writer,
+                                                call      = call,
+                                                passcode  = passcode,
+                                                login_evt = login_evt,
+                                                )))
         await asyncio.gather(*tasks, return_exceptions=True)
     except asyncio.CancelledError:
         raise

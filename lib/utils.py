@@ -27,6 +27,22 @@ def parse_args(args):
     try:
         #general args
         args = spl.pop(0)
+        if '-h' in args or '--help' in args or len(args)==1:
+            print('''APRS MOD/DEMOD
+Usage: 
+aprs_mod/demod.py [GENERAL OPTIONS] -t [OUTPUT OPTIONS] -t [INPUT OPTIONS]
+aprs_mod/demod.py [GENERAL OPTIONS] -t [INPUT OPTIONS]
+
+GENERAL OPTIONS:
+    -r, --rate       22050 (default)
+    -v, --verbose    verbose mode to show intermediary steps
+    -q, --quiet      suppress output, may be used with verbose
+
+INPUT/OUTPUT OPTIONS:
+    -t, --type       type, currently only supports 'raw'
+    -f, --file       file input/output.  Default '-'
+''')
+            exit()
         if '-rate' in args:
             r['args']['rate'] = get_arg_val(args, '-rate', int)
         if '-r' in args:
@@ -57,6 +73,37 @@ def parse_args(args):
         if r['in']['type'] not in types:
             raise Exception('unknown type {}, not in {}'.format(r['in']['type'], types))
         r['in']['file'] = _in[-1]
+    except IndexError:
+        pass
+    return r
+
+def is_parse_args(args):
+    r = {
+        'args' : {
+            'call'      : 'KI5TOF',
+            'passcode'  : '17081',
+        },
+    }
+    try:
+        #general args
+        if '-h' in args or '--help' in args or len(args)==1:
+            print('''APRS IS GATEWAY
+Usage: python aprs_is.py [OPTIONS]
+aprs_is.py sends aprs commands from stdin to aprs is servers.
+
+OPTIONS:
+    -c, --call         APRS call sign
+    -p, --passcode     APRS passcode (https://apps.magicbug.co.uk/passcode/)
+''')
+            exit()
+        if '-p' in args:
+            r['args']['passcode'] = get_arg_val(args, '-p', str)
+        if '--passcode' in args:
+            r['args']['passcode'] = get_arg_val(args, '--passcode', str)
+        if '-c' in args:
+            r['args']['call'] = get_arg_val(args, '-c', str)
+        if '--call' in args:
+            r['args']['call'] = get_arg_val(args, '--call', str)
     except IndexError:
         pass
     return r

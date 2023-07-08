@@ -152,8 +152,8 @@ async def consume_ax25_crc_err(ax25_crc_err_q):
 
 async def main():
     # print(sys.argv)
-    if len(sys.argv) == 1:
-        print('args missing...')
+    # if len(sys.argv) == 1:
+        # print('args missing...')
     args = parse_args(sys.argv)
     # print(args)
 

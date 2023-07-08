@@ -1,18 +1,19 @@
 
 
-# Micro AX25 AFSK
 
-A python based library for encoding and decoding APRS/AX.25 packets in AFSK.  
+# Micro APRS MODEM
 
-![AFSK hello world](media/afsk_hello.png?raw=true "AFSK hello")
+A python based library for encoding and decoding, modulating and demodulating APRS/AX.25 packets in AFSK.  
 
-The purpose of this library is to thread-the-needle of both enabling APRS/AX.25/AFSK from PC to microcontroller while maintaining portability and readability of python.  This library is optimized for embedded systems, especially [micropython supported targets and platforms ](https://github.com/micropython/micropython#supported-platforms--architectures) and small computers (eg. OpenWRT), not to mention and machine running python!
+![AFSK hello world](docs/afsk_hello.png?raw=true "AFSK hello")
+
+The purpose of this library is to thread-the-needle of both enabling APRS/AX.25/AFSK from PC to microcontroller while maintaining portability and readability of python.  This library is optimized for embedded systems, especially [micropython supported targets and platforms ](https://github.com/micropython/micropython#supported-platforms--architectures) and small computers, not to mention native python3!
 
 In practice this means we:
 * Avoid floating point and math libraries and dependencies in critical sections.  
 	* :+1: Integer math only
 	* :+1: Lookup tables 
-	* :+1: No external libraries or especially advanced math libraries (numpy/scipy/pandas).
+	* :+1: No external libraries (numpy/scipy/pandas).
 * Special care for memory allocation
 	* :+1: Pre-computing buffer/array sizes and modifying in place
 	* :+1: Using memoryview objects to pass slices to functions and modifying those slices in place
@@ -77,7 +78,7 @@ echo "KI5TOF>APRS:hello world!" | python mod.py -v -q
 ```
 ===== MOD >>>>> KI5TOF>APRS:hello world!
 --ax25--
-0000  7e 82 a0 a4 a6 40 40 60 96 92   01111110 10000010 10100000 10100100 10100110 01000000 01000000 01100000 10010110 10010010   ~ ¤¦@@`
+0000  7e 82 a0 a4 a6 40 40 60 96 92   01111110 10000010 10100000 10100100 10100110 01000000 01000000 01100000 10010110 10010010   ~ ¤¦@@`
 0010  6a a8 9e 8c 61 03 f0 68 65 6c   01101010 10101000 10011110 10001100 01100001 00000011 11110000 01101000 01100101 01101100   j¨aðhel
 0020  6c 6f 20 77 6f 72 6c 64 21 ff   01101100 01101111 00100000 01110111 01101111 01110010 01101100 01100100 00100001 11111111   lo world!ÿ
 0030  07 7e -- -- -- -- -- -- -- --   00000111 01111110 -------- -------- -------- -------- -------- -------- -------- --------   ~--------
@@ -126,7 +127,7 @@ frame
 0020  36 f6 04 ee f6 4e 36 26 84 ff   00110110 11110110 00000100 11101110 11110110 01001110 00110110 00100110 10000100 11111111   6öîöN6&ÿ
 0030  e0 7e 00 -- -- -- -- -- -- --   11100000 01111110 00000000 -------- -------- -------- -------- -------- -------- --------   à~-------
 -un-reversed-
-0000  7e 82 a0 a4 a6 40 40 60 96 92   01111110 10000010 10100000 10100100 10100110 01000000 01000000 01100000 10010110 10010010   ~ ¤¦@@`
+0000  7e 82 a0 a4 a6 40 40 60 96 92   01111110 10000010 10100000 10100100 10100110 01000000 01000000 01100000 10010110 10010010   ~ ¤¦@@`
 0010  6a a8 9e 8c 61 03 f0 68 65 6c   01101010 10101000 10011110 10001100 01100001 00000011 11110000 01101000 01100101 01101100   j¨aðhel
 0020  6c 6f 20 77 6f 72 6c 64 21 ff   01101100 01101111 00100000 01110111 01101111 01110010 01101100 01100100 00100001 11111111   lo world!ÿ
 0030  07 7e 00 -- -- -- -- -- -- --   00000111 01111110 00000000 -------- -------- -------- -------- -------- -------- --------   ~-------

@@ -5,6 +5,8 @@ from asyncio import Event
 import traceback
 import sys
 
+from ax25.ax25 import AX25
+
 from lib.utils import is_parse_args
 
 CALL = 'KI5TOF'
@@ -90,13 +92,18 @@ async def egress(writer,
                 buf[i] = ord(b)
                 i = (i+1)%512
             line = buf[:i].decode().strip()
-            if line:
-                print('>',line)
-                # writer.write(line.encode())
-                # writer.write(b'\r\n')
-            await writer.drain()
-    except asyncio.CancelledError:
-        raise
+            if not line:
+                continue
+            try:
+                ax25 = AX25(aprs = line)
+                print('>',ax25)
+                writer.write(ax25.encode())
+                writer.write(b'\r\n')
+                await writer.drain()
+            except asyncio.CancelledError:
+                raise
+            except Exception as err:
+                print('x',line)
     except asyncio.CancelledError:
         raise
     except Exception as err:

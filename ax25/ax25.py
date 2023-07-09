@@ -267,6 +267,9 @@ class AX25():
 
         return (frame,stop_bit)
 
+    def encode(self):
+        return self.to_aprs().encode()
+
     def __repr__(self):
         return self.to_aprs()
 

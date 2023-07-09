@@ -22,13 +22,9 @@ def parse_args(args):
             'file'  : '-', #to stdout
         },
     }
-    argstr = ' '.join(args)
-    spl = [x.split() for x in ' '.join(args).split('-t')]
-    try:
-        #general args
-        args = spl.pop(0)
-        if '-h' in args or '--help' in args or len(args)==1:
-            print('''APRS MOD/DEMOD
+
+    if '-h' in args or '--help' in args or len(args)==1:
+        print('''APRS MOD/DEMOD
 Usage: 
 aprs_mod/demod.py [GENERAL OPTIONS] -t [OUTPUT OPTIONS] -t [INPUT OPTIONS]
 aprs_mod/demod.py [GENERAL OPTIONS] -t [INPUT OPTIONS]
@@ -42,7 +38,13 @@ INPUT/OUTPUT OPTIONS:
     -t, --type       type, currently only supports 'raw'
     -f, --file       file input/output.  Default '-'
 ''')
-            exit()
+        exit()
+
+    argstr = ' '.join(args)
+    spl = [x.split() for x in ' '.join(args).split('-t')]
+    try:
+        #general args
+        args = spl.pop(0)
         if '-rate' in args:
             r['args']['rate'] = get_arg_val(args, '-rate', int)
         if '-r' in args:

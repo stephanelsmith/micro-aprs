@@ -97,9 +97,9 @@ async def egress(writer,
             try:
                 ax25 = AX25(aprs = line)
                 print('>',ax25)
-                writer.write(ax25.encode())
-                writer.write(b'\r\n')
-                await writer.drain()
+                # writer.write(ax25.encode())
+                # writer.write(b'\r\n')
+                # await writer.drain()
             except asyncio.CancelledError:
                 raise
             except Exception as err:

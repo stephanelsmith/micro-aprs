@@ -12,8 +12,9 @@ from afsk.sin_table import get_sin_table
 from afsk.func import gen_bits_from_bytes
 from afsk.func import create_nrzi
 
-AFSK_SCALE     = 25
-AX25_FLAG      = 0x7e
+# AFSK_SCALE     = 25
+AFSK_SCALE_DOWN = 1
+AX25_FLAG       = 0x7e
 
 
 class AFSKModulator():
@@ -121,8 +122,7 @@ class AFSKModulator():
 
             if verbose:
                 eprint('--nrzi--', 'bits',stop_bit, 'bytes',stop_bit//8,'remain',stop_bit%8)
-            # for b in range(int(zpad_ms/1000/self.ts)):
-                # await afsk_q_put(0)
+
             for b in gen_bits_from_bytes(mv       = afsk,
                                         stop_bit = stop_bit):
 
@@ -135,11 +135,8 @@ class AFSKModulator():
                         eprint('')
 
                 for sample in gen_samples(b):
-                    await afsk_q_put(sample//AFSK_SCALE)
-                    # eprint(sample//AFSK_SCALE, end=' ')
+                    await afsk_q_put(sample//AFSK_SCALE_DOWN)
 
-            # for b in range(int(zpad_ms/1000/self.ts)):
-                # await afsk_q_put(0)
             if verbose:
                 eprint('\n')
         except Exception as err:

@@ -8,7 +8,7 @@ import lib.upydash as _
 
 # import matplotlib.pyplot as plt
 
-from lib.utils import frange
+# from lib.utils import frange
 import lib.defs as defs
 from lib.utils import eprint
 from lib.memoize import memoize_loads
@@ -177,45 +177,45 @@ class AFSKDemodulator():
         except Exception as err:
             traceback.print_exc()
 
-    def analyze(self,start_from = 100e-3):
-        o = self.o
-        m   = max([max(o),abs(min(o))])
-        sca = m//(2**8)
-        st = int(start_from/self.ts)
-        while o[st-1]<0 and o[st] >= 0:
-            st+=1
-        bstp = self.tbaud/self.ts
-        ibaud = int(bstp)
-        st = st - int(bstp/4) # clk sample (center of eye)
-        eye     = {'l':None,'r':None,'u':None,'d':None} #TODO use array lookup
-        booleye = {'l':False,'r':False,} #TODO use array lookup
-        for x in frange(st, len(o)-ibaud, bstp):
-            ci = round(x)
-            r = int(3*ibaud/4) #eye scan range
-            #plt.plot(list(range(-r,r)), [v//sca for v in o[ci-r:ci+r]])
+    # def analyze(self,start_from = 100e-3):
+        # o = self.o
+        # m   = max([max(o),abs(min(o))])
+        # sca = m//(2**8)
+        # st = int(start_from/self.ts)
+        # while o[st-1]<0 and o[st] >= 0:
+            # st+=1
+        # bstp = self.tbaud/self.ts
+        # ibaud = int(bstp)
+        # st = st - int(bstp/4) # clk sample (center of eye)
+        # eye     = {'l':None,'r':None,'u':None,'d':None} #TODO use array lookup
+        # booleye = {'l':False,'r':False,} #TODO use array lookup
+        # for x in frange(st, len(o)-ibaud, bstp):
+            # ci = round(x)
+            # r = int(3*ibaud/4) #eye scan range
+            # #plt.plot(list(range(-r,r)), [v//sca for v in o[ci-r:ci+r]])
 
-            #eye u/d
-            if o[ci] > 0:
-                eye['u'] = eye['u'] if eye['u'] and eye['u'] < o[ci]//sca else o[ci]//sca
-            else:
-                eye['d'] = eye['d'] if eye['d'] and eye['d'] > o[ci]//sca else o[ci]//sca
+            # #eye u/d
+            # if o[ci] > 0:
+                # eye['u'] = eye['u'] if eye['u'] and eye['u'] < o[ci]//sca else o[ci]//sca
+            # else:
+                # eye['d'] = eye['d'] if eye['d'] and eye['d'] > o[ci]//sca else o[ci]//sca
 
-            #eye l/r
-            for k in booleye:
-                booleye[k] = True
-            for e in range(r):
-                if booleye['l'] and\
-                   (o[ci-e] > 0 and o[ci-e-1] <= 0 or\
-                    o[ci-e] < 0 and o[ci-e-1] >= 0):
-                    eye['l'] = eye['l'] if eye['l'] and eye['l'] > -e else -e
-                    booleye['l'] = False
-                if booleye['r'] and\
-                   (o[ci+e] > 0 and o[ci+e+1] <= 0 or\
-                   o[ci+e] < 0 and o[ci+e+1] >= 0):
-                    eye['r'] = eye['r'] if eye['r'] and eye['r'] < +e else +e
-                    booleye['r'] = False
-                if not booleye['r'] and not booleye['l']:
-                    break
-        eprint(eye)
-        # plt.show()
+            # #eye l/r
+            # for k in booleye:
+                # booleye[k] = True
+            # for e in range(r):
+                # if booleye['l'] and\
+                   # (o[ci-e] > 0 and o[ci-e-1] <= 0 or\
+                    # o[ci-e] < 0 and o[ci-e-1] >= 0):
+                    # eye['l'] = eye['l'] if eye['l'] and eye['l'] > -e else -e
+                    # booleye['l'] = False
+                # if booleye['r'] and\
+                   # (o[ci+e] > 0 and o[ci+e+1] <= 0 or\
+                   # o[ci+e] < 0 and o[ci+e+1] >= 0):
+                    # eye['r'] = eye['r'] if eye['r'] and eye['r'] < +e else +e
+                    # booleye['r'] = False
+                # if not booleye['r'] and not booleye['l']:
+                    # break
+        # eprint(eye)
+        # # plt.show()
 

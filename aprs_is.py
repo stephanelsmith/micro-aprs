@@ -21,7 +21,7 @@ APRS_IS_FILTER_PORT = 14580
 #filters: https://www.aprs-is.net/javAPRSFilter.aspx
 
 #position: KI5TOF>APRS:=2941.97N/09545.01WChello world
-#status:   KI5TOF>APRS:>QTH
+#status:   KI5TOF>APRS:>hello world!
 #message:  KI5TOF>APRS::KI5TOF   :hello world
 
 #https://aprs.fi/doc/guide/aprsfi-telemetry.html

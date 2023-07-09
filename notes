@@ -19,7 +19,7 @@ echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | multimon-ng -t raw -A -a
 
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test.wav
 atest test.wav
-sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
+sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -v -t raw -
 
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -quiet
 

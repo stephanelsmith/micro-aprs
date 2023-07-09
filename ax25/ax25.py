@@ -28,6 +28,13 @@ AX25_FLAG_LEN  = 1
 AX25_CONTROLPID_LEN = 2
 AX25_CRC_LEN   = 2
 
+ORD_0 = 48
+ORD_9 = 57
+ORD_A = 65
+ORD_Z = 90
+ORD_a = 97
+ORD_z = 122
+
 class AX25():
     # __slots__ = (
         # 'src',
@@ -90,20 +97,28 @@ class AX25():
         # KI5TOF>APRS,WIDE1-1,WIDE2-1:hello world!
         if isinstance(aprs, (bytes, bytearray)):
             aprs = aprs.decode('utf')
-        par = 0
+
         i = _.find_index(aprs,'>')
         if not i:
             raise Exception('could not find source',aprs)
-        self.src = CallSSID(aprs = aprs[par:i])
-        par += i + 1
+
+        #find first character, this is to ignore message counters [%d] AX25
+        for j in range(i):
+            o = ord(aprs[j])
+            if o >= ORD_A and o <= ORD_Z or\
+               o >= ORD_a and o <= ORD_z:
+                break
+
+        self.src = CallSSID(aprs = aprs[j:i])
+        j = i + 1
 
         i = _.find_index(aprs,':')
         if not i:
             raise Exception('could not find digis ',aprs)
-        digis = aprs[par:i].split(',')
+        digis = aprs[j:i].split(',')
         self.dst = CallSSID(aprs = digis.pop(0))
         self.digis = [CallSSID(aprs = digi) for digi in digis]
-        par += i + 1
+        j += i + 1
 
         self.info = aprs[i+1:]
 

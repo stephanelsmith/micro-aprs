@@ -114,7 +114,7 @@ async def consume_ax25(ax25_q):
             count = 1
             while True:
                 ax25 = await ax25_q.get()
-                print('{}: {}'.format(count, ax25), flush=True)
+                print('[{}] {}'.format(count, ax25), flush=True)
                 f.write('{}\n'.format(ax25))
                 count += 1
                 ax25_q.task_done()

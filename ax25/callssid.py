@@ -9,8 +9,6 @@ ORD_A = 65
 ORD_Z = 90
 ORD_COLON = 58
 
-
-
 class CallSSID():
     __slots__ = (
         'call',
@@ -40,7 +38,7 @@ class CallSSID():
         if isinstance(call_ssid, str):
             call_ssid = call_ssid.split('-')
         elif isinstance(call_ssid, (bytes, bytearray)):
-            call_ssid = call_ssid.decode('utf').split('-')
+            call_ssid = call_ssid.decode().split('-')
         else:
             raise Exception('unknown format '+str(call_ssid))
         self.call = call_ssid[0].upper()

@@ -91,10 +91,11 @@ async def egress(writer,
                     break
                 buf[i] = ord(b)
                 i = (i+1)%512
-            line = buf[:i].decode().strip()
+            line = buf[:i]
             if not line:
                 continue
             try:
+                print('<', line.decode())
                 ax25 = AX25(aprs = line)
                 print('>',ax25)
                 # writer.write(ax25.encode())

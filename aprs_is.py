@@ -1,9 +1,11 @@
 #!env/bin/python
 
-import asyncio
-from asyncio import Event
 import traceback
 import sys
+
+import asyncio
+from asyncio import Event
+from asyncio import Queue
 
 from ax25.ax25 import AX25
 
@@ -23,6 +25,7 @@ APRS_IS_FILTER_PORT = 14580
 #position: KI5TOF>APRS:=2941.97N/09545.01WChello world
 #status:   KI5TOF>APRS:>hello world!
 #message:  KI5TOF>APRS::KI5TOF   :hello world
+#station:  KI5TOF-1>APKI5:!2941.97N/09545.01W#PHG0009Rx only igate
 
 #https://aprs.fi/doc/guide/aprsfi-telemetry.html
 #https://github.com/PhirePhly/aprs_notes/blob/master/telemetry_format.md
@@ -36,7 +39,7 @@ APRS_IS_FILTER_PORT = 14580
 #telem:    KI5TOF>APRS:T#002,10.12,20.23,30.45,40.67,50.89,10101010
 #telem:    KI5TOF>APRS:T#003,110.12,120.23,130.45,140.67,150.89,10101010comment
 
-async def ingress(reader, login_evt, call):
+async def aprs_is_ingress(reader, login_evt, call):
     try:
         login_resp = 'logresp {} verified'.format(call)
         while True:
@@ -54,30 +57,18 @@ async def ingress(reader, login_evt, call):
     except Exception as err:
         traceback.print_exc()
 
-async def egress(writer, 
-                 call,
-                 passcode,
-                 login_evt,
-                 ):
-    login_str = 'user {} pass {} vers microax25afsk 0.0 filter p/{}'.format(
-            call, passcode, call)
-    # print(login_str)
+async def stdin_ingress(call,
+                        ax25_q,
+                        ):
     try:
         loop = asyncio.get_event_loop()
         reader = asyncio.StreamReader()
         protocol = asyncio.StreamReaderProtocol(reader)
         await loop.connect_read_pipe(lambda: protocol, sys.stdin)
 
-        #login
-        writer.write(login_str.encode())
-        writer.write(b'\r\n')
-        await writer.drain()
         eol = ord('\n')
         done = False
         buf = bytearray(512)
-       
-        #wait for login response
-        await login_evt.wait()
 
         while not done:
             i = 0
@@ -94,17 +85,51 @@ async def egress(writer,
             line = buf[:i]
             if not line:
                 continue
-            try:
-                print('<', line.decode())
-                ax25 = AX25(aprs = line)
-                print('>',ax25)
-                # writer.write(ax25.encode())
-                # writer.write(b'\r\n')
-                # await writer.drain()
-            except asyncio.CancelledError:
-                raise
-            except Exception as err:
-                print('x',line)
+
+            print('<', line.decode())
+            ax25 = AX25(aprs = line)
+            await ax25_q.put(ax25)
+
+    except asyncio.CancelledError:
+        raise
+    except Exception as err:
+        traceback.print_exc()
+
+async def station_beacon( ax25_q,):
+    try:
+        beacon_ax25 = AX25(aprs='KI5TOF-1>APKI5:!2941.97N/09545.01W#PHG0009Rx only igate')
+        while True:
+            await ax25_q.put(beacon_ax25)
+            await asyncio.sleep(60*15)
+    except asyncio.CancelledError:
+        raise
+    except Exception as err:
+        traceback.print_exc()
+
+async def aprs_is_egress(writer, 
+                         call,
+                         passcode,
+                         login_evt,
+                         ax25_q,
+                         ):
+    try:
+        #login
+        login_str = 'user {} pass {} vers microax25afsk 0.0 filter p/{}'.format(
+                    call, passcode, call)
+        writer.write(login_str.encode())
+        writer.write(b'\r\n')
+        await writer.drain()
+       
+        #wait for login response
+        await login_evt.wait()
+
+        while True:
+            ax25 = await ax25_q.get()
+            print('>',ax25)
+            writer.write(ax25.encode())
+            writer.write(b'\r\n')
+            await writer.drain()
+            ax25_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:
@@ -118,15 +143,26 @@ async def main():
         call = args['args']['call'].upper()
         passcode = args['args']['passcode']
         login_evt = Event()
-        tasks.append(asyncio.create_task(ingress(reader    = reader,
-                                                 call      = call,
-                                                 login_evt = login_evt,
-                                                 )))
-        tasks.append(asyncio.create_task(egress(writer    = writer,
-                                                call      = call,
-                                                passcode  = passcode,
-                                                login_evt = login_evt,
-                                                )))
+        ax25_q = Queue()
+
+        tasks.append(asyncio.create_task(aprs_is_ingress(reader    = reader,
+                                                         call      = call,
+                                                         login_evt = login_evt,
+                                                         )))
+
+        tasks.append(asyncio.create_task(aprs_is_egress(writer    = writer,
+                                                        call      = call,
+                                                        passcode  = passcode,
+                                                        login_evt = login_evt,
+                                                        ax25_q    = ax25_q,
+                                                        )))
+
+        tasks.append(asyncio.create_task(stdin_ingress(call      = call,
+                                                       ax25_q    = ax25_q,
+                                                       )))
+
+        tasks.append(asyncio.create_task(station_beacon( ax25_q    = ax25_q,)))
+
         await asyncio.gather(*tasks, return_exceptions=True)
     except asyncio.CancelledError:
         raise

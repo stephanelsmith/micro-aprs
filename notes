@@ -21,7 +21,7 @@ echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | sox -t raw -b 16 -e s
 atest test.wav
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -v -t raw -
 
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -quiet
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -quiet #no output, just mod debug
 
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t raw -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -r 44100 -t raw - | python aprs_demod.py -v -r 44100 -t raw -

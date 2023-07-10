@@ -46,7 +46,7 @@ class AX25():
     def __init__(self, src        = '',
                        dst        = '',
                        digis      = [],
-                       info       = '',
+                       info       = b'',
                        aprs       = None,
                        frame      = None,
                        verbose    = False,
@@ -82,13 +82,11 @@ class AX25():
         dst_digis = ','.join([dst]+[self.callssid_to_str(digi) for digi in self.digis])
         if isinstance(self.info, (bytes, bytearray)):
             try:
-                info = self.info.decode().strip()
+                info = self.info.decode()#.strip()
             except UnicodeDecodeError:
                 info = str(self.info)
-        elif isinstance(self.info, (bytes, bytearray)):
-            info = self.info.strip()
         else:
-            info = str(self.info).strip()
+            info = str(self.info)#.strip()
         return '{}>{}:{}'.format(src,
                                  dst_digis,
                                  info)
@@ -120,7 +118,8 @@ class AX25():
         self.digis = [CallSSID(aprs = digi) for digi in digis]
         j += i + 1
 
-        self.info = aprs[i+1:]
+        # self.info = aprs[i+1:]
+        self.info = aprs[i+1:].encode()
 
 
     def from_frame(self, frame):
@@ -229,7 +228,8 @@ class AX25():
         idx += 1
 
         #payload
-        mv[idx:idx+len(self.info)] = bytes(self.info,'utf')
+        #mv[idx:idx+len(self.info)] = bytes(self.info,'utf')
+        mv[idx:idx+len(self.info)] = self.info
         idx += len(self.info)
 
         #crc

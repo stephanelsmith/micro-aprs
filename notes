@@ -15,7 +15,7 @@ python aprs_demod.py test.raw  | sox -t raw -b 16 -e signed-integer -c 1 -r 2205
 python aprs_demod.py -t raw test/test.raw
 
 
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 - #not working now?
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | multimon-ng -t raw -A -a AFSK1200 -
 
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test.wav
 atest test.wav

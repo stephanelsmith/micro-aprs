@@ -92,10 +92,13 @@ async def main():
                 aprss.append(await aprs_q.get())
                 aprs_q.task_done()
 
+            #for x in range(100):
+            #    await afsk_q.put(0)
+
             #pre-message flags 
             #we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
             #increasing this number for vox
-            await afsk_mod.send_flags(50)
+            await afsk_mod.send_flags(1)
 
             for aprs in aprss:
                 ax25 = AX25(aprs    = aprs,
@@ -115,7 +118,10 @@ async def main():
             #send post message flags
             #multimon-ng and direwolf want one additional post flag in addition to the one at the end
             #of the message
-            await afsk_mod.send_flags(50)
+            await afsk_mod.send_flags(1)
+
+            #for x in range(100):
+            #    await afsk_q.put(0)
 
         await aprs_q.join()
         await afsk_q.join()

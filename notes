@@ -15,17 +15,16 @@ python aprs_demod.py test.raw  | sox -t raw -b 16 -e signed-integer -c 1 -r 2205
 python aprs_demod.py -t raw test/test.raw
 
 
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 -
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 - #not working now?
 
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test.wav
 atest test.wav
-sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -v -t raw -
+sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
+sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
 
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -quiet #no output, just mod debug
 
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t raw -
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -r 44100 -t raw - | python aprs_demod.py -v -r 44100 -t raw -
-
 echo "KI5TOF>APRS,WIDE2-1,WIDE1-1:hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t raw -
 cat aprs.txt | python aprs_mod.py -v | python aprs_demod.py -v -t raw -
 
@@ -44,13 +43,11 @@ find -name "*wav" | xargs basename -s .wav | xargs -i sox -t wav {}.wav -t raw -
 
 #ISS
 sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
-sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 44100 - | python aprs_demod.py -r 44100 -t raw -
 python aprs_demod.py -t raw test/ISSpkt.raw
 :!clear && python % -t raw test/ISSpkt.raw
 
 #TNC
 sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
-sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 44100 - | python aprs_demod.py -r 44100 -t raw -
 python aprs_demod.py -t raw test/tnc_test02.raw
 
 #RTL-SDR

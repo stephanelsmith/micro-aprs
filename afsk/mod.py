@@ -13,7 +13,7 @@ from afsk.func import gen_bits_from_bytes
 from afsk.func import create_nrzi
 
 # AFSK_SCALE     = 25
-AFSK_SCALE_DOWN = 1
+AFSK_SCALE_DOWN = 10
 AX25_FLAG       = 0x7e
 
 

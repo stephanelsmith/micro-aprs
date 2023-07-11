@@ -9,7 +9,7 @@ from asyncio import Queue
 
 from ax25.ax25 import AX25
 
-from lib.utils import is_parse_args
+from lib.parse_args import is_parse_args
 
 CALL = 'KI5TOF'
 PASSCODE = '17081'

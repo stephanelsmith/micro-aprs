@@ -16,7 +16,7 @@ from ax25.from_afsk import AX25FromAFSK
 from afsk.func import create_afsk_detector
 
 import lib.upydash as _
-from lib.utils import parse_args
+from lib.parse_args import demod_parse_args
 from lib.utils import eprint
 import lib.defs as defs
 
@@ -24,7 +24,6 @@ AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
 
 async def read_raw_from_pipe(samples_q, 
-                             read_done_evt,
                              ):
     try:
         loop = asyncio.get_event_loop()
@@ -65,12 +64,10 @@ async def read_raw_from_pipe(samples_q,
         traceback.print_exc()
     except asyncio.CancelledError:
         raise
-    finally:
-        read_done_evt.set()
 
 async def read_samples_from_raw(samples_q, 
                                 file,
-                                read_done_evt):
+                                ):
     try:
         if file[-4:] != '.raw':
             raise Exception('uknown file type', file)
@@ -105,8 +102,6 @@ async def read_samples_from_raw(samples_q,
         traceback.print_exc()
     except asyncio.CancelledError:
         raise
-    finally:
-        read_done_evt.set()
 
 async def consume_ax25(ax25_q):
     try:
@@ -123,66 +118,11 @@ async def consume_ax25(ax25_q):
     except Exception as err:
         traceback.print_exc()
 
-async def consume_ax25_crc_err(ax25_crc_err_q):
+async def demod_core(samples_q,
+                     bits_q,
+                     ax25_q,
+                     args):
     try:
-        with open('r_crc_err.txt', 'w') as f:
-            count = 1
-            while True:
-                ax25 = await ax25_crc_err_q.get()
-                print(count,'crcerr',ax25.frame)
-                # print('{}: CRC ERR | SRC:{} DST:{} DIGIS:{} INFO:{}'.format(count, 
-                                                                            # ax25.src,
-                                                                            # ax25.dst,
-                                                                            # ax25.digis,
-                                                                            # ax25.info), flush=True)
-                # f.write('{}\n'.format(dumps(
-                        # {
-                            # 'frame' : str(ax25.frame),
-                        # }
-                        # )
-                    # )
-                # )
-                f.write('{}\n'.format( str(ax25.frame)))
-                count += 1
-                ax25_crc_err_q.task_done()
-    except asyncio.CancelledError:
-        raise
-    except Exception as err:
-        traceback.print_exc()
-
-async def main():
-    # print(sys.argv)
-    # if len(sys.argv) == 1:
-        # print('args missing...')
-    args = parse_args(sys.argv)
-    # print(args)
-
-    read_done_evt = Event()
-    samples_q = Queue()
-    bits_q = Queue()
-    ax25_q = Queue()
-    ax25_crc_err_q = Queue()
-
-    try:
-        tasks = []
-
-        #from .raw file
-        if args['in']['file'] == '-':
-            tasks.append(asyncio.create_task(read_raw_from_pipe(samples_q      = samples_q,
-                                                                read_done_evt  = read_done_evt,
-                                                                )))
-        elif args['in']['type'] == 'raw' and args['in']['file']:
-            tasks.append(asyncio.create_task(read_samples_from_raw(samples_q     = samples_q, 
-                                                                   file          = args['in']['file'],
-                                                                   read_done_evt = read_done_evt,
-                                                                   )))
-        else:
-            raise Exception('unsupported input {} {}'.format(args['in']['type'], args['in']['file']))
-
-        #create ax25 consumer
-        tasks.append(asyncio.create_task(consume_ax25(ax25_q = ax25_q)))
-        # tasks.append(asyncio.create_task(consume_ax25_crc_err(ax25_crc_err_q = ax25_crc_err_q)))
-
         #AFSK Demodulation - convert analog samples to bits
         #samples_q consumer
         #bits_q producer
@@ -197,19 +137,59 @@ async def main():
             #ax25_q producer
             async with AX25FromAFSK(bits_in_q      = bits_q,
                                     ax25_q         = ax25_q,
-                                    ax25_crc_err_q = ax25_crc_err_q,
                                     verbose        = args['args']['verbose']) as bits2ax25:
-                #wait for data for work through the system
-                await read_done_evt.wait()
 
                 #flush afsk_demod filters
                 await samples_q.put((array('i',(0 for x in range(afsk_demod.flush_size))),afsk_demod.flush_size))
+                
+                # just wait
+                await Event().wait()
+    except asyncio.CancelledError:
+        raise
+    except Exception as err:
+        traceback.print_exc()
 
-                await samples_q.join()
-                await bits_q.join()
-                await ax25_q.join()
-                await ax25_crc_err_q.join()
-                # await asyncio.sleep(1)
+async def main():
+
+    args = demod_parse_args(sys.argv)
+    eprint('# APRS DEMOD')
+    eprint('# RATE {}'.format(args['args']['rate']))
+    eprint('# IN   {} {}'.format(args['in']['type'], args['in']['file']))
+    eprint('# OUT  {} {}'.format(args['out']['type'], args['out']['file']))
+
+    samples_q = Queue()
+    bits_q = Queue()
+    ax25_q = Queue()
+
+    try:
+        tasks = []
+
+        #create ax25 consumer
+        tasks.append(asyncio.create_task(consume_ax25(ax25_q = ax25_q)))
+        tasks.append(asyncio.create_task(demod_core(samples_q,
+                                                    bits_q,
+                                                    ax25_q,
+                                                    args)))
+
+        #from .raw file
+        if args['in']['file'] == '-':
+            # tasks.append(asyncio.create_task(read_raw_from_pipe(samples_q      = samples_q,
+                                                                # )))
+            await read_raw_from_pipe(samples_q)
+        elif args['in']['type'] == 'raw' and args['in']['file']:
+            # tasks.append(asyncio.create_task(read_samples_from_raw(samples_q     = samples_q, 
+                                                                   # file          = args['in']['file'],
+                                                                   # )))
+            await read_samples_from_raw(samples_q = samples_q,
+                                        file          = args['in']['file'],
+                                        )
+        else:
+            raise Exception('unsupported input {} {}'.format(args['in']['type'], args['in']['file']))
+
+        await samples_q.join()
+        await bits_q.join()
+        await ax25_q.join()
+
     except Exception as err:
         traceback.print_exc()
     except asyncio.CancelledError:

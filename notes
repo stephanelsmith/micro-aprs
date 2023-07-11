@@ -1,22 +1,10 @@
 
-#modulation, built in encode for now
-python aprs_mod.py  | play -t raw -b 16 -e signed -c 1 -v 7 -r 22050 -  #slow....
-python aprs_mod.py  | multimon-ng -t raw -A -a AFSK1200 -
-python aprs_mod.py  -z 0 | sox -t raw -b 16 -e signed-integer -c 1 -v 7 -r 22050 -  -t wav test.wav
-atest test.wav
-python aprs_mod.py -z 0 > test.raw
+#interactive verbose mod, no raw output
+python aprs_mod.py -v -t null null -t aprs -
 
-sox -t wav test.wav -t raw - | python bin2num.py
-
-#demodulation
-sox -t wav test.wav -t raw - | python aprs_demod.py -
-python aprs_demod.py test.raw  | sox -t raw -b 16 -e signed-integer -c 1 -r 22050 - -t wav demod.wav
-
-python aprs_demod.py -t raw test/test.raw
-
-
+#mod + demod
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t raw - -t aprs - | multimon-ng -t raw -A -a AFSK1200 -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | multimon-ng -t raw -A -a AFSK1200 -
-
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test.wav
 atest test.wav
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -

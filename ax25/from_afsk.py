@@ -93,7 +93,7 @@ class AX25FromAFSK():
         reverse_bit_order(mv)
         # mv = trim_frame(mv)
         if self.verbose:
-            print('-un-reversed-')
+            print('-un-reversed (ax25)-')
             pretty_binary(mv)
 
         #decode

@@ -25,7 +25,8 @@ APRS_IS_FILTER_PORT = 14580
 #position: KI5TOF>APRS:=2941.97N/09545.01WChello world
 #status:   KI5TOF>APRS:>hello world!
 #message:  KI5TOF>APRS::KI5TOF   :hello world
-#station:  KI5TOF-1>APKI5:!2941.97N/09545.01W#PHG0009Rx only igate
+#station:  KI5TOF-1>APKI5:!2941.97NI09545.01W#144.390MHz Rx Only APRS iGate
+# W5LCR-10>APRX29,TCPIP*,qAC,T2QUEBEC:!2906.46NI09627.19W#144.390MHz Louise, TX APRS iGate Digi
 
 #https://aprs.fi/doc/guide/aprsfi-telemetry.html
 #https://github.com/PhirePhly/aprs_notes/blob/master/telemetry_format.md
@@ -97,7 +98,7 @@ async def stdin_ingress(call,
 
 async def station_beacon( ax25_q,):
     try:
-        beacon_ax25 = AX25(aprs='KI5TOF-1>APKI5:!2941.97N/09545.01W#PHG0009Rx only igate')
+        beacon_ax25 = AX25(aprs='KI5TOF-1>APKI5:!2941.97NI09545.01W#144.390MHz Rx Only APRS iGate')
         while True:
             await ax25_q.put(beacon_ax25)
             await asyncio.sleep(60*15)
@@ -161,7 +162,7 @@ async def main():
                                                        ax25_q    = ax25_q,
                                                        )))
 
-        tasks.append(asyncio.create_task(station_beacon( ax25_q    = ax25_q,)))
+        # tasks.append(asyncio.create_task(station_beacon( ax25_q    = ax25_q,)))
 
         await asyncio.gather(*tasks, return_exceptions=True)
     except asyncio.CancelledError:

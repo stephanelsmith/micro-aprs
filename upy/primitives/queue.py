@@ -6,7 +6,8 @@
 # Code is based on Paul Sokolovsky's work.
 # This is a temporary solution until uasyncio V3 gets an efficient official version
 
-import uasyncio as asyncio
+import asyncio
+import sys
 
 
 # Exception raised by get_nowait().
@@ -25,6 +26,9 @@ class Queue:
         self._queue = []
         self._evput = asyncio.Event()  # Triggered by put, tested by get
         self._evget = asyncio.Event()  # Triggered by get, tested by put
+
+        self._jncnt = 0
+        self._jnevt = asyncio.Event()
 
     def _get(self):
         self._evget.set()  # Schedule all tasks waiting on get
@@ -45,6 +49,7 @@ class Queue:
         return self._get()
 
     def _put(self, val):
+        self._jncnt += 1
         self._evput.set()  # Schedule tasks waiting on put
         self._evput.clear()
         self._queue.append(val)
@@ -74,10 +79,8 @@ class Queue:
 
     #ssmith, wait for the queue to be not empty, does not return item like get
     async def wait(self):
-        while self.empty():  # May be multiple tasks waiting on get()
-            # Queue is empty, suspend task until a put occurs
-            # 1st of N tasks gets, the rest loop again
-            await self._evput.wait()
+        while not self.empty():
+            await self._evget.wait()
 
     #ssmith, get the size of the next item, so we know what we are dealing with
     #before getting
@@ -85,4 +88,15 @@ class Queue:
         if self.empty():
             raise QueueEmpty()
         return len(self._queue[0])
+
+    #ssmith, support for task_done and join to match cpython
+    def task_done(self):
+        self._jncnt -= 1
+        if self._jncnt == 0:
+            self._jnevt.set()
+        else:
+            self._jnevt.clear()
+        print('join count',self._jncnt)
+    async def join(self):
+        await self._jnevt.wait()
 

@@ -18,10 +18,10 @@ def pretty_binary(mv,
         _print = print
     for ridx in range(0,len(mv),cols):
         #byte number
-        _print(str(ridx).zfill(4),' ',end='') 
+        _print('{:04}'.format(ridx),' ',end='') 
         #hex
         for idx in range(ridx,ridx+cols):
-            v = hex(mv[idx])[2:].zfill(2) if idx<len(mv) else '--'
+            v = '{:02x}'.format(mv[idx]) if idx<len(mv) else '--'
             _print(v,end=' ')
         _print('  ',end='')
         #binary
@@ -36,9 +36,10 @@ def pretty_binary(mv,
         _print('  ',end='')
         #string
         for idx in range(ridx,ridx+cols):
-            v = chr(mv[idx]) if idx<len(mv) else '-'
-            v = v if v.isprintable() else '-'
-            _print(v,end='')
+            if idx<len(mv) and mv[idx]>=32 and mv[idx]<=127:
+                _print(chr(mv[idx]),end='')
+            else:
+                _print('-',end='')
         _print()
 
 def format_bytes(mv):

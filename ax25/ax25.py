@@ -2,10 +2,9 @@ import sys
 import io
 import asyncio
 import struct
-import traceback
 from array import array
 
-from asyncio import Queue
+from lib.compat import Queue
 
 from ax25.defs import DecodeError
 from ax25.defs import DecodeErrorFix

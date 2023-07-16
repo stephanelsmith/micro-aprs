@@ -3,9 +3,10 @@
 import sys
 import asyncio
 import struct
+
 from lib.compat import Queue
 #from asyncio import Queue
-from asyncio import Event
+#from upy.primitives.queue import Queue
 
 from afsk.mod import AFSKModulator
 from ax25.ax25 import AX25
@@ -42,7 +43,7 @@ async def read_aprs_from_pipe(aprs_q,
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc()
+        print_exc(err)
 
 async def afsk_mod(aprs_q,
                    afsk_q,
@@ -89,11 +90,11 @@ async def afsk_mod(aprs_q,
                 #multimon-ng and direwolf want one additional post flag in addition to the one at the end
                 #of the message
                 await afsk_mod.send_flags(4)
-                aprs_q.task_done()
+                #aprs_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc()
+        print_exc(err)
 
 async def afsk_out(afsk_q,
                    args,
@@ -104,11 +105,11 @@ async def afsk_out(afsk_q,
             x = struct.pack('<h', samp)
             if args['out']['file'] == '-':
                 stdout_write(x)
-            afsk_q.task_done()
+            #afsk_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc()
+        print_exc(err)
 
 
 async def main():
@@ -126,10 +127,10 @@ async def main():
         tasks.append(asyncio.create_task(afsk_out(afsk_q, args,)))
         tasks.append(asyncio.create_task(afsk_mod(aprs_q, afsk_q, args,)))
         await read_aprs_from_pipe(aprs_q)
-        await aprs_q.join()
-        await afsk_q.join()
+        #await aprs_q.join()
+        #await afsk_q.join()
     except Exception as err:
-        print_exc()
+        print_exc(err)
     finally:
         for task in tasks:
             task.cancel()

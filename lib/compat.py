@@ -17,7 +17,8 @@ if IS_UPY:
 else:
     #python3
     import traceback
-    print_exc =  traceback.print_exc
+    #print_exc = traceback.print_exc
+    print_exc = traceback.print_exception
 
 # Stdout
 if IS_UPY:

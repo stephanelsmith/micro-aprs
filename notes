@@ -2,6 +2,9 @@
 #interactive verbose mod, no raw output
 python aprs_mod.py -v -t null null -t aprs -
 
+#no output, just debug
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t null null -t aprs -
+
 #mod + demod
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t raw - -t aprs - | multimon-ng -t raw -A -a AFSK1200 -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | multimon-ng -t raw -A -a AFSK1200 -
@@ -10,7 +13,6 @@ atest test.wav
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
 
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -quiet #no output, just mod debug
 
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t raw -
 echo "KI5TOF>APRS,WIDE2-1,WIDE1-1:hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t raw -
@@ -52,5 +54,12 @@ sox -t wav test/static.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | pyth
 #APRS IS
 echo "KI5TOF>APRS:>hello world!" | python aprs_is.py -c KI5TOF -p 17081
 rtl_fm -f 144.390M -s 22050 -g 10 - | python aprs_demod.py -t raw - | python aprs_is.py -c KI5TOF
+
+
+#UPY
+./micropython utest.py write | ./micropython utest.py read
+
+
+
 
 

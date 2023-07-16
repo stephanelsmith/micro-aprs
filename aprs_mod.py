@@ -2,9 +2,9 @@
 
 import sys
 import asyncio
-import traceback
 import struct
-from asyncio import Queue
+from lib.compat import Queue
+#from asyncio import Queue
 from asyncio import Event
 
 from afsk.mod import AFSKModulator
@@ -15,34 +15,34 @@ from lib.parse_args import mod_parse_args
 from lib.utils import pretty_binary
 from lib.utils import eprint
 
+#micropython/python compatibility
+from lib.compat import IS_UPY
+from lib.compat import print_exc
+from lib.compat import stdout_write
+from lib.compat import get_stdin_streamreader
+
 async def read_aprs_from_pipe(aprs_q, 
                               ):
     try:
-        loop = asyncio.get_event_loop()
-        reader = asyncio.StreamReader()
-        protocol = asyncio.StreamReaderProtocol(reader)
-        await loop.connect_read_pipe(lambda: protocol, sys.stdin)
+        reader = await get_stdin_streamreader()
         buf = bytearray(2048)
         idx = 0
-        eol = ord('\n')
         while True:
             try:
-                b = await reader.readexactly(1)
-            except asyncio.IncompleteReadError:
+                buf[idx:idx+1] = await reader.readexactly(1)
+            except EOFError:
                 break #eof break
-            if ord(b) == eol:
-                # print('GOT', bytes(buf[:idx]))
+            if buf[idx] == 10:#\n
                 await aprs_q.put(bytes(buf[:idx]))
                 idx = 0
                 continue
-            buf[idx] = ord(b)
             idx = (idx+1)%2048
         if idx:
             await aprs_q.put(bytes(buf[:idx]))
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        traceback.print_exc()
+        print_exc()
 
 async def afsk_mod(aprs_q,
                    afsk_q,
@@ -93,7 +93,7 @@ async def afsk_mod(aprs_q,
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        traceback.print_exc()
+        print_exc()
 
 async def afsk_out(afsk_q,
                    args,
@@ -103,12 +103,12 @@ async def afsk_out(afsk_q,
             samp = await afsk_q.get()
             x = struct.pack('<h', samp)
             if args['out']['file'] == '-':
-                sys.stdout.buffer.write(x)
+                stdout_write(x)
             afsk_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        traceback.print_exc()
+        print_exc()
 
 
 async def main():
@@ -129,7 +129,7 @@ async def main():
         await aprs_q.join()
         await afsk_q.join()
     except Exception as err:
-        traceback.print_exc()
+        print_exc()
     finally:
         for task in tasks:
             task.cancel()

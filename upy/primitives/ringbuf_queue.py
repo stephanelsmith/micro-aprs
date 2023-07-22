@@ -14,7 +14,7 @@ import uasyncio as asyncio
 class RingbufQueue:  # MicroPython optimised
     def __init__(self, buf):
         self._q = [0 for _ in range(buf)] if isinstance(buf, int) else buf
-        self._size = len(buf)
+        self._size = len(self._q)
         self._wi = 0
         self._ri = 0
         self._evput = asyncio.Event()  # Triggered by put, tested by get
@@ -39,6 +39,12 @@ class RingbufQueue:  # MicroPython optimised
         self._evget.clear()
         return r
 
+    def peek(self):  # Return oldest item from the queue without removing it.
+        # Return an item if one is immediately available, else raise QueueEmpty.
+        if self.empty():
+            raise IndexError
+        return self._q[self._ri]
+
     def put_nowait(self, v):
         self._q[self._wi] = v
         self._evput.set()  # Schedule any tasks waiting on get
@@ -58,6 +64,9 @@ class RingbufQueue:  # MicroPython optimised
         return self
 
     async def __anext__(self):
+        return await self.get()
+
+    async def get(self):
         while self.empty():  # Empty. May be more than one task waiting on ._evput
             await self._evput.wait()
         r = self._q[self._ri]

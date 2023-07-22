@@ -6,8 +6,7 @@
 # Code is based on Paul Sokolovsky's work.
 # This is a temporary solution until uasyncio V3 gets an efficient official version
 
-import asyncio
-import sys
+import uasyncio as asyncio
 
 
 # Exception raised by get_nowait().
@@ -29,6 +28,7 @@ class Queue:
 
         self._jncnt = 0
         self._jnevt = asyncio.Event()
+        self._upd_jnevt(0) #update join event
 
     def _get(self):
         self._evget.set()  # Schedule all tasks waiting on get
@@ -49,7 +49,7 @@ class Queue:
         return self._get()
 
     def _put(self, val):
-        self._jncnt += 1
+        self._upd_jnevt(1) # update join event
         self._evput.set()  # Schedule tasks waiting on put
         self._evput.clear()
         self._queue.append(val)
@@ -77,10 +77,24 @@ class Queue:
         # any negative number, then full() is never True.
         return self.maxsize > 0 and self.qsize() >= self.maxsize
 
-    #ssmith, wait for the queue to be not empty, does not return item like get
+
+    def _upd_jnevt(self, inc:int): # #Update join count and join event
+        self._jncnt += inc
+        if self._jncnt <= 0:
+            self._jnevt.set()
+        else:
+            self._jnevt.clear()
+
+    def task_done(self): # Task Done decrements counter
+        self._upd_jnevt(-1)
+
+    async def join(self): # Wait for join event
+        await self._jnevt.wait()
+
+    #ssmith, wait for queue to have at least an item to get
     async def wait(self):
-        while not self.empty():
-            await self._evget.wait()
+        while self.empty():
+            await self._evput.wait()
 
     #ssmith, get the size of the next item, so we know what we are dealing with
     #before getting
@@ -88,15 +102,4 @@ class Queue:
         if self.empty():
             raise QueueEmpty()
         return len(self._queue[0])
-
-    #ssmith, support for task_done and join to match cpython
-    def task_done(self):
-        self._jncnt -= 1
-        if self._jncnt == 0:
-            self._jnevt.set()
-        else:
-            self._jnevt.clear()
-        print('join count',self._jncnt)
-    async def join(self):
-        await self._jnevt.wait()
 

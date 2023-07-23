@@ -90,7 +90,7 @@ async def afsk_mod(aprs_q,
                 #multimon-ng and direwolf want one additional post flag in addition to the one at the end
                 #of the message
                 await afsk_mod.send_flags(4)
-                #aprs_q.task_done()
+                aprs_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:
@@ -102,15 +102,19 @@ async def afsk_out(afsk_q,
     try:
         while True:
             samp = await afsk_q.get()
-            x = struct.pack('<h', samp)
+            samp = struct.pack('<h', samp)
             if args['out']['file'] == '-':
-                stdout_write(x)
-            #afsk_q.task_done()
+                stdout_write(samp)
+            afsk_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:
         print_exc(err)
-
+    finally:
+        for x in range(100):
+            samp = struct.pack('<h', samp)
+            stdout_write(samp)
+        sys.stdout.flush()
 
 async def main():
     args = mod_parse_args(sys.argv)
@@ -127,8 +131,8 @@ async def main():
         tasks.append(asyncio.create_task(afsk_out(afsk_q, args,)))
         tasks.append(asyncio.create_task(afsk_mod(aprs_q, afsk_q, args,)))
         await read_aprs_from_pipe(aprs_q)
-        #await aprs_q.join()
-        #await afsk_q.join()
+        await aprs_q.join()
+        await afsk_q.join()
     except Exception as err:
         print_exc(err)
     finally:

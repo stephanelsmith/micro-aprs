@@ -5,8 +5,6 @@ import asyncio
 import struct
 
 from lib.compat import Queue
-#from asyncio import Queue
-#from upy.primitives.queue import Queue
 
 from afsk.mod import AFSKModulator
 from ax25.ax25 import AX25
@@ -19,7 +17,6 @@ from lib.utils import eprint
 #micropython/python compatibility
 from lib.compat import IS_UPY
 from lib.compat import print_exc
-from lib.compat import stdout_write
 from lib.compat import get_stdin_streamreader
 
 async def read_aprs_from_pipe(aprs_q, 
@@ -99,12 +96,13 @@ async def afsk_mod(aprs_q,
 async def afsk_out(afsk_q,
                    args,
                    ):
+    write = sys.stdout.buffer.write
     try:
         while True:
             samp = await afsk_q.get()
             samp = struct.pack('<h', samp)
             if args['out']['file'] == '-':
-                stdout_write(samp)
+                write(samp)
             afsk_q.task_done()
     except asyncio.CancelledError:
         raise
@@ -113,8 +111,8 @@ async def afsk_out(afsk_q,
     finally:
         for x in range(100):
             samp = struct.pack('<h', samp)
-            stdout_write(samp)
-        sys.stdout.flush()
+            write(samp)
+        sys.stdout.buffer.flush()
 
 async def main():
     args = mod_parse_args(sys.argv)

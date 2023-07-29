@@ -1,21 +1,23 @@
 
 #interactive verbose mod, no raw output
 python aprs_mod.py -v -t null null -t aprs -
-./micropython aprs_mod.py -v -t null null -t aprs -
+micropython aprs_mod.py -v -t null null -t aprs -
 
 #no output, just debug
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t null null -t aprs -
-echo "KI5TOF>APRS:>hello world!" | ./micropython aprs_mod.py -v -t null null -t aprs -
+echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v -t null null -t aprs -
 
 #mod
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t raw - -t aprs - | multimon-ng -t raw -A -a AFSK1200 -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 -
+echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test.wav
 atest test.wav
 
 #demod
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
+sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t raw -
 
 #mod + demod
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t raw -

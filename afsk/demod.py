@@ -1,7 +1,6 @@
 
 import sys
 import asyncio
-import traceback
 from array import array
 import math
 import lib.upydash as _
@@ -22,6 +21,8 @@ from afsk.func import bandpass_fir_design
 from afsk.func import create_sampler
 from afsk.func import create_fir
 from afsk.func import create_fir_arr
+
+from lib.compat import print_exc
 
 class AFSKDemodulator():
     def __init__(self, samples_in_q,
@@ -175,7 +176,7 @@ class AFSKDemodulator():
 
                 samp_q.task_done() # done
         except Exception as err:
-            traceback.print_exc()
+            print_exc(err)
 
     # def analyze(self,start_from = 100e-3):
         # o = self.o

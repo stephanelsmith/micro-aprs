@@ -1,0 +1,7 @@
+
+
+#ammend commit
+git commit --amend --no-edit
+git push -f origin unix_sys_buff
+
+

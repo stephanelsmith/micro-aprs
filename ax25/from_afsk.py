@@ -3,10 +3,9 @@ import sys
 import io
 import asyncio
 import struct
-import traceback
 from array import array
 
-from asyncio import Queue
+# from asyncio import Queue
 
 from ax25.ax25 import AX25
 from ax25.func import reverse_bit_order
@@ -22,6 +21,8 @@ from lib.utils import int_div_ceil
 from lib.utils import assign_bit
 from lib.utils import eprint
 
+from lib.compat import print_exc
+
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
 AX25_MIN_BITS  = 160
@@ -36,7 +37,7 @@ class AX25FromAFSK():
         self.ax25_crc_err_q = ax25_crc_err_q
         self.verbose = verbose
 
-        self.frames_q = Queue()
+        # self.frames_q = Queue()
         self.tasks = []
 
     async def __aenter__(self):
@@ -75,7 +76,7 @@ class AX25FromAFSK():
                     idx = 0
                 self.bits_q.task_done()
         except Exception as err:
-            traceback.print_exc()
+            print_exc(err)
 
     async def frame_to_ax25(self, buf, stop_bit):
         mv = memoryview(buf)

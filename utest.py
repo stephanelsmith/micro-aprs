@@ -13,15 +13,15 @@ async def write():
     try:
         x = 0
         b=bytearray(1)
-        while True:
+        for x in range(256):
             b[0]=x
-            #sys.stdout.buffer.write(b) #err
-            #sys.stdout.write(b)
+            # sys.stdout.buffer.write(b) #err
+            # sys.stdout.write(b)
             stdout_write(b)
-            x = (x+1)%256
-            await asyncio.sleep_ms(100)
-            if x == 100:
-                return
+            # x = (x+1)%256
+            # await asyncio.sleep_ms(10)
+            # if x == 100:
+                # return
     except asyncio.CancelledError:
         raise
     except Exception as err:
@@ -33,10 +33,30 @@ async def read():
     try:
         while True:
             try:
-                b[0:1] = await reader.readexactly(1)
+                # b = sys.stdin.buffer.read(1)
+                # b = sys.stdin.read(1)
+                # if not b:
+                    # break
+                    # continue
+                # b = await reader.read(1)
+                b = await reader.readexactly(1)
             except EOFError:
                 break
-            print(b[0],b)
+            print(b)
+    except asyncio.CancelledError:
+        raise
+    except Exception as err:
+        print_exc(err)
+
+async def read2():
+    reader = await get_stdin_streamreader()
+    try:
+        while True:
+            try:
+                a = await reader.readexactly(2)
+                print('**',a)
+            except EOFError:
+                break
     except asyncio.CancelledError:
         raise
     except Exception as err:
@@ -77,6 +97,8 @@ async def main():
     try:
         if 'read' in sys.argv:
             await read()
+        if 'read2' in sys.argv:
+            await read2()
         elif 'write' in sys.argv:
             await write()
         elif 'q' in sys.argv:

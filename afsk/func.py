@@ -13,13 +13,12 @@ def frange(start, stop, step, rnd=None):
         for i in range(n):
             yield start+i*step
 
-# detect afsk signal with minimal possible computation requirements
-def create_afsk_detector():
+def afsk_detector(arr, size):
     pol = True #polarity of the run we are currently tracking
     run = 0    #current run count (number of consecutive pos/neg samples)
     act = 0   #count of the number of runs we've seen above a threshold
-    def inner(v,rst):
-        nonlocal pol, run, act
+    for i in range(size):
+        v = arr[i]
         if pol and v > 0:
             run += 1
         elif pol and v <= 0:
@@ -34,11 +33,7 @@ def create_afsk_detector():
                 act += 1
             pol = not pol
             run = 1
-        _act = act 
-        if rst:
-            act = 0
-        return 1 if _act > 10 else 0 # 10 - minimum number of run we need to declare signal detected
-    return inner
+    return 1 if act > 10 else 0 # 10 - minimum number of run we need to declare signal detected
 
 
 # generator for iterating over the bits in bytearray

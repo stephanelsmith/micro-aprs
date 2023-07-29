@@ -129,14 +129,14 @@ class AX25():
 
         mv = memoryview(frame)
         if len(mv) < 3:
-            raise DecodeErrorFix(ax25=self)
+            raise DecodeErrorFix(self)
         start_idx = 1
         idx = 1
         stop_idx = 2
         while mv[stop_idx] != AX25_FLAG:
             stop_idx += 1
             if stop_idx >= len(mv):
-                raise DecodeErrorFix(ax25=self)
+                raise DecodeErrorFix(self)
         
         try:
             #destination
@@ -153,12 +153,12 @@ class AX25():
                 self.digis.append(CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN]))
                 idx += AX25_ADDR_LEN
         except IndexError:
-            raise DecodeErrorFix(ax25=self)
+            raise DecodeErrorFix(self)
         except CallSSIDError:
-            raise DecodeErrorFix(ax25=self)
+            raise DecodeErrorFix(self)
 
         if idx>=stop_idx-1:
-            raise DecodeErrorFix(ax25=self)
+            raise DecodeErrorFix(self)
 
         #skip control/pid
         idx += 2
@@ -167,7 +167,7 @@ class AX25():
         crc  = bytes(mv[stop_idx-2:stop_idx])
         _crc = struct.pack('<H',crc16_ccit(mv[start_idx:stop_idx-2]))
         if crc != _crc:
-            raise DecodeErrorFix(ax25=self)
+            raise DecodeErrorFix(self)
 
         #if crc passes assign info, minimize assignment
         if crc == _crc:

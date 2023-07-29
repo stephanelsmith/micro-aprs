@@ -3,6 +3,7 @@ import sys
 import math
 import asyncio
 import lib.upydash as _
+from array import array
 
 from array import array
 
@@ -15,6 +16,7 @@ from afsk.func import create_nrzi
 # AFSK_SCALE     = 25
 AFSK_SCALE_DOWN = 10
 AX25_FLAG       = 0x7e
+AFSK_Q_SIZE     = 22050
 
 
 class AFSKModulator():
@@ -62,18 +64,22 @@ class AFSKModulator():
         #nrzi converter
         self.nrzi = create_nrzi()
 
-        self.tasks = []
-
     async def __aenter__(self):
-        zpad_ms = 1
-        afsk_q_put = self.afsk_q.put
-        for b in range(int(zpad_ms/1000/self.ts)):
-            await afsk_q_put(0)
+        #zero-pad
+        await self.zero_padding()
         return self
 
     async def __aexit__(self, *args):
-        _.for_each(self.tasks, lambda t: t.cancel())
-        await asyncio.gather(*self.tasks, return_exceptions=True)
+        #zero-pad
+        await self.zero_padding()
+
+    async def zero_padding(self):
+        zpad_ms = 1
+        siz = int(zpad_ms/1000/self.ts)
+        await self.afsk_q.put( (
+            array('i',[0 for x in range(siz)]), 
+            siz
+        ))
 
     def gen_baud_period_samples(self, markspace):
         self.baud_index = self.ts_index + self.baud_step_int
@@ -113,12 +119,17 @@ class AFSKModulator():
                                stop_bit,
                                # zpad_ms = 0,
                                ):
+        arr = array('i', range(AFSK_Q_SIZE))
+        idx = 0
+
+        nrzi_dbg_i = 0
+
+        nrzi = self.nrzi
+        afsk_q_put = self.afsk_q.put
+        gen_samples = self.gen_baud_period_samples
+        verbose = self.verbose
+
         try:
-            nrzi = self.nrzi
-            afsk_q_put = self.afsk_q.put
-            gen_samples = self.gen_baud_period_samples
-            verbose = self.verbose
-            i = 0
 
             if verbose:
                 eprint('--nrzi--', 'bits',stop_bit, 'bytes',stop_bit//8,'remain',stop_bit%8)
@@ -128,14 +139,22 @@ class AFSKModulator():
 
                 #convert nrzi
                 b = nrzi(b)
+
                 if verbose:
-                    i+=1
-                    eprint(b,end=' ' if i%8==0 else '')
-                    if i%80==0:
+                    nrzi_dbg_i += 1
+                    eprint(b,end=' ' if nrzi_dbg_i%8==0 else '')
+                    if nrzi_dbg_i%80==0:
                         eprint('')
 
                 for sample in gen_samples(b):
-                    await afsk_q_put(sample//AFSK_SCALE_DOWN)
+                    arr[idx] = sample//AFSK_SCALE_DOWN
+                    idx += 1
+                    if idx == AFSK_Q_SIZE:
+                        await afsk_q_put((arr, idx))
+                        arr = array('i', range(AFSK_Q_SIZE))
+                        idx = 0
+
+            await afsk_q_put((arr, idx))
 
             if verbose:
                 eprint('\n')

@@ -1,4 +1,3 @@
-#! env/bin/python
 
 import sys
 import asyncio
@@ -87,7 +86,9 @@ async def afsk_mod(aprs_q,
                 #multimon-ng and direwolf want one additional post flag in addition to the one at the end
                 #of the message
                 await afsk_mod.send_flags(4)
+
                 aprs_q.task_done()
+
     except asyncio.CancelledError:
         raise
     except Exception as err:
@@ -99,10 +100,11 @@ async def afsk_out(afsk_q,
     write = sys.stdout.buffer.write
     try:
         while True:
-            samp = await afsk_q.get()
-            samp = struct.pack('<h', samp)
-            if args['out']['file'] == '-':
-                write(samp)
+            arr,siz = await afsk_q.get()
+            for i in range(siz):
+                samp = struct.pack('<h', arr[i])
+                # if args['out']['file'] == '-':
+                write(samp) #buffer write binary
             afsk_q.task_done()
     except asyncio.CancelledError:
         raise

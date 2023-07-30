@@ -26,11 +26,11 @@ Great!
 
 ## Discrete waveform generation
 
-A key goal of this project is performance on embedded systems lacking a floating point unit.  As such, we need to be limited to integer only math as well as utilization of look-up tables for sinusoidal generation.
+A key goal of this project is performance on embedded systems lacking a floating point unit without access to purpose math libraries (eg. numpy).  We utiluze integer only math combined with look-up tables (eg. sinusoidal generation).
 
 ### Sin Lookup Table
 
-First we will need a sin look-up table.  From [afsk/sin_table.py](https://github.com/stephanelsmith/micro-aprs-modem/blob/master/afsk/sin_table.py). 
+First we will need a sin look-up table.  From [afsk/sin_table.py](https://github.com/stephanelsmith/micro-aprs-modem/blob/master/afsk/sin_table.py), we can easily generate an array (of type array such that we know the bytes are sequentially addressed as in a c-style array). The function may be memoized to file. 
 
 ```python
 return array('h', (int((2**15-1)*math.sin(x)) for x in frange(0,2*math.pi,2*math.pi/size)))
@@ -38,21 +38,21 @@ return array('h', (int((2**15-1)*math.sin(x)) for x in frange(0,2*math.pi,2*math
 
 ![Discrete Sin](discrete_sin.png?raw=true "Discrete Sin")
 
-This look-up table, either generated on start or pre-generated look-up table (default), will provide the values for the waveform
-- Where the phase [0,PI) is mapped to [1,1024)
+The look-up table provides the values for the waveform
+- Where the phase [0,PI) is mapped to look-up table phase indexes [0,1024)
 - Where the frequency is determined by iterative step size.
 
 ### Non-Integer Frequency Sample Correction
 
-To faithfully reproduce a mark tone (1200 Hz) at a sampling rate of 22050 Hz, with a lookup table of size 1024, the stride length is:
+To reproduce a mark tone (1200 Hz) at a sampling rate of 22050 Hz, with a lookup table of size 1024, the index step size is:
 
 $$ N_{markstep} = \frac{1024}{\frac{t_{mark}}{t_{s}}} = 55.7279 $$ 
 
-While this wouldn't normally be a problem if we are solving sin directly and simply tracking the phase accumulation, because we are using integer math, rounding $N_{markstep}$ up or down with lead to a rapid frequency rate deviation.  It will be necessary to not only track the frequency step size, but also track the factional residue.
+While this wouldn't normally be a problem if we are solving sin directly with floating point math, because we are using integer math, rounding $N_{markstep}$ up or down with lead to a rapid frequency rate deviation.  It is necessary to not only track the frequency step size, but also track the factional residue.
 
-In our case, we pick a residue size of 10000, which leads us with a residue of 7279.
+In our case, we pick a residue size of 10000, which leads us with a residue of 7279 per iteration (sampling rate step.)
 
-In implementation, we will accumulate the the phase (look-up table index) by 55 each iteration.  In a seperate residue accumulator, we increment by the residue amount of 7279.  We again increment the phase every time the residue accumulator is greater the the residue size (careful to keep the remainder amound in the residue accumulator.  In code:
+In implementation, we will accumulate the phase (look-up table index) by 55 each iteration.  In a seperate residue accumulator, we increment by the residue accumulator by 7279.  The residue accumulator cycles with modulous 10000, incrementing phase index each time the accumulator wraps around.  In code:
 
 ```
 mark_step_int = 55 

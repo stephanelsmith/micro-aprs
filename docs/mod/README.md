@@ -73,7 +73,7 @@ for t in range(tsim_array_size):
 
   # update the phase/residue accumulators if we exceed the residue size
 	markspace_index += markspace_residue_accumulator // residue_size 
-	markspace_residue_accumulator = markspace_residue_accumulator % residue_size
+	markspace_residue_accumulator %= residue_size
 ```
 
 With this scheme, we are able to create the desired waveform, matching exact as well as floating point implementations.

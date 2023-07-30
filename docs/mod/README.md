@@ -62,16 +62,16 @@ markspace_index = 0  # the phase accumulator
 markspace_residue_accumulator = 0
 
 for t in range(tsim_array_size):
-  # append the sample from the lookup table, 
+        # append the sample from the lookup table, 
 	r.append(sin_array[markspace_index%lookup_size])
 
-  # advanced the phase by the integer phase step size
+        # advanced the phase by the integer phase step size
 	markspace_index += mark_step_int
 
-  # advance the phase residue accumulator
+        # advance the phase residue accumulator
 	markspace_residue_accumulator += mark_residue
 
-  # update the phase/residue accumulators if we exceed the residue size
+        # update the phase/residue accumulators if we exceed the residue size
 	markspace_index += markspace_residue_accumulator // residue_size 
 	markspace_residue_accumulator %= residue_size
 ```

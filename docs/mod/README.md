@@ -48,7 +48,7 @@ To reproduce a mark tone (1200 Hz) at a sampling rate of 22050 Hz, with a lookup
 
 $$ N_{markstep} = \frac{1024}{\frac{t_{mark}}{t_{s}}} = 55.7279 $$ 
 
-While this wouldn't normally be a problem if we are solving sin directly with floating point math, because we are using integer math, rounding $N_{markstep}$ up or down with lead to a rapid frequency rate deviation.  It is necessary to not only track the frequency step size, but also track the factional residue.
+While this wouldn't normally be a problem if we are solving sin directly with floating point math, because we are using integer math, rounding $N_{markstep}$ up or down will lead to a rapid frequency rate deviation.  It is necessary to not only track the frequency step size, but also track the factional residue.
 
 In our case, we pick a residue size of 10000, which leads us with a residue of 7279 per iteration (sampling rate step.)
 

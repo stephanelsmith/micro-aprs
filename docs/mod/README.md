@@ -80,7 +80,11 @@ With this scheme, we are able to create the desired waveform, matching exact as 
 
 ![Compare Sin](sin_out.png?raw=true "Compare Sin")
 
+### Putting it together
 
+Each bit will need to include one baud period's worth of samples.  Similar to mark and space, you will need to track the phase and residue to account for the correct number of samples per bit.  By retaining the phase and residue between adjacent mark/space bits, the output is a continous waveform.
+
+![Mark/Space](markspace_out.png?raw=true "Mark/Space")
 
  
 

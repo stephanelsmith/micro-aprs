@@ -14,3 +14,6 @@ Alternatively, I decided to go with an auto-correlator detection based approach.
 ![Correlator Block](corr_block.png?raw=true "Correlator Block")
 
 ![Mark Correlator Example](markcorr.gif?raw=true "Mark Correlator Example")
+
+![DeModulation Block Diagram](demod_block.png?raw=true "DeModulation Block Diagram")
+

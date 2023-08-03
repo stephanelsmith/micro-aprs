@@ -44,15 +44,14 @@ Next step is to detect both mark and space frequencies.  A clever concept I foun
 
 $$ MarkSpace(t) = \frac{1}{2} cos(\omega_{mark} d_{optimal}) - \frac{1}{2} cos(\omega_{space} d_{optimal}) $$
 
-where $` d_{optimal} `$ is chosen to maximize $` MarkSpace(t) `$.
-
-Searching iteratively, we find  $` d_{optimal} = 446 \micro s `$
+where $` d_{optimal} `$ is chosen to _maximize_ $` MarkSpace(t) `$.  Below, we show MarkSpace(t), Mark, and Space.  Searching iteratively, we find  $` d_{optimal} = 446 \micro s `$
 
 <p align="center">
+    <br>
   <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/markspacecorrdelay.gif?raw=true" alt=""/>
 </p>
 
-
+Armed with this knowledge we now know if we delay the AFSK input signal by $` d_{optimal} = 446 \micro s `$, and filter out the ripple terms, we are able to detect marks as values < 0 and spaces as values > 0.  Incredibly, the detection algorithm only cost us a delay element (if sampling at 22050 Hz, a delay or buffer depth of 10 samples) and some multiplications!
 
 
 

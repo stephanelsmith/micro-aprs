@@ -13,6 +13,18 @@ Alternatively, I decided to go with an auto-correlator detection based approach.
 
 ![Correlator Block](corr_block.png?raw=true "Correlator Block")
 
+The output of the block is:
+
+$$ H(t) = sin(\omega t) sin(\omega(t+d)) $$
+
+Using trig identity:
+
+$$ sin(\alpha) sin(\beta) = \frac{1}{2} \left(cos(\alpha-\beta)-cos(\alpha+\beta) \right) $$
+
+We find that:
+
+$$ H(t) = \frac{1}{2} cos(\omega d) - \frac{1}{2} cos((d+2t)\omega)$$
+
 ![Mark Correlator Example](markcorr.gif?raw=true "Mark Correlator Example")
 
 ![DeModulation Block Diagram](demod_block.png?raw=true "DeModulation Block Diagram")

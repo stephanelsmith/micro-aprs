@@ -46,6 +46,13 @@ $$ MarkSpace(t) = \frac{1}{2} cos(\omega_{mark} d_{optimal}) - \frac{1}{2} cos(\
 
 where $` d_{optimal} `$ is chosen to maximize $` MarkSpace(t) `$.
 
+Searching iteratively, we find  $` d_{optimal} = 446 \micro s `$
+
+<p align="center">
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/markspacecorrdelay.gif?raw=true" alt=""/>
+</p>
+
+
 
 
 

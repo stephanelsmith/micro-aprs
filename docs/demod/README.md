@@ -11,21 +11,30 @@ Alternatively, I decided to go with an auto-correlator detection based approach.
 
 ## Auto-Correlation Based Detection
 
-![Correlator Block](corr_block.png?raw=true "Correlator Block")
+<p align="center">
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/corr_block.png?raw=true" alt=""/>
+</p>
+
 
 The output of the block is:
 
 $$ H(t) = sin(\omega t) sin(\omega(t+d)) $$
 
-Using trig identity:
+By trig identity:
 
 $$ sin(\alpha) sin(\beta) = \frac{1}{2} \left(cos(\alpha-\beta)-cos(\alpha+\beta) \right) $$
 
-We find that:
+We find the output is:
 
 $$ H(t) = \frac{1}{2} cos(\omega d) - \frac{1}{2} cos((d+2t)\omega)$$
 
+Graphically:
+
 ![Mark Correlator Example](markcorr.gif?raw=true "Mark Correlator Example")
+
+
+- The first term, the DC component, is what we are seeking to detect
+- The second, the ripple, we will eliminate with a low pass filter.
 
 ![DeModulation Block Diagram](demod_block.png?raw=true "DeModulation Block Diagram")
 

@@ -67,7 +67,41 @@ To put everything together, we need two more blocks:
 
 ### Bandpass FIR filters
 
+Now onto the input filter.  The goal here is to remove any DC offsets and any 'noise' out of band.  While I found that sane values can be picked to get a functional demodulator, I recommend final parameter tuning using real-world test, eg. track 2 of the TNC test CD.
+
+I've picked a gain of 1x of 0dB at mark (1200Hz) and space (2200Hz) frequencies.
+
+Using Mathematica's filter designer:
+```
+taps = LeastSquaresFilterKernel[{"Bandpass", {fMark (2 \[Pi])/fs - 
+      fPad (2 \[Pi])/fs, fSpace (2 \[Pi])/fs + fPad (2 \[Pi])/fs}}, 
+   n];
+```
+
+In Python, you can find the filter taps similarly as done in the [afsk/bandpass_fir_design](https://github.com/stephanelsmith/micro-aprs/blob/b9f495bdfbe1bea1bd5a199fc17ff02f6e048a79/afsk/func.py#L163) function:
+```
+    from scipy import signal
+    coefs = signal.firls(ncoefs,
+                        (0, fmark-width, fmark, fspace, fspace+width, fs/2),
+                        (0, 0,           amark, aspace, 0,            0),
+                        fs=fs)
+```
+
+For the location of zeros, we apply the Z transform and solve for the solution (in Mathematica again):
+```
+zexpr = ListZTransform[taps, z];
+zs = z /. NSolve[zexpr == 0, z];
+```
+
+I always recommend looking at the Z-plane when designing filter, as the zero placement really helps one understand how the coefficients shape the magnitude response.  The resulting filter looks as follows:
+
+![Bandpass Filter](bandpass_filter.png?raw=true "Bandpass Filter")
+
 ### Lowpass FIR filters
+
+Same process for the low pass filter. Here, my initial filter design cutoff is 1200Hz.  For fun, including phase, group delay, and step response.  In the Z place, notice how the zeros on the real axis boost the gain, and how the zeros along the unit circle suppress the magnitude after our cutoff.
+
+![Lowpass filter](lowpass_filter.png?raw=true "Lowpass filter")
 
 ### Sample output
 

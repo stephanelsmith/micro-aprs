@@ -105,5 +105,8 @@ Same process for the low pass filter. Here, my initial filter design cutoff is 1
 
 ### Sample output
 
+<p align="center">
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/corr_total.gif?raw=true" alt=""/>
+</p>
 
 

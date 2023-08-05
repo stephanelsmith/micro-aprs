@@ -100,7 +100,7 @@ class AFSKModulator():
             #as we switch between mark/space
             #increment by residual amount if we overflow residue size
             self.markspace_index += self.markspace_residue_accumulator // self.residue_size 
-            self.markspace_residue_accumulator = self.markspace_residue_accumulator % self.residue_size
+            self.markspace_residue_accumulator %= self.markspace_residue_accumulator
             
             #push the next point to the waveform
             yield self.sintbl[self.markspace_index%self.sintbl_sz]

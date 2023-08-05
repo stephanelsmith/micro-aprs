@@ -101,10 +101,10 @@ async def afsk_out(afsk_q,
     try:
         while True:
             arr,siz = await afsk_q.get()
-            for i in range(siz):
-                samp = struct.pack('<h', arr[i])
-                # if args['out']['file'] == '-':
-                write(samp) #buffer write binary
+            if args['out']['file'] == '-':
+                for i in range(siz):
+                    samp = struct.pack('<h', arr[i])
+                    write(samp) #buffer write binary
             afsk_q.task_done()
     except asyncio.CancelledError:
         raise

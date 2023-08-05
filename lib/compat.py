@@ -1,16 +1,14 @@
 
 import asyncio
 
-try:
-    import micropython
-    IS_UPY = True
-except ModuleNotFoundError:
-    IS_UPY = False
-
 import sys
 import io
 
-# Exception printing
+if sys.implementation.name == 'micropython':
+    IS_UPY = True
+else:
+    IS_UPY = False
+
 if IS_UPY:
     #micropython
     print_exc = sys.print_exception

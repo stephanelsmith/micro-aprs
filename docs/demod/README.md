@@ -119,6 +119,15 @@ Here we convert the samples into bits.  Many implementations I found have feedba
 All-in-all, I didn't really do too much here.  This is an area of future work, but it's working to my satisfaction, requires very little compute in the spirit of this project.
 
 
+### Final Thoughts
+
+Incredibly, it turns out afsk demod comes down to:
+- *Shift*: (generate the delayed signal)
+- *Multiply*: (multiply delayed signal to signal)
+- *Convolve*: (run the low pass fir)
+
+Cool!
+  
 ### References and Acknowledgements
 
 Lots of good work out there which assisted me in my process, most notibly the following:

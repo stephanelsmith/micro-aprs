@@ -3,11 +3,11 @@
 
 # Micro APRS MODEM
 
-A python based library for encoding and decoding, modulating and demodulating APRS/AX.25 packets in AFSK.  
+A python/micropython based library for encoding/decoding, modulating/demodulating APRS/AX.25 packets in AFSK.  
 
 ![AFSK hello world](docs/afsk_hello.png?raw=true "AFSK hello")
 
-The purpose of this library is to thread-the-needle of both enabling APRS/AX.25/AFSK from PC to microcontroller while maintaining portability and readability of python.  This library is optimized for embedded systems, especially [micropython supported targets and platforms ](https://github.com/micropython/micropython#supported-platforms--architectures) and small computers, not to mention native python3!
+The purpose of this library is to thread-the-needle of both enabling APRS/AX.25/AFSK from PC to microcontroller while maintaining portability and readability of python.  This library is optimized for embedded systems, especially [micropython supported targets and platforms ](https://github.com/micropython/micropython#supported-platforms--architectures) and small computers, not to mention Cpython and Pypy!
 
 In practice this means we:
 * Avoid floating point and math libraries and dependencies in critical sections.  
@@ -21,6 +21,14 @@ In practice this means we:
 	* :-1: Functional programming style -> creating/returning new arrays instead of mutating in place
 * Single threaded, multitask friendly
 	* :+1::+1: Asyncio
+
+
+## Tutorial
+
+As many who've gone down this path have mentioned, there's really just not a lot of information out there covering these topics.  I hope these tutorial sections will provide you additional information on how it works: 
+* [AFSK Demodulation](docs/demod/README.md)
+* [AFSK Modulation](docs/mod/README.md)
+* [AX25/APRS Encoding and Decoding](docs/encdec/README.md)
 
 
 ## Testing

@@ -1,6 +1,6 @@
 # Encoding and Decoding AX25 and APRS messages
 
-This is one of the fairly straight forward areas where I struggled to find solid examples, especially regarding the order of operations (byte reversing, bit stuffing, NRZI).  For anyone else looking for a definitive answer, the provided utilitizes have a verbose mode which output the intermediate steps to stderr.  This way you should have no problem comparing your output with a a model.
+I struggled to find solid examples, especially regarding the order of operations for encoding/decoding AX25 frames to AFSK samples (spoiler alert it's: byte reverse, bit stuff, NRZI).  For anyone else looking for a definitive answer, ```aprs_mod.py``` and ```aprs_demod.py``` have a verbose mode which outputs the intermediate steps to stderr.  This way you should have no problem providing your inputs and compare intermediate steps in addition to the final output.
 
 ## Encoding APRS messages to AX25 format
 

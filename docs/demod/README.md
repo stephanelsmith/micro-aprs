@@ -103,10 +103,19 @@ Same process for the low pass filter. Here, my initial filter design cutoff is 1
 
 ![Lowpass filter](lowpass_filter.png?raw=true "Lowpass filter")
 
-### Sample output
+### Output
+
+After the low pass filtering of the correlated output, we have
 
 <p align="center">
   <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/corr_total.gif?raw=true" alt=""/>
 </p>
+
+
+### Digitizer
+
+Here we convert the samples into bits.  Many implementations I found have feedback based clock recovery schemes.  However, I found that simple edge detection is doing a surprisingly good job, even for real-life tests and Track 2 of the TNC test CD.  This is the route I went here.  The other benefit being this scheme allows for decoding a signal after just a single header, while other methods used 25+ header bytes to lock the clock (I believe).
+
+All-in-all, I didn't really do too much here.  This is an area of future work, but it's working to my satisfaction, requires very little compute in the spirit of this project.
 
 

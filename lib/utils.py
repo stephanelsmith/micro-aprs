@@ -10,7 +10,7 @@ def int_div_ceil(total_size, chunk_size):
     return total_size//chunk_size + (1 if total_size%chunk_size else 0)
 
 def pretty_binary(mv, 
-                  cols      = 10, 
+                  cols      = 8, 
                   to_stderr = True):
     if to_stderr:
         _print = eprint

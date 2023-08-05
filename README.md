@@ -183,16 +183,6 @@ python demod.py -t raw test/tnc_test02.raw
 
 
 
-## References and Acknowledgments
-
-AX25 encoding and decoding references were not as easy to come by as I expected considering the standard.  I hope the full verbose output provided by this utility will assist others.  A few references were particularly helpful
-* [Direwolf packet assembler](https://github.com/wb2osz/direwolf/blob/master/src/ax25_pad.c)
-* [Infineon Simplifed FSK Detection App Note](https://www.infineon.com/dgdl/Infineon-AN2336_PSoC_1_Simplified_FSK_Detection-ApplicationNotes-v07_00-EN.pdf?fileId=8ac78c8c7cdc391c017d07237cdd46c0)
-* [AFSK Digital Correlator Demodulator](https://notebooks.githubusercontent.com/view/ipynb?browser=chrome&color_mode=auto&commit=18914893d0853070788a37d986bbd58db08721aa&device=unknown&enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f6d6f62696c696e6b642f6166736b2d64656d6f64756c61746f722f313839313438393364303835333037303738386133376439383662626435386462303837323161612f6166736b2d64656d6f64756c61746f722e6970796e62&logged_in=false&nwo=mobilinkd%2Fafsk-demodulator&path=afsk-demodulator.ipynb&platform=android&repository_id=175103461&repository_type=Repository&version=98)
-
-
-
-
 ## License
 MIT License
 

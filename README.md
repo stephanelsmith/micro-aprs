@@ -30,9 +30,9 @@ In practice this means we:
 ## Tutorial
 
 As many who've gone down this path have mentioned, there's really just not a lot of information out there covering these topics.  I hope these tutorial sections will provide you additional information on how it works: 
-* [AFSK Demodulation](docs/demod/README.md)
-* [AFSK Modulation](docs/mod/README.md)
-* [AX25/APRS Encoding and Decoding](docs/encdec/README.md)
+* [AFSK Demodulation](docs/demod/README.md). Convert raw AFSK samples to bits.
+* [AFSK Modulation](docs/mod/README.md). Convert byte arrays to AFSK samples
+* [AX25/APRS Encoding and Decoding](docs/encdec/README.md). Step-by-step encoding/decoding APRS and AX25.
 
 
 ## Testing

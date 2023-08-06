@@ -27,19 +27,20 @@ In practice this means we:
 ```aprs_demo.py``` decodes over 1000 (**1004** :eyes:) error-free frames on the [TNC CD Track 2](http://wa8lmf.net/TNCtest/).  TNC CD Track 2 being the benchmark, [this performance is very good!](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf)  Cheers to that! :beers: 
 
 
-## Tutorial
+## Tutorials :mortar_board:
 
-As many who've gone down this path have mentioned, there's really just not a lot of information out there covering these topics.  I hope these tutorial sections will provide you additional information on how it works: 
+As many who've gone down this path have mentioned, there's really just not a lot of information out there covering these topics.  I hope these tutorial sections will provide you additional information on getting started!
 * [AFSK Demodulation](docs/demod/README.md). Convert raw AFSK samples to bits.
 * [AFSK Modulation](docs/mod/README.md). Convert byte arrays to AFSK samples
 * [AX25/APRS Encoding and Decoding](docs/encdec/README.md). Step-by-step encoding/decoding APRS and AX25.
 
 
-## Testing
+## Python :snake: Compatibility
+Care has been taken to make the source fully compatible across target python versions:
+* Python (for the lazy)
+* Micropython (for embedded)
+* Pypy3 (for speed!)
 
-The standards tested against are: 
-* [DireWolf](https://github.com/wb2osz/direwolf)
-* [Multimon-NG](https://github.com/EliasOenal/multimon-ng)
 
 ## ```aprs_mod.py``` APRS to AFSK Modulation
 

@@ -11,8 +11,11 @@ echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v -t null null -t ap
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t raw - -t aprs - | multimon-ng -t raw -A -a AFSK1200 -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 -
 echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 -
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test.wav
+echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test.wav
 atest test.wav
+sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
+sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t raw -
+
 
 #demod
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
@@ -26,8 +29,8 @@ echo "KI5TOF>APRS,WIDE2-1,WIDE1-1:hello world!" | python aprs_mod.py -v | python
 cat aprs.txt | python aprs_mod.py -v | python aprs_demod.py -v -t raw -
 cat aprs.txt | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t raw -
 
-gen_packets -r 22050 -o x.wav
-sox -t wav x.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
+gen_packets -r 22050 -o test.wav
+sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
 
 #ISS TESTs
 wget https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav

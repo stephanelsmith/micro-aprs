@@ -16,13 +16,11 @@ The purpose of this library is to thread-the-needle of both enabling APRS/AX.25/
 In practice this means we:
 * Avoid floating point and math libraries and dependencies in critical sections.  
 	* :+1: Integer math only
-	* :+1: Lookup tables 
-	* :+1: No external libraries (numpy/scipy/pandas).
+	* :+1: Lookup tables
+	* :+1: NO external libraries (numpy/scipy/pandas).
 * Special care for memory allocation
 	* :+1: Pre-computing buffer/array sizes and modifying in place
-	* :+1: Using memoryview objects to pass slices to functions and modifying those slices in place
 	* :-1: Dynamically appending items to a list
-	* :-1: Functional programming style -> creating/returning new arrays instead of mutating in place
 * Single threaded, multitask friendly
 	* :+1::+1: Asyncio
  

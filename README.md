@@ -159,12 +159,10 @@ RS0ISS>CQ:>ARISS - International Space Station
 ```
 wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip
 bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
-find -name "*wav" | xargs basename -s .wav | xargs -i sox -t wav {}.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 {}.raw
 ```
     * Run track 2 test
 ```
-sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python demod.py -t raw -
-python demod.py -t raw test/tnc_test02.raw
+sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
 ```
 
 

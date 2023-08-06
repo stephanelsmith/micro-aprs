@@ -132,11 +132,15 @@ class AX25():
             raise DecodeErrorFix(self)
         start_idx = 1
         idx = 1
-        stop_idx = 2
-        while mv[stop_idx] != AX25_FLAG:
-            stop_idx += 1
-            if stop_idx >= len(mv):
-                raise DecodeErrorFix(self)
+        # stop_idx = 
+        # while mv[stop_idx] != AX25_FLAG:
+            # stop_idx += 1
+            # if stop_idx >= len(mv):
+                # raise DecodeErrorFix(self)
+        stop_idx = len(mv)-1
+        while stop_idx > 0 and mv[stop_idx] != AX25_FLAG:
+            stop_idx-=1
+
         
         try:
             #destination

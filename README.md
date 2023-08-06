@@ -26,7 +26,8 @@ In practice this means we:
 * Single threaded, multitask friendly
 	* :+1::+1: Asyncio
  
- ```aprs_demo.py``` deocdes 975 messages of the TNC Track 2.  Not bad!
+```aprs_demo.py``` decodes over 1000 (**1004** :eyes:) error-free frames on the [TNC CD Track 2](http://wa8lmf.net/TNCtest/).  TNC CD Track 2 being the benchmark, [this performance is very good!](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf)  Cheers to that! :beers: 
+
 
 ## Tutorial
 
@@ -132,6 +133,13 @@ outfile       '-' (default)
 
 ### Examples
 
+* Demod with python, micropython, and pypy
+```
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t raw -
+echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t raw -
+echo "KI5TOF>APRS:>hello world!" | pypy3 aprs_mod.py -v | pypy3 aprs_demod.py -v -t raw -
+```
+
 * Decode Direwolf generated sample
 ```
 gen_packets -r 22050 -o test.wav
@@ -156,11 +164,11 @@ RS0ISS>CQ:>ARISS - International Space Station
 * Decode [TNC Test CD](http://wa8lmf.net/TNCtest/)
     * Download and convert TNC tests to .wav/.flac files
     * Using bchunk (apt-get install bchunk)
+    * Run track 2 test
 ```
 wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip
 bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
 ```
-    * Run track 2 test
 ```
 sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
 ```
@@ -169,4 +177,5 @@ sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | 
 
 ## License
 MIT License
+
 

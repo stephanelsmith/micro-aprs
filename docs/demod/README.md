@@ -111,11 +111,23 @@ After the low pass filtering of the correlated output, we have
   <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/corr_total.gif?raw=true" alt=""/>
 </p>
 
+Incredibly, it turns out afsk demod comes down to:
+- *Shift*: (generate the delayed signal)
+- *Multiply*: (multiply delayed signal to signal)
+- *Convolve*: (run the low pass fir)
 
+  
 ### Digitizer
 
 Here we convert the samples into bits.  Many implementations I found have feedback based clock recovery schemes.  However, I found that simple edge detection is doing a surprisingly good job, even for real-life tests and Track 2 of the TNC test CD.  This is the route I went here.  The other benefit being this scheme allows for decoding a signal after just a single header, while other methods used 25+ header bytes to lock the clock (I believe).
 
 All-in-all, I didn't really do too much here.  This is an area of future work, but it's working to my satisfaction, requires very little compute in the spirit of this project.
 
+### References and Acknowledgements
+
+Lots of good work out there which assisted me in my process, most notibly the following:
+- [PSoC® 1 - Simplified FSK Detection](https://www.infineon.com/dgdl/Infineon-AN2336_PSoC_1_Simplified_FSK_Detection-ApplicationNotes-v07_00-EN.pdf?fileId=8ac78c8c7cdc391c017d07237cdd46c0)
+- [AFSK Digital Correlator Demodulator](https://notebooks.githubusercontent.com/view/ipynb?browser=chrome&color_mode=auto&commit=18914893d0853070788a37d986bbd58db08721aa&device=unknown&enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f6d6f62696c696e6b642f6166736b2d64656d6f64756c61746f722f313839313438393364303835333037303738386133376439383662626435386462303837323161612f6166736b2d64656d6f64756c61746f722e6970796e62&logged_in=false&nwo=mobilinkd%2Fafsk-demodulator&path=afsk-demodulator.ipynb&platform=android&repository_id=175103461&repository_type=Repository&version=98)
+- [Direwolf - A-Better-APRS-Packet-Demodulator-Part-1-1200-baud.pdf](https://github.com/wb2osz/direwolf/blob/master/doc/A-Better-APRS-Packet-Demodulator-Part-1-1200-baud.pdf)
+- [Not Black Magic - AFSK](https://www.notblackmagic.com/bitsnpieces/afsk/)
 

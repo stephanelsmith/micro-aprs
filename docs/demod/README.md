@@ -123,7 +123,22 @@ Here we convert the samples into bits.  Many implementations I found have feedba
 
 All-in-all, I didn't really do too much here.  This is an area of future work, but it's working to my satisfaction, requires very little compute in the spirit of this project.
 
-### References and Acknowledgements
+
+### "One bad apple doesn't spoil the bunch" (CRC fixing)
+
+[Direwolf documentation](https://github.com/wb2osz/direwolf/blob/dev/doc/A-Better-APRS-Packet-Demodulator-Part-1-1200-baud.pdf) does a great job walking through methodology.  Though we've taken a different approach, one idea we are borrowing is the concept of attempting to "fix" a frame if everything looks good except for a CRC error.  In our demodulation flow, we flip every 2 bits, computing the crc, to see if we can find a fix.  This was the trick that got us over the 1000 decodes.
+
+
+### Going for a high score :rocket:
+
+The defacto score for APRS decoding is the number of error-free frames deocded in the TNC Test CD track 2.  [In the battle of the TNCs ](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf).  While Direwolf still clocks in at the top, this implementation looks like a solid second.
+
+The way I was able to get 1000+ decoded frames was by primarily sweeping through the band pass and low pass filter parameters.  The solution space is quite bumpy, and ended up doing a more-or-less brute force search to finally derive the default values.
+
+**End results 1010 Decoded Frames!** :beers:
+
+
+## References and Acknowledgements
 
 Lots of good work out there which assisted me in my process, most notibly the following:
 - [PSoC® 1 - Simplified FSK Detection](https://www.infineon.com/dgdl/Infineon-AN2336_PSoC_1_Simplified_FSK_Detection-ApplicationNotes-v07_00-EN.pdf?fileId=8ac78c8c7cdc391c017d07237cdd46c0)

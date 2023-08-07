@@ -24,7 +24,7 @@ In practice this means we:
 * Single threaded, multitask friendly
 	* :+1::+1: Asyncio
  
-```aprs_demo.py``` decodes over 1000 (**1004** :eyes:) error-free frames on the [TNC CD Track 2](http://wa8lmf.net/TNCtest/).  TNC CD Track 2 being the benchmark, [this performance is very good!](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf)  Cheers to that! :beers: 
+```aprs_demo.py``` decodes over 1000 (**1010** :eyes:) error-free frames on the [TNC CD Track 2](http://wa8lmf.net/TNCtest/).  TNC CD Track 2 being the benchmark, [this performance is very good!](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf)  Cheers to that! :beers: 
 
 
 ## Tutorials :mortar_board:

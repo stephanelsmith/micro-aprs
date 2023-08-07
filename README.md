@@ -16,32 +16,31 @@ The purpose of this library is to thread-the-needle of both enabling APRS/AX.25/
 In practice this means we:
 * Avoid floating point and math libraries and dependencies in critical sections.  
 	* :+1: Integer math only
-	* :+1: Lookup tables 
-	* :+1: No external libraries (numpy/scipy/pandas).
+	* :+1: Lookup tables
+	* :+1: NO external libraries (numpy/scipy/pandas).
 * Special care for memory allocation
 	* :+1: Pre-computing buffer/array sizes and modifying in place
-	* :+1: Using memoryview objects to pass slices to functions and modifying those slices in place
 	* :-1: Dynamically appending items to a list
-	* :-1: Functional programming style -> creating/returning new arrays instead of mutating in place
 * Single threaded, multitask friendly
 	* :+1::+1: Asyncio
  
 ```aprs_demo.py``` decodes over 1000 (**1004** :eyes:) error-free frames on the [TNC CD Track 2](http://wa8lmf.net/TNCtest/).  TNC CD Track 2 being the benchmark, [this performance is very good!](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf)  Cheers to that! :beers: 
 
 
-## Tutorial
+## Tutorials :mortar_board:
 
-As many who've gone down this path have mentioned, there's really just not a lot of information out there covering these topics.  I hope these tutorial sections will provide you additional information on how it works: 
+As many who've gone down this path have mentioned, there's really just not a lot of information out there covering these topics.  I hope these tutorial sections will provide you additional information on getting started!
 * [AFSK Demodulation](docs/demod/README.md). Convert raw AFSK samples to bits.
 * [AFSK Modulation](docs/mod/README.md). Convert byte arrays to AFSK samples
 * [AX25/APRS Encoding and Decoding](docs/encdec/README.md). Step-by-step encoding/decoding APRS and AX25.
 
 
-## Testing
+## Python :snake: Compatibility
+Care has been taken to make the source fully compatible across target python versions:
+* Python (for the lazy)
+* Micropython (for embedded)
+* Pypy3 (for speed!)
 
-The standards tested against are: 
-* [DireWolf](https://github.com/wb2osz/direwolf)
-* [Multimon-NG](https://github.com/EliasOenal/multimon-ng)
 
 ## ```aprs_mod.py``` APRS to AFSK Modulation
 

@@ -68,6 +68,7 @@ class AX25FromAFSK():
                     if idx >= AX25_MIN_BITS:
                         if self.verbose:
                             eprint('frame')
+                        # eprint('frame')
                         await self.frame_to_ax25(bytearray(mv[:int_div_ceil(idx,8)]), idx)
                     mv[0] = AX25_FLAG #keep the frame flag that we detected in buffer
                     idx = 8
@@ -142,7 +143,7 @@ class AX25FromAFSK():
                     flip(mv, flip_a, flip_b)
                     ax25 = AX25(frame = mv)
                     if ax25.src.is_valid() and ax25.dst.is_valid():
-                        print('FIXED src/dst')
+                        # print('FIXED src/dst')
                         return ax25
                     else:
                         flip(mv, flip_a, flip_b)
@@ -164,7 +165,7 @@ class AX25FromAFSK():
                 try:
                     flip(mv, flip_a, flip_b)
                     ax25 = AX25(frame = mv)
-                    print('FIXED info')
+                    # print('FIXED info')
                     return ax25
                 except DecodeErrorFix as err:
                     pass

@@ -42,6 +42,7 @@ unzip TNC_Test_CD_Ver-1.1.zip
 bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
 
 #convert wav->raw
+sox -t wav tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 tnc_test02.raw
 find -name "*wav" | xargs basename -s .wav | xargs -i sox -t wav {}.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 {}.raw
 
 #ISS
@@ -53,6 +54,8 @@ micropython aprs_demod.py -t raw test/ISSpkt.raw
 
 #TNC
 sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
+sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | pypy3 aprs_demod.py -t raw -
+sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - > test/tnc_test02.raw
 python aprs_demod.py -t raw test/tnc_test02.raw
 
 #RTL-SDR

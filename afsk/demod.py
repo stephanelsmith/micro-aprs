@@ -30,7 +30,6 @@ class AFSKDemodulator():
                        sampling_rate = 22050,
                        verbose       = False,
                        options       = {},
-                       do_memoize    = True,
                        ):
 
         self.samples_q  = samples_in_q
@@ -45,22 +44,35 @@ class AFSKDemodulator():
         self.ts = 1/self.fs
         self.fbaud = 1200
         self.tbaud = 1/self.fbaud
-
+        
+        # print(options)
+        do_memoize = True
+        if options:
+            eprint('OPTIONS: {}'.format(options))
         options = dict({
-            'bandpass_ncoefsbaud' : 3, #6
+            'bandpass_ncoefsbaud' : 3,
             'bandpass_width'      : 460,
             'bandpass_amark'      : 7,
             'bandpass_aspace'     : 24,
-            'lpf_ncoefsbaud'      : 4, #6
+            'lpf_ncoefsbaud'      : 4,
             'lpf_f'               : 1000,
-            'lpf_width'           : 240,
+            'lpf_width'           : 360,
             'lpf_aboost'          : 3,
         }, **options)
+        # options = dict({
+            # 'bandpass_ncoefsbaud' : 5,
+            # 'bandpass_width'      : 460,
+            # 'bandpass_amark'      : 7,
+            # 'bandpass_aspace'     : 24,
+            # 'lpf_ncoefsbaud'      : 7,
+            # 'lpf_f'               : 1000,
+            # 'lpf_width'           : 360,
+            # 'lpf_aboost'          : 3,
+        # }, **options)
 
         nmark = int(self.tmark/self.ts)
         bandpass_ncoefsbaud = options['bandpass_ncoefsbaud']
         bandpass_ncoefs = int(nmark*bandpass_ncoefsbaud) if int(nmark*bandpass_ncoefsbaud)%2==1 else int(nmark*bandpass_ncoefsbaud)+1
-
         bandpass_width = options['bandpass_width']
         bandpass_amark = options['bandpass_amark']
         bandpass_aspace = options['bandpass_aspace']
@@ -164,7 +176,6 @@ class AFSKDemodulator():
                 for i in range(arr_size):
                     o = arr[i]
                     o = bandpass(o)
-                    # o = agc(o)
                     o = corr(o)
                     o = lpf(o)
                     bs = sampler(o)

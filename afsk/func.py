@@ -193,9 +193,13 @@ def create_sampler(fbaud,
     def inner(v:int)->int:
         nonlocal idx,buf,lastx
         nonlocal o,oidx
-        buf[idx] = v
-        # if (buf[(idx-1)%buflen] > 0) and (buf[idx] < 0) or\
-           # (buf[(idx-1)%buflen] < 0) and (buf[idx] > 0):
+        try:
+            buf[idx] = v
+        except OverflowError:
+            if v>0:
+                buf[idx] = 0x7fffffff
+            else:
+                buf[idx] = -0x7fffffff
         if (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0):
             #detected crossing
             if lastx > ibaud_2 and lastx < ibaud*8:

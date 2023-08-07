@@ -81,11 +81,11 @@ class AX25():
         dst_digis = ','.join([dst]+[self.callssid_to_str(digi) for digi in self.digis])
         if isinstance(self.info, (bytes, bytearray)):
             try:
-                info = self.info.decode()#.strip()
+                info = self.info.decode().strip()
             except UnicodeDecodeError:
-                info = str(self.info)
+                info = str(self.info).strip()
         else:
-            info = str(self.info)#.strip()
+            info = str(self.info).strip()
         return '{}>{}:{}'.format(src,
                                  dst_digis,
                                  info)

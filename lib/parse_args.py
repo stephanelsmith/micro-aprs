@@ -131,12 +131,9 @@ outfile       '-' (default)
             r['args']['rate'] = get_arg_val(args, '-r', int)
         if '-v' in args or '-verbose' in args:
             r['args']['verbose'] = True
-        # if '-q' in args or '-quiet' in args:
-            # r['args']['quiet'] = True
         if '-o' in args:
-            r['args']['options'] = loads(get_arg_val(args, '-o'))
-        if '-options' in args:
-            r['args']['options'] = loads(get_arg_val(args, '-options'))
+            r['args']['options'] = loads(get_arg_val(args, '-o', str))
+            # print('OPTIONS:{}'.format(r['args']['options']))
     except IndexError:
         pass
     if len(spl) == 2:

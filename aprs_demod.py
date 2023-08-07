@@ -46,9 +46,11 @@ async def read_raw_from_pipe(samples_q,
             if idx%defs.SAMPLES_SIZE == 0:
                 if afsk_detector(arr,idx): #afsk signal detector
                     await samples_q.put((arr, idx))
+                    await asyncio.sleep(0)
                     arr = array('i',range(defs.SAMPLES_SIZE))
                 idx = 0
         await samples_q.put((arr, idx))
+        await asyncio.sleep(0)
 
     except Exception as err:
         print_exc(err)
@@ -63,13 +65,14 @@ async def read_samples_from_raw(samples_q,
             raise Exception('uknown file type', file)
         arr = array('i',range(defs.SAMPLES_SIZE))
         idx = 0
+
         with open(file, 'rb') as f:
             f.seek(0, 2)#SEEK_END = 2 
             size = f.tell()
             f.seek(0)
             i = 0
             while i < size:
-                a = f.read(2) # TODO, USE READINTO
+                a = f.read(2)
                 if not a:
                     break
                 i += 2 
@@ -79,14 +82,15 @@ async def read_samples_from_raw(samples_q,
                 if idx%defs.SAMPLES_SIZE == 0:
                     if afsk_detector(arr,idx): #afsk signal detector
                         await samples_q.put((arr, idx))
+                        await asyncio.sleep(0)
                         arr = array('i',range(defs.SAMPLES_SIZE))
                     idx = 0
             await samples_q.put((arr, idx))
+            await asyncio.sleep(0)
     except Exception as err:
         print_exc(err)
     except asyncio.CancelledError:
         raise
-
 
 async def consume_ax25(ax25_q):
     try:
@@ -97,6 +101,7 @@ async def consume_ax25(ax25_q):
             sys.stdout.flush()
             count += 1
             ax25_q.task_done()
+            await asyncio.sleep(0)
     except asyncio.CancelledError:
         raise
     except Exception as err:
@@ -154,14 +159,12 @@ async def main():
                                                     bits_q,
                                                     ax25_q,
                                                     args)))
+        await asyncio.sleep(0)
 
         #from .raw file
         if args['in']['file'] == '-':
             await read_raw_from_pipe(samples_q)
         elif args['in']['type'] == 'raw' and args['in']['file']:
-            # tasks.append(asyncio.create_task(read_samples_from_raw(samples_q     = samples_q, 
-                                                                   # file          = args['in']['file'],
-                                                                   # )))
             await read_samples_from_raw(samples_q = samples_q,
                                         file          = args['in']['file'],
                                         )

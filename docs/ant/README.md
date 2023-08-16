@@ -3,8 +3,8 @@
 [I used a fantastic online calculator](https://m0ukd.com/calculators/quarter-wave-ground-plane-antenna-calculator/).
 
 ## Design
-[Design](ant_calc.png?raw=True)
+![Design](ant_calc.png?raw=True)
 
 ## S11 and SWR
-[S11 and SWR](ant.png?raw=True)
+![S11 and SWR](ant.png?raw=True)
 

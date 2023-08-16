@@ -35,6 +35,7 @@ As many who've gone down this path have mentioned, there's really just not a lot
 * [AFSK Demodulation](docs/demod/README.md). Convert raw AFSK samples to bits.
 * [AFSK Modulation](docs/mod/README.md). Convert byte arrays to AFSK samples
 * [AX25/APRS Encoding and Decoding](docs/encdec/README.md). Step-by-step encoding/decoding APRS and AX25.
+* [144.39MHz 1/4 Wave Ground Plane Antenna Design](docs/ant/README.md).
 
 
 ## :snake: Python Compatibility
@@ -189,6 +190,9 @@ rtl_fm -f 144.390M -s 22050 -g 10 - | python aprs_demod.py -t raw - | python apr
 ```
 
 
+## :raised_hands: Acknowledgements
+- [Micropython](https://github.com/micropython/micropython) project
+- [Direwolf TNC](https://github.com/wb2osz/direwolf)
 
 
 ## License

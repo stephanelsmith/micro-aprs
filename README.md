@@ -16,33 +16,36 @@ The purpose of this library is to thread-the-needle of both enabling APRS/AX.25/
 In practice this means we:
 * Avoid floating point and math libraries and dependencies in critical sections.  
 	* :+1: Integer math only
-	* :+1: Lookup tables
 	* :+1: NO external libraries (numpy/scipy/pandas).
 * Special care for memory allocation
 	* :+1: Pre-computing buffer/array sizes and modifying in place
 	* :-1: Dynamically appending items to a list
 * Single threaded, multitask friendly
 	* :+1::+1: Asyncio
- 
-```aprs_demo.py``` decodes over 1000 (**1010** :eyes:) error-free frames on the [TNC CD Track 2](http://wa8lmf.net/TNCtest/).  TNC CD Track 2 being the benchmark, [this performance is very good!](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf)  Cheers to that! :beers: 
 
 
-## Tutorials :mortar_board:
+### **Micro-Aprs decodes 1000+ error-free frames on the [TNC CD Track 2](http://wa8lmf.net/TNCtest/).  That's **1010** :eyes: in a balanced mode at **1014** :fireworks: in a more computational intensive mode!**
+
+(TNC CD Track 2 is the universal test for APRS demod, [this performance is very good!](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf))
+
+
+## :mortar_board: Tutorials
 
 As many who've gone down this path have mentioned, there's really just not a lot of information out there covering these topics.  I hope these tutorial sections will provide you additional information on getting started!
 * [AFSK Demodulation](docs/demod/README.md). Convert raw AFSK samples to bits.
 * [AFSK Modulation](docs/mod/README.md). Convert byte arrays to AFSK samples
 * [AX25/APRS Encoding and Decoding](docs/encdec/README.md). Step-by-step encoding/decoding APRS and AX25.
+* [144.39MHz 1/4 Wave Ground Plane Antenna Design](docs/ant/README.md).
 
 
-## Python :snake: Compatibility
+## :snake: Python Compatibility
 Care has been taken to make the source fully compatible across target python versions:
 * Python (for the lazy)
 * Micropython (for embedded)
 * Pypy3 (for speed!)
 
 
-## ```aprs_mod.py``` APRS to AFSK Modulation
+## :satellite: APRS to AFSK Modulation
 
 ```aprs_mod.py``` provides conversion from APRS string(s) into raw 16 bit signed integer raw format with a default sampling rate 22050. 
 
@@ -96,7 +99,7 @@ echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py 
 ```
 
 
-## ```aprs_demod.py``` AFSK Demodulation to APRS Strings
+## :satellite: AFSK Demodulation to APRS Strings
 
 ```aprs_demod.py``` reads in raw 16 bit signed integers from standard input or file and output detected APRS strings.
 
@@ -172,6 +175,24 @@ bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
 sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
 ```
 
+## :radio: Live APRS Decode with RTL-SDR
+
+* Live decode of APRS on 144.39MHz using rtl_fm:
+```
+rtl_fm -f 144.390M -s 22050 -g 1 - | python aprs_demod.py -t raw -
+```
+
+
+* Rx Only IGate with APRS forwarding to APRS IS (live viewing on [aprs.fi](https://aprs.fi/)).
+Note: currently the aprs_is function is somewhat hard coded for me out of convenience, can certainly be better paramerterized.
+```
+rtl_fm -f 144.390M -s 22050 -g 10 - | python aprs_demod.py -t raw - | python aprs_is.py -c KI5TOF
+```
+
+
+## :raised_hands: Acknowledgements
+- [Micropython](https://github.com/micropython/micropython) project
+- [Direwolf TNC](https://github.com/wb2osz/direwolf)
 
 
 ## License

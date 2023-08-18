@@ -156,6 +156,9 @@ def is_parse_args(args):
         'args' : {
             'call'      : 'KI5TOF',
             'passcode'  : '17081',
+            'lat'       : None,
+            'lon'       : None,
+            'msg'       : None,
         },
     }
     try:
@@ -170,6 +173,9 @@ aprs_is.py sends aprs commands from stdin to aprs is servers.
 OPTIONS:
     -c, --call         APRS call sign
     -p, --passcode     APRS passcode (https://apps.magicbug.co.uk/passcode/)
+    -lat               Beacon lat (decimal notation)
+    -lon               Beacon lon (decimal notation)
+    -msg               Beacon message, default: micro-aprs-modem 144.390MHz rx only APRS iGate
 ''')
             exit()
         if '-p' in args:
@@ -180,6 +186,12 @@ OPTIONS:
             r['args']['call'] = get_arg_val(args, '-c', str)
         if '--call' in args:
             r['args']['call'] = get_arg_val(args, '--call', str)
+        if '-lat' in args:
+            r['args']['lat'] = get_arg_val(args, '-lat', float)
+        if '-lon' in args:
+            r['args']['lon'] = get_arg_val(args, '-lon', float)
+        if '-msg' in args:
+            r['args']['msg'] = args[args.index('-msg')+1:]
     except IndexError:
         pass
     return r

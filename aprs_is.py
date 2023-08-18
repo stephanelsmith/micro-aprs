@@ -114,10 +114,12 @@ async def stdin_ingress(call,
         traceback.print_exc()
 
 async def station_beacon(ax25_q, 
-                         call, 
-                         lat, lon, 
+                         call = None, 
+                         lat = None, lon = None, 
                          msg = 'micro-aprs-modem 144.390MHz rx only APRS iGate',
                          ):
+    if not lat or not lon or not call:
+        print('skipping beacon lat:{} lon:{}'.format(lat, lon))
     try:
         lat_frac = lat % 1
         lon_frac = lon % 1
@@ -180,6 +182,8 @@ async def main():
         tasks = []
         call = args['args']['call'].upper()
         passcode = args['args']['passcode']
+        if not passcode:
+            raise Exception('Missing passcode')
         login_evt = Event()
         ax25_q = Queue()
 
@@ -201,6 +205,9 @@ async def main():
 
         tasks.append(asyncio.create_task(station_beacon(call      = call,
                                                         ax25_q    = ax25_q,
+                                                        lat       = args['args']['lat'],
+                                                        lon       = args['args']['lon'],
+                                                        msg       = args['args']['msg'],
                                                         )))
 
         await asyncio.gather(*tasks, return_exceptions=True)

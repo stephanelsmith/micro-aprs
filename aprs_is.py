@@ -121,15 +121,17 @@ async def station_beacon(ax25_q,
     if not lat or not lon or not call:
         print('skipping beacon lat:{} lon:{}'.format(lat, lon))
     try:
-        lat_frac = lat % 1
-        lon_frac = lon % 1
-        lat_deg = round(int(lat)*100 + (lat_frac*60.0),2)
+        lat_deg = int(lat)*100
+        lat_min = (abs(lat)%1)*60.0
         lat_dir = 'N' if lat_deg > 0 else 'S'
-        lat_deg = abs(lat_deg)
-        lon_deg = round(int(lon)*100 + (lon_frac*60.0),2)
+        lat = abs(lat_deg)+abs(lat_min)
+
+        lon_deg = int(lon)*100
+        lon_min = (abs(lon)%1)*60.0
         lon_dir = 'W' if lon_deg < 0 else 'E'
-        lon_deg = abs(lon_deg)
-        aprs_loc = '{:04}{}I{:08.2f}{}'.format(lat_deg, lat_dir, lon_deg, lon_dir)
+        lon = abs(lon_deg)+abs(lon_min)
+
+        aprs_loc = '{:07.2f}{}I{:08.2f}{}'.format(lat, lat_dir, lon, lon_dir)
         msg = 'micro-aprs-modem 144.390MHz rx only APRS iGate'
         ax25 = AX25(src  = call,
                     dst  = 'APKI5',

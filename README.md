@@ -154,7 +154,7 @@ WB2OSZ-11>TEST:,The quick brown fox jumps over the lazy dog!  3 of 4
 WB2OSZ-11>TEST:,The quick brown fox jumps over the lazy dog!  4 of 4
 ```
 
-* Decode [International Space Station flyby recording](https://inst.eecs.berkeley.edu/~ee123/sp15/lab/lab6/Lab6_Part_B-APRS.html)
+* Decode [International Space Station flyby recording](https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav)
 ```
 wget https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav
 sox -t wav ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -

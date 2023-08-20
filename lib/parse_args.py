@@ -159,6 +159,7 @@ def is_parse_args(args):
             'lat'       : None,
             'lon'       : None,
             'msg'       : None,
+            'log_file'  : 'aprs.log',
         },
     }
     try:
@@ -176,6 +177,7 @@ OPTIONS:
     -lat               Beacon lat (decimal notation)
     -lon               Beacon lon (decimal notation)
     -msg               Beacon message, default: micro-aprs-modem 144.390MHz rx only APRS iGate
+    -log_file          Save APRS messages received to log
 ''')
             exit()
         if '-p' in args:

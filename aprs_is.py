@@ -2,6 +2,7 @@
 
 import traceback
 import sys
+from datetime import datetime
 
 import asyncio
 from asyncio import Event
@@ -106,7 +107,7 @@ async def stdin_ingress(call,
             ax25.digis.append(CallSSID(call='qAR'))
             ax25.digis.append(CallSSID(aprs=call))
 
-            await ax25_q.put(ax25)
+            await ax25_q.put((ax25,True))
 
     except asyncio.CancelledError:
         raise
@@ -141,7 +142,7 @@ async def station_beacon(ax25_q,
         ax25.digis.append(CallSSID(call='qAS'))
         ax25.digis.append(CallSSID(aprs=call))
         while True:
-            await ax25_q.put(ax25)
+            await ax25_q.put((ax25, False))
             await asyncio.sleep(60*15)
     except asyncio.CancelledError:
         raise
@@ -153,6 +154,7 @@ async def aprs_is_egress(writer,
                          passcode,
                          login_evt,
                          ax25_q,
+                         log_file = None,
                          ):
     try:
         #login
@@ -166,8 +168,13 @@ async def aprs_is_egress(writer,
         await login_evt.wait()
 
         while True:
-            ax25 = await ax25_q.get()
-            print('>',ax25)
+            ax25,echo = await ax25_q.get()
+            if echo:
+                now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                print('[{}] {}'.format(now,ax25))
+                if log_file:
+                    with open(log_file, 'a') as l:
+                        l.write('[{}] {}\n'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ax25))
             writer.write(ax25.encode())
             writer.write(b'\r\n')
             await writer.drain()
@@ -199,6 +206,7 @@ async def main():
                                                         passcode  = passcode,
                                                         login_evt = login_evt,
                                                         ax25_q    = ax25_q,
+                                                        log_file  = args['args']['log_file'],
                                                         )))
 
         tasks.append(asyncio.create_task(stdin_ingress(call      = call,

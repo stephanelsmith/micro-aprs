@@ -55,70 +55,68 @@ async def read_raw_from_pipe(samples_q,
     except asyncio.CancelledError:
         raise
 
-async def play_samples(samples_q):
-    try:
-        while True:
-            f_name = 'play.wav'
-            try:
-                a = array('i', [])
-                while True:
-                    try:
-                        _a,idx = await asyncio.wait_for(samples_q.get(), 1)
-                        a = a + _a[:idx]
-                        samples_q.task_done()
-                    except asyncio.CancelledError:
-                        raise
-                    except asyncio.TimeoutError:
-                        break
-            except asyncio.CancelledError:
-                raise
-            except Exception as err:
-                traceback.print_exc()
-            finally:
-                print('play samples', len(a))
-                # play the samples
-                obj = wave.open(f_name,'w')
-                obj.setnchannels(1)
-                obj.setsampwidth(2)
-                obj.setframerate(22050)
-                for h in a:
-                    obj.writeframesraw(struct.pack('<h', h))
-                obj.close()
-                print('play {}'.format(f_name))
-                await run('play {}'.format(f_name))
-
-
-    except asyncio.CancelledError:
-        raise
-    except Exception as err:
-        traceback.print_exc()
-
-# async def play_samples(samples_q):
+async # def play_samples(samples_q):
     # try:
-        # # p = pyaudio.PyAudio()
-        # # stream = p.open(format=pyaudio.paInt16,
-                        # # channels=1,
-                        # # rate=22050,
-                        # # output=True)
         # while True:
-            # with tempfile.NamedTemporaryFile() as f:
+            # f_name = 'play.wav'
+            # try:
                 # a = array('i', [])
                 # while True:
                     # try:
                         # _a,idx = await asyncio.wait_for(samples_q.get(), 1)
-                        # #a = a + _a[:idx]
-                        # f.write(a[:idx])
+                        # a = a + _a[:idx]
                         # samples_q.task_done()
+                    # except asyncio.CancelledError:
+                        # raise
                     # except asyncio.TimeoutError:
                         # break
-                # if len(a):
-                    # # play the samples
-                    # # stream.write(bytes(a))
-                    # f.seek(0)
+            # except asyncio.CancelledError:
+                # raise
+            # except Exception as err:
+                # traceback.print_exc()
+            # finally:
+                # print('play samples', len(a))
+                # # play the samples
+                # obj = wave.open(f_name,'w')
+                # obj.setnchannels(1)
+                # obj.setsampwidth(2)
+                # obj.setframerate(22050)
+                # for h in a:
+                    # obj.writeframesraw(struct.pack('<h', h))
+                # obj.close()
+                # print('play {}'.format(f_name))
+                # await run('play {}'.format(f_name))
     # except asyncio.CancelledError:
         # raise
     # except Exception as err:
         # traceback.print_exc()
+
+async def play_samples(samples_q):
+    try:
+        p = pyaudio.PyAudio()
+        stream = p.open(format=pyaudio.paInt16,
+                        channels=1,
+                        rate=22050,
+                        output=True)
+        while True:
+            a = array('i', [])
+            while True:
+                try:
+                    _a,idx = await asyncio.wait_for(samples_q.get(), 1)
+                    a = a + _a[:idx]
+                    samples_q.task_done()
+                except asyncio.TimeoutError:
+                    break
+            if len(a):
+                # play the samples
+                stream.write(bytes(a))
+    except asyncio.CancelledError:
+        raise
+    except Exception as err:
+        traceback.print_exc()
+    finally:
+        stream.close()
+        p.terminate()
 
 async def main():
 

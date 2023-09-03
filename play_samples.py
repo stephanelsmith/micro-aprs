@@ -2,6 +2,7 @@
 import traceback
 import sys
 import io
+import os
 from datetime import datetime
 from subprocess import check_output
 from array import array
@@ -13,7 +14,7 @@ from asyncio import Event
 from asyncio import Queue
 import json
 import wave
-import pyaudio 
+# import pyaudio 
 
 from ax25.ax25 import AX25
 from ax25.callssid import CallSSID
@@ -41,10 +42,9 @@ async def read_raw_from_pipe(samples_q,
             arr[idx] = struct.unpack('<h', a)[0]
             idx += 1
             if idx%defs.SAMPLES_SIZE == 0:
-                if afsk_detector(arr,idx): #afsk signal detector
-                    await samples_q.put((arr, idx))
-                    await asyncio.sleep(0)
-                    arr = array('i',range(defs.SAMPLES_SIZE))
+                await samples_q.put((arr, idx))
+                await asyncio.sleep(0)
+                arr = array('i',range(defs.SAMPLES_SIZE))
                 idx = 0
         await samples_q.put((arr, idx))
         await asyncio.sleep(0)
@@ -55,68 +55,71 @@ async def read_raw_from_pipe(samples_q,
     except asyncio.CancelledError:
         raise
 
-async # def play_samples(samples_q):
-    # try:
-        # while True:
-            # f_name = 'play.wav'
-            # try:
-                # a = array('i', [])
-                # while True:
-                    # try:
-                        # _a,idx = await asyncio.wait_for(samples_q.get(), 1)
-                        # a = a + _a[:idx]
-                        # samples_q.task_done()
-                    # except asyncio.CancelledError:
-                        # raise
-                    # except asyncio.TimeoutError:
-                        # break
-            # except asyncio.CancelledError:
-                # raise
-            # except Exception as err:
-                # traceback.print_exc()
-            # finally:
-                # print('play samples', len(a))
-                # # play the samples
-                # obj = wave.open(f_name,'w')
-                # obj.setnchannels(1)
-                # obj.setsampwidth(2)
-                # obj.setframerate(22050)
-                # for h in a:
-                    # obj.writeframesraw(struct.pack('<h', h))
-                # obj.close()
-                # print('play {}'.format(f_name))
-                # await run('play {}'.format(f_name))
-    # except asyncio.CancelledError:
-        # raise
-    # except Exception as err:
-        # traceback.print_exc()
-
 async def play_samples(samples_q):
     try:
-        p = pyaudio.PyAudio()
-        stream = p.open(format=pyaudio.paInt16,
-                        channels=1,
-                        rate=22050,
-                        output=True)
+        f_name = 'play.wav'
         while True:
-            a = array('i', [])
-            while True:
-                try:
-                    _a,idx = await asyncio.wait_for(samples_q.get(), 1)
-                    a = a + _a[:idx]
-                    samples_q.task_done()
-                except asyncio.TimeoutError:
-                    break
-            if len(a):
-                # play the samples
-                stream.write(bytes(a))
+            try:
+                a = array('i', [])
+                while True:
+                    try:
+                        _a,idx = await asyncio.wait_for(samples_q.get(), 1)
+                        a = a + _a[:idx]
+                        samples_q.task_done()
+                    except asyncio.CancelledError:
+                        raise
+                    except asyncio.TimeoutError:
+                        break
+            except asyncio.CancelledError:
+                raise
+            except Exception as err:
+                traceback.print_exc()
+            finally:
+                if a:
+                    # play the samples
+                    try:
+                        obj = wave.open(f_name,'w')
+                        obj.setnchannels(1)
+                        obj.setsampwidth(2)
+                        obj.setframerate(22050)
+                        for h in a:
+                            obj.writeframesraw(struct.pack('<h', h))
+                        obj.close()
+                        #print('play {}'.format(f_name))
+                        await run('play {}'.format(f_name))
+                    finally:
+                        os.remove(f_name)
     except asyncio.CancelledError:
         raise
     except Exception as err:
         traceback.print_exc()
-    finally:
-        stream.close()
-        p.terminate()
+
+# async def play_samples(samples_q):
+    # try:
+        # p = pyaudio.PyAudio()
+        # stream = p.open(format=pyaudio.paInt16,
+                        # channels=1,
+                        # rate=22050,
+                        # output=True)
+        # while True:
+            # a = array('i', [])
+            # while True:
+                # try:
+                    # _a,idx = await asyncio.wait_for(samples_q.get(), 1)
+                    # a = a + _a[:idx]
+                    # samples_q.task_done()
+                # except asyncio.TimeoutError:
+                    # break
+            # if len(a):
+                # # play the samples
+                # stream.write(bytes(a))
+    # except asyncio.CancelledError:
+        # raise
+    # except Exception as err:
+        # traceback.print_exc()
+    # finally:
+        # stream.close()
+        # p.terminate()
 
 async def main():
 

@@ -75,8 +75,7 @@ rtl_fm -f 144.390M -s 22050 -g 10 - | python aprs_demod.py -t raw - | python apr
 rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t raw - | python aprs_is.py -c KI5TOF-10 -p 17081 -lat 29.699616621630348 -lon -95.75020574442557
 
 # TERMUX
-python termux_beacon.py | python aprs_mod.py
-
+python termux_beacon.py | python aprs_mod.py | python play_samples.py
 
 #UPY
 ./micropython utest.py write | ./micropython utest.py read

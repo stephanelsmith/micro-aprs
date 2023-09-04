@@ -3,6 +3,7 @@
 import traceback
 import sys
 from datetime import datetime
+from subprocess import check_output
 
 import asyncio
 from asyncio import Event
@@ -42,6 +43,10 @@ APRS_IS_FILTER_PORT = 14580
 #telem:    KI5TOF>APRS:T#000,1,2,3,4,5,01010101
 #telem:    KI5TOF>APRS:T#002,10.12,20.23,30.45,40.67,50.89,10101010
 #telem:    KI5TOF>APRS:T#003,110.12,120.23,130.45,140.67,150.89,10101010comment
+
+
+async def run(cmd):
+    return await asyncio.to_thread(check_output, cmd.split())
 
 async def aprs_is_ingress(reader, login_evt, call):
     try:

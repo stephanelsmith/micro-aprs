@@ -8,6 +8,7 @@ def mod_parse_args(args):
             'verbose' : False,
             'quiet'   : False,
             'rate'    : 22050,
+            'vox'     : False,
             'options' : {},
         },
         'in' : {
@@ -32,6 +33,7 @@ aprs_mod.py
 
 OPTIONS:
 -r, --rate       22050 (default)
+-vox             Vox mode, pad header flags to activate radio vox
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:
@@ -49,10 +51,12 @@ outfile       '-' (default) | 'null' (no output)
     try:
         #general args
         args = spl.pop(0)
-        if '-rate' in args:
-            r['args']['rate'] = get_arg_val(args, '-rate', int)
+        if '--rate' in args:
+            r['args']['rate'] = get_arg_val(args, '--rate', int)
         if '-r' in args:
             r['args']['rate'] = get_arg_val(args, '-r', int)
+        if '-vox' in args:
+            r['args']['vox'] = get_arg_val(args, '-vox', bool)
         if '-v' in args or '-verbose' in args:
             r['args']['verbose'] = True
         if '-q' in args or '-quiet' in args:

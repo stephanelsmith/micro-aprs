@@ -67,6 +67,7 @@ aprs_mod.py
 
 OPTIONS:
 -r, --rate       22050 (default)
+-vox             Vox mode, pad header flags to activate radio vox
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:

@@ -96,7 +96,13 @@ async def stdin_ingress(call,
                 continue
 
             print('<', line.decode())
-            ax25 = AX25(aprs = line)
+            try:
+                ax25 = AX25(aprs = line)
+            except asyncio.CancelledError:
+                raise
+            except Exception as err:
+                traceback.print_exc()
+                print('SKIPPING...')
 
             # skip paths with keywords
             for digi in ax25.digis:
@@ -123,13 +129,13 @@ async def stdin_ingress(call,
 async def station_beacon(ax25_q, 
                          call = None, 
                          lat = None, lon = None, 
-                         msg = 'micro-aprs-modem 144.390MHz rx only APRS iGate',
+                         msg = 'micro-aprs 144.390MHz rx only APRS iGate',
                          ):
     if not lat or not lon or not call:
         print('skipping beacon lat:{} lon:{}'.format(lat, lon))
     try:
         aprs_loc = aprs_gps_format(lat, lon)
-        msg = 'micro-aprs-modem 144.390MHz rx only APRS iGate'
+        msg = 'micro-aprs 144.390MHz rx only APRS iGate'
         ax25 = AX25(src  = call,
                     dst  = 'APKI5',
                     info = '!{}#{}'.format(aprs_loc, msg).encode(),

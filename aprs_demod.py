@@ -72,12 +72,15 @@ async def read_samples_from_rtl_fm(samples_q,
             idx = 0
 
             while True:
+                stderr = await proc.stderr.readline()
+                if stderr:
+                    msg = stderr.decode().strip()
+                    eprint(msg)
+                    # todo, detect rtl-sdr dongle not found
+                    continue
                 try:
                     a = await proc.stdout.readexactly(2)
                 except EOFError:
-                    stderr = await proc.stderr.readline()
-                    print(stderr.decode().strip())
-                    await asyncio.sleep(1)
                     break
                 arr[idx] = struct.unpack('<h', a)[0]
                 # arr[idx] = int.from_bytes(a,'little',signed=True)
@@ -203,7 +206,7 @@ async def main():
         #from .raw file
         if args['in']['file'] == '-':
             await read_samples_from_pipe(samples_q)
-        if args['in']['file'] == 'rtl_fm':
+        elif args['in']['file'] == 'rtl_fm':
             await read_samples_from_rtl_fm(samples_q)
         elif args['in']['type'] == 'raw' and args['in']['file']:
             await read_samples_from_file(samples_q = samples_q,

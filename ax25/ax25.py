@@ -89,6 +89,22 @@ class AX25():
         return '{}>{}:{}'.format(src,
                                  dst_digis,
                                  info)
+
+    # some fancy highlighting if we have rich
+    def to_aprs_rich(self):
+        src = self.callssid_to_str(self.src)
+        dst = self.callssid_to_str(self.dst)
+        dst_digis = ','.join([dst]+[self.callssid_to_str(digi) for digi in self.digis])
+        if isinstance(self.info, (bytes, bytearray)):
+            try:
+                info = self.info.decode().strip()
+            except UnicodeDecodeError:
+                info = str(self.info).strip()
+        else:
+            info = str(self.info).strip()
+        return '[bold bright_green]{}[/]>[bright_yellow]{}[/]:[bold]{}[/]'.format(src,
+                                 dst_digis,
+                                 info)
     
     def from_aprs(self, aprs):
         # KI5TOF>APRS,WIDE1-1,WIDE2-1:hello world!

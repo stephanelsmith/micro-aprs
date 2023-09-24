@@ -72,7 +72,10 @@ sox -t wav test/static.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | pyth
 #APRS IS
 echo "KI5TOF>APRS:>hello world!" | python aprs_is.py -c KI5TOF-10 -p 17081 -lat 29.699616621630348 -lon -95.75020574442557 -msg micro-aprs-modem 144.390MHz rx only APRS iGate
 rtl_fm -f 144.390M -s 22050 -g 10 - | python aprs_demod.py -t raw - | python aprs_is.py -c KI5TOF-10 -p 17081 -lat 29.699616621630348 -lon -95.75020574442557
+python aprs_demod.py -t raw rtl_fm | python aprs_is.py -c KI5TOF-10 -p 17081 -lat 29.699616621630348 -lon -95.75020574442557
+pypy3 aprs_demod.py -t raw rtl_fm | python aprs_is.py -c KI5TOF-10 -p 17081 -lat 29.699616621630348 -lon -95.75020574442557
 rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t raw - | python aprs_is.py -c KI5TOF-10 -p 17081 -lat 29.699616621630348 -lon -95.75020574442557
+
 
 # TERMUX
 # for pyaudio, install "it's pointless" https://wiki.termux.com/wiki/Package_Management

@@ -116,7 +116,7 @@ OPTIONS:
 
 -t INPUT TYPE OPTIONS:
 intype       'raw' (default)
-infile       '-' (default) | raw file
+infile       '-' (default) | raw file | 'rtl_fm'
 
 -t OUTPUT TYPE OPTIONS:
 outtype       'aprs'

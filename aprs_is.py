@@ -15,6 +15,14 @@ from ax25.callssid import CallSSID
 from lib.parse_args import is_parse_args
 from lib.gps import aprs_gps_format
 
+# try importing rich, colorize output text for readability
+try:
+    from rich.console import Console
+    console = Console()
+    print = console.print
+except ImportError:
+    console = None
+
 CALL = 'KI5TOF'
 PASSCODE = '17081'
 
@@ -57,14 +65,16 @@ async def aprs_is_ingress(reader, login_evt, call):
                 # print('<<<',data)
                 line = data.decode()
                 if len(line) > 0:
-                    if line[:7] != '# aprsc':
-                        print(line.rstrip())
+                    #if line[:7] != '# aprsc':
+                    #    print(line.rstrip())
                     if line.find(login_resp) != -1:
                         login_evt.set()
     except asyncio.CancelledError:
         raise
     except Exception as err:
         traceback.print_exc()
+    finally:
+        print('exiting aprs_is ingress')
 
 async def stdin_ingress(call,
                         ax25_q,
@@ -78,6 +88,7 @@ async def stdin_ingress(call,
         eol = ord('\n')
         done = False
         buf = bytearray(512)
+        count = 0
 
         while not done:
             i = 0
@@ -90,12 +101,14 @@ async def stdin_ingress(call,
                 if ord(b) == eol:
                     break
                 buf[i] = ord(b)
-                i = (i+1)%512
+                i += 1
+                if i >= 512:
+                    break
             line = buf[:i]
             if not line:
                 continue
 
-            print('<', line.decode())
+            #print(line.decode(), flush=True)
             try:
                 ax25 = AX25(aprs = line)
             except asyncio.CancelledError:
@@ -103,6 +116,12 @@ async def stdin_ingress(call,
             except Exception as err:
                 traceback.print_exc()
                 print('SKIPPING...')
+           
+            count += 1
+            if console:
+                print('[bright_blue bold]\[{}][/] {}'.format(count, ax25.to_aprs_rich()))
+            else:
+                print('[{}] {}'.format(count, ax25))
 
             # skip paths with keywords
             for digi in ax25.digis:
@@ -111,7 +130,7 @@ async def stdin_ingress(call,
                    'tcpxx' in via or\
                    'rfonly' in via or\
                    'nogate' in via:
-                    print('x', ax25)
+                    print('X', ax25)
                     continue
 
             #Packets being relayed to APRS-IS network get ",qAR,IGATECALL-SSID" appended to outermost address before first ':' character
@@ -125,6 +144,8 @@ async def stdin_ingress(call,
         raise
     except Exception as err:
         traceback.print_exc()
+    finally:
+        print('exiting stdin ingress')
 
 async def station_beacon(ax25_q, 
                          call = None, 
@@ -150,6 +171,8 @@ async def station_beacon(ax25_q,
         raise
     except Exception as err:
         traceback.print_exc()
+    finally:
+        print('exiting station beacon')
 
 async def aprs_is_egress(writer, 
                          call,
@@ -173,7 +196,7 @@ async def aprs_is_egress(writer,
             ax25,echo = await ax25_q.get()
             if echo:
                 now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                print('[{}] {}'.format(now,ax25))
+                #print('{}'.format(ax25), flush=True)
                 if log_file:
                     with open(log_file, 'a') as l:
                         l.write('[{}] {}\n'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ax25))
@@ -185,6 +208,8 @@ async def aprs_is_egress(writer,
         raise
     except Exception as err:
         traceback.print_exc()
+    finally:
+        print('exiting aprs is egress')
 
 async def main():
     args = is_parse_args(sys.argv)

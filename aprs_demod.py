@@ -27,7 +27,7 @@ from lib.compat import get_stdin_streamreader
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
 
-async def read_raw_from_pipe(samples_q, 
+async def read_samples_from_pipe(samples_q, 
                              ):
     try:
         reader = await get_stdin_streamreader()
@@ -57,7 +57,46 @@ async def read_raw_from_pipe(samples_q,
     except asyncio.CancelledError:
         raise
 
-async def read_samples_from_raw(samples_q, 
+async def read_samples_from_rtl_fm(samples_q, 
+                                   ):
+    try:
+        while True:
+            cmd = 'rtl_fm -f 144.390M -s 22050 -g 10'
+            proc = await asyncio.create_subprocess_exec(
+                cmd.split()[0], *cmd.split()[1:], 
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+
+            arr = array('i',range(defs.SAMPLES_SIZE))
+            idx = 0
+
+            while True:
+                try:
+                    a = await proc.stdout.readexactly(2)
+                except EOFError:
+                    stderr = await proc.stderr.readline()
+                    print(stderr.decode().strip())
+                    await asyncio.sleep(1)
+                    break
+                arr[idx] = struct.unpack('<h', a)[0]
+                # arr[idx] = int.from_bytes(a,'little',signed=True)
+                idx += 1
+                if idx%defs.SAMPLES_SIZE == 0:
+                    if afsk_detector(arr,idx): #afsk signal detector
+                        await samples_q.put((arr, idx))
+                        await asyncio.sleep(0)
+                        arr = array('i',range(defs.SAMPLES_SIZE))
+                    idx = 0
+            await samples_q.put((arr, idx))
+            await asyncio.sleep(0)
+
+    except Exception as err:
+        print_exc(err)
+    except asyncio.CancelledError:
+        raise
+
+async def read_samples_from_file(samples_q, 
                                 file,
                                 ):
     try:
@@ -163,9 +202,11 @@ async def main():
 
         #from .raw file
         if args['in']['file'] == '-':
-            await read_raw_from_pipe(samples_q)
+            await read_samples_from_pipe(samples_q)
+        if args['in']['file'] == 'rtl_fm':
+            await read_samples_from_rtl_fm(samples_q)
         elif args['in']['type'] == 'raw' and args['in']['file']:
-            await read_samples_from_raw(samples_q = samples_q,
+            await read_samples_from_file(samples_q = samples_q,
                                         file          = args['in']['file'],
                                         )
         else:

@@ -172,6 +172,7 @@ class AFSKDemodulator():
             while True:
                 #fetch next chunk of samples (array)
                 arr,arr_size = await samp_q.get()
+                eprint(arr_size)
 
                 for i in range(arr_size):
                     o = arr[i]

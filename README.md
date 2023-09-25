@@ -228,6 +228,6 @@ rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t raw - | python aprs
 
 
 ## License
-MIT License
+GNU General Public License v3.0
 
 

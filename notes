@@ -59,6 +59,8 @@ sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - > 
 python aprs_demod.py -t raw test/tnc_test02.raw
 
 #RTL-SDR
+# install udev
+# sudo wget -P /etc/udev/rules.d https://raw.githubusercontent.com/osmocom/rtl-sdr/master/rtl-sdr.rules
 rtl_fm -M wbfm -f 94.5M -r 22500 | play -r 22500 -t raw -e s -b 16 -c 1 -v 0.1 -
 rtl_fm -f 144.390M -s 22050 -g 1 - | multimon-ng -t raw -A -a AFSK1200 -
 rtl_fm -f 144.390M -s 22050 -g 1 - | sox -t raw -b 16 -e signed-integer -c 1 -v 1 -r 22050 -  -t wav test/static_and_aprs.wav

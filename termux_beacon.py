@@ -32,13 +32,13 @@ async def get_loc():
             d = json.loads(r.decode())
 
             aprs_loc = aprs_gps_format(d['latitude'], d['longitude'])
-            msg = 'hello world'
+            msg = 'bapfelpfannkuchen et un croque monsieur'
             ax25 = AX25(src  = CALL,
                         dst  = 'APRS',
                         info = '={}{}'.format(aprs_loc, msg).encode(),
                         )
             print(ax25, flush=True)
-            await asyncio.sleep(5)
+            await asyncio.sleep(30)
     except asyncio.CancelledError:
         raise
     except Exception as err:

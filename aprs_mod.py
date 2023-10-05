@@ -76,7 +76,7 @@ async def afsk_mod(aprs_q,
 				#pre-message flags
 				#we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
                 if args['args']['vox']:
-                    await afsk_mod.send_flags(100)
+                    await afsk_mod.send_flags(200)
                 else:
                     await afsk_mod.send_flags(4)
 

@@ -20,7 +20,6 @@ from afsk.func import lpf_fir_design
 from afsk.func import bandpass_fir_design
 from afsk.func import create_sampler
 from afsk.func import create_fir
-from afsk.func import create_fir_arr
 
 from lib.compat import print_exc
 
@@ -101,7 +100,6 @@ class AFSKDemodulator():
                                            bandpass_amark, 
                                            bandpass_aspace)
         self.bandpass = create_fir(coefs = coefs, scale = g)
-        #self.bandpass = create_fir_arr(coefs = coefs, scale = scale)
 
 
         self.corr = create_corr(ts    = self.ts,

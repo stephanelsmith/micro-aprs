@@ -78,6 +78,7 @@ async def play_samples(samples_q):
                 if a:
                     # play the samples
                     try:
+                        print('write wav')
                         obj = wave.open(f_name,'w')
                         obj.setnchannels(1)
                         obj.setsampwidth(2)
@@ -85,7 +86,7 @@ async def play_samples(samples_q):
                         for h in a:
                             obj.writeframesraw(struct.pack('<h', h))
                         obj.close()
-                        #print('play {}'.format(f_name))
+                        print('play {}'.format(f_name))
                         await run('play {}'.format(f_name))
                     finally:
                         os.remove(f_name)

@@ -125,8 +125,8 @@ async def read_samples_from_file(samples_q,
                                 file,
                                 ):
     try:
-        if file[-4:] != '.raw':
-            raise Exception('uknown file type', file)
+        # if file[-4:] != '.raw':
+            # raise Exception('uknown file type', file)
         arr = array('i',range(defs.SAMPLES_SIZE))
         idx = 0
 
@@ -207,8 +207,8 @@ async def main():
     args = demod_parse_args(sys.argv)
     eprint('# APRS DEMOD')
     eprint('# RATE {}'.format(args['args']['rate']))
-    eprint('# IN   {} {}'.format(args['in']['type'], args['in']['file']))
-    eprint('# OUT  {} {}'.format(args['out']['type'], args['out']['file']))
+    eprint('# IN   {}'.format(args['in']['file']))
+    eprint('# OUT  {}'.format(args['out']['file']))
 
     samples_q = Queue()
     bits_q = Queue()
@@ -230,12 +230,12 @@ async def main():
             await read_samples_from_pipe(samples_q)
         elif args['in']['file'] == 'rtl_fm':
             await read_samples_from_rtl_fm(samples_q)
-        elif args['in']['type'] == 'raw' and args['in']['file']:
+        elif args['in']['file']:
             await read_samples_from_file(samples_q = samples_q,
                                         file          = args['in']['file'],
                                         )
         else:
-            raise Exception('unsupported input {} {}'.format(args['in']['type'], args['in']['file']))
+            raise Exception('unsupported input {}'.format(args['in']['file']))
 
         await samples_q.join()
         await bits_q.join()

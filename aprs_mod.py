@@ -2,8 +2,6 @@
 import sys
 import asyncio
 import struct
-import wave
-from subprocess import check_output
 
 from lib.compat import Queue
 
@@ -19,6 +17,10 @@ from lib.utils import eprint
 from lib.compat import IS_UPY
 from lib.compat import print_exc
 from lib.compat import get_stdin_streamreader
+
+if not IS_UPY:
+    import wave
+    from subprocess import check_output
 
 async def read_aprs_from_pipe(aprs_q, 
                               ):
@@ -123,6 +125,8 @@ async def afsk_out(afsk_q,
         wav = None
         if args['out']['file'][-4:] == '.wav' or\
            args['out']['file'] == 'play':
+            if IS_UPY:
+                raise Exception('wave files not supported in upy')
             is_wave = True
             if args['out']['file'][-4:] == '.wav':
                 wave_filename = args['out']['file']
@@ -147,7 +151,6 @@ async def afsk_out(afsk_q,
                         wav.writeframesraw(samp)
                 else:
                     wav.close()
-                    eprint('wrote {}'.format(wave_filename))
                     if args['out']['file'] == 'play':
                         # play wav
                         await run('play {}'.format(wave_filename))
@@ -161,7 +164,6 @@ async def afsk_out(afsk_q,
     finally:
         if wav:
             wav.close()
-            eprint('wrote {}'.format(wave_filename))
             if args['out']['file'] == 'play':
                 # play wav
                 await run('play {}'.format(wave_filename))
@@ -174,8 +176,8 @@ async def main():
     eprint('# APRS MOD')
     # eprint(args)
     eprint('# RATE {}'.format(args['args']['rate']))
-    eprint('# IN   {} {}'.format(args['in']['type'], args['in']['file']))
-    eprint('# OUT  {} {}'.format(args['out']['type'], args['out']['file']))
+    eprint('# IN   {}'.format(args['in']['file']))
+    eprint('# OUT  {}'.format(args['out']['file']))
 
     aprs_q = Queue() #aprs input queue
     afsk_q = Queue() #afsk output queue

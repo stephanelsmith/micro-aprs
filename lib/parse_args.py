@@ -12,11 +12,11 @@ def mod_parse_args(args):
             'options' : {},
         },
         'in' : {
-            'type' : 'aprs',
+            # 'type' : 'aprs',
             'file'  : '-', #from stdin
         },
         'out' : {
-            'type' : 'raw',
+            # 'type' : 'raw',
             'file'  : '-', #to stdout
         },
     }
@@ -26,8 +26,8 @@ def mod_parse_args(args):
 (C) Stephane Smith (KI5TOF) 2023
 
 Usage: 
-aprs_mod.py [options] (-t outtype outfile) (-t intype infile)
-aprs_mod.py [options] (-t intype infile)
+aprs_mod.py [options] (-t outfile) (-t infile)
+aprs_mod.py [options] (-t infile)
 aprs_mod.py [options]
 aprs_mod.py
 
@@ -37,12 +37,12 @@ OPTIONS:
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:
-intype       'aprs' (default)
+intype       aprs strings
 infile       '-' (default)
 
 -t OUTPUT TYPE OPTIONS:
-outtype       'raw'
-outfile       '-' (default) | 'null' (no output)
+outtype       raw 16 bit samples
+outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' play audio
 ''')
         exit()
 
@@ -69,13 +69,13 @@ outfile       '-' (default) | 'null' (no output)
     if len(spl) == 2:
         try:
             _out = spl.pop(0)
-            r['out']['type'] = _out[0]
+            # r['out']['type'] = _out[0]
             r['out']['file'] = _out[-1]
         except IndexError:
             pass
     try:
         _in = spl.pop(0)
-        r['in']['type'] = _in[0]
+        # r['in']['type'] = _in[0]
         r['in']['file'] = _in[-1]
     except IndexError:
         pass
@@ -90,11 +90,11 @@ def demod_parse_args(args):
             'options' : {},
         },
         'in' : {
-            'type' : 'raw',
+            # 'type' : 'raw',
             'file'  : '-', #from stdin
         },
         'out' : {
-            'type' : 'aprs',
+            # 'type' : 'aprs',
             'file'  : '-', #to stdout
         },
     }
@@ -104,8 +104,8 @@ def demod_parse_args(args):
 (C) Stephane Smith (KI5TOF) 2023
 
 Usage: 
-aprs_demod.py [options] (-t outtype outfile) (-t intype infile)
-aprs_demod.py [options] (-t intype infile)
+aprs_demod.py [options] (-t outfile) (-t infile)
+aprs_demod.py [options] (-t infile)
 aprs_demod.py [options]
 aprs_demod.py
 
@@ -114,12 +114,12 @@ OPTIONS:
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:
-intype       'raw' (default)
-infile       '-' (default) | raw file | 'rtl_fm'
+intype       'raw' 16 bit signed samples
+infile       '-' (default stdin) | 'filename.raw' raw file | 'rtl_fm' input from rtl_fm
 
 -t OUTPUT TYPE OPTIONS:
-outtype       'aprs'
-outfile       '-' (default)
+outtype       'aprs' strings
+outfile       '-' (default stdout)
 ''')
         exit()
 
@@ -142,13 +142,13 @@ outfile       '-' (default)
     if len(spl) == 2:
         try:
             _out = spl.pop(0)
-            r['out']['type'] = _out[0]
+            # r['out']['type'] = _out[0]
             r['out']['file'] = _out[-1]
         except IndexError:
             pass
     try:
         _in = spl.pop(0)
-        r['in']['type'] = _in[0]
+        # r['in']['type'] = _in[0]
         r['in']['file'] = _in[-1]
     except IndexError:
         pass

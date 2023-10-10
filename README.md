@@ -60,23 +60,23 @@ APRS MOD
 (C) Stephane Smith (KI5TOF) 2023
 
 Usage:
-aprs_mod.py [options] (-t outtype outfile) (-t intype infile)
-aprs_mod.py [options] (-t intype infile)
+aprs_mod.py [options] (-t outfile) (-t infile)
+aprs_mod.py [options] (-t infile)
 aprs_mod.py [options]
 aprs_mod.py
 
 OPTIONS:
 -r, --rate       22050 (default)
--vox             Vox mode, pad header flags to activate radio vox
+-vox, --vox      Vox mode, pad header flags to activate radio vox
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:
-intype       'aprs' (default)
+intype       aprs strings
 infile       '-' (default)
 
 -t OUTPUT TYPE OPTIONS:
-outtype       'raw'
-outfile       '-' (default) | 'null' (no output)
+outtype       raw 16 bit samples
+outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' play audio
 ```
 
 ### Examples
@@ -87,16 +87,18 @@ outfile       '-' (default) | 'null' (no output)
   	* aprs_demod
 ```
 echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test.wav
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t test.wav -t -
 atest test.wav
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
-sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t raw -
+sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t play -t -
 ```
 
 * ```aprs_mod.py``` python inline decode
 ```
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -t raw - -t aprs - | multimon-ng -t raw -A -a AFSK1200 -
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -t - -t aprs - | multimon-ng -t raw -A -a AFSK1200 -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 -
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t raw -
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t -
 ```
 
 
@@ -116,8 +118,8 @@ APRS DEMOD
 (C) Stephane Smith (KI5TOF) 2023
 
 Usage:
-aprs_demod.py [options] (-t outtype outfile) (-t intype infile)
-aprs_demod.py [options] (-t intype infile)
+aprs_demod.py [options] (-t outfile) (-t infile)
+aprs_demod.py [options] (-t infile)
 aprs_demod.py [options]
 aprs_demod.py
 
@@ -126,27 +128,27 @@ OPTIONS:
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:
-intype       'raw' (default)
-infile       '-' (default) | raw file
+intype       'raw' 16 bit signed samples
+infile       '-' (default stdin) | 'filename.raw' raw file | 'rtl_fm' input from rtl_fm
 
 -t OUTPUT TYPE OPTIONS:
-outtype       'aprs'
-outfile       '-' (default)
+outtype       'aprs' strings
+outfile       '-' (default stdout)
 ```
 
 ### Examples
 
 * Demod with python, micropython, and pypy
 ```
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t raw -
-echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t raw -
-echo "KI5TOF>APRS:>hello world!" | pypy3 aprs_mod.py -v | pypy3 aprs_demod.py -v -t raw -
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t -
+echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t -
+echo "KI5TOF>APRS:>hello world!" | pypy3 aprs_mod.py -v | pypy3 aprs_demod.py -v -t -
 ```
 
 * Decode Direwolf generated sample
 ```
 gen_packets -r 22050 -o test.wav
-sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t raw -
+sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
 ```
 ```
 WB2OSZ-11>TEST:,The quick brown fox jumps over the lazy dog!  1 of 4
@@ -158,7 +160,7 @@ WB2OSZ-11>TEST:,The quick brown fox jumps over the lazy dog!  4 of 4
 * Decode [International Space Station flyby recording](https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav)
 ```
 wget https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav
-sox -t wav ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
+sox -t wav ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 ```
 ```
 RS0ISS>CQ:>ARISS - International Space Station
@@ -173,14 +175,14 @@ wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip
 bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
 ```
 ```
-sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t raw -
+sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 ```
 
 ## :radio: Live APRS Decode with RTL-SDR
 
 * Live decode of APRS on 144.39MHz using rtl_fm:
 ```
-rtl_fm -f 144.390M -s 22050 -g 1 - | python aprs_demod.py -t raw -
+rtl_fm -f 144.390M -s 22050 -g 1 - | python aprs_demod.py -t -
 ```
 
 ## :satellite: APRS Rx only IGate
@@ -218,7 +220,30 @@ echo "KI5TOF>APRS:>hello world!" | python aprs_is.py -c KI5TOF -p xxxxx
 
 * A 144.390MHz rx only APRS iGate
 ```
-rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t raw - | python aprs_is.py -c KI5TOF -p xxxx -lat xxxx -lon xxxx
+rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t - | python aprs_is.py -c KI5TOF -p xxxx -lat xxxx -lon xxxx
+```
+
+## :iphone: Termux (Android) based APRS Beacon
+
+* One goal is use a cell phone to generate beacon audio samples that can then be passed two a handy radio.  This is accomplished using [Termux](https://termux.dev/en/), a rad feature packed terminal for phones.  You will need to install it from F-Droid and install Termux-Api, which allows for fetching the GPS points.
+* A pitfall here is my radio, Yaesu ft-4x, needed AC coupling on the mic cable!
+
+### Examples
+ 
+* Fetch GPS points and generate beacon APRS messages 
+```
+python termux_beacon.py
+```
+
+* Modulate and play APRS becaons messages.  You will need
+** Type-C to audio cable connected to the mic of your radio
+** Vox activated as we don't have PTT control
+** For my radio, I needed to AC couple the the mic pin like so.  I used 10uF.
+<p align="center">
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/termux/ioqNL.png?raw=true" alt=""/>
+</p>
+```
+python termux_beacon.py | python aprs_mod.py -vox -t play -t -
 ```
 
 

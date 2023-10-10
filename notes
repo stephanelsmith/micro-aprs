@@ -21,6 +21,7 @@ sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython
 #demod
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
+sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | pypy3 aprs_demod.py -t -
 sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
 
 #mod + demod
@@ -85,6 +86,6 @@ rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t - | python aprs_is.
 # for pyaudio, install "it's pointless" https://wiki.termux.com/wiki/Package_Management
 # pkg install portaudio portaudio-dev
 # python -m pip install pyaudio
-python termux_beacon.py | python aprs_mod.py -vox | python play_samples.py
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox | python play_samples.py
+python termux_beacon.py | python aprs_mod.py -vox -t play -t -
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t play -t -
 

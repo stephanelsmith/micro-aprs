@@ -33,7 +33,7 @@ aprs_mod.py
 
 OPTIONS:
 -r, --rate       22050 (default)
--vox             Vox mode, pad header flags to activate radio vox
+-vox, --vox      Vox mode, pad header flags to activate radio vox
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:
@@ -55,8 +55,7 @@ outfile       '-' (default) | 'null' (no output)
             r['args']['rate'] = get_arg_val(args, '--rate', int)
         if '-r' in args:
             r['args']['rate'] = get_arg_val(args, '-r', int)
-        if '-vox' in args:
-            r['args']['vox'] = get_arg_val(args, '-vox', bool)
+        r['args']['vox'] = True if '-vox' in args or '--vox' in args else False
         if '-v' in args or '-verbose' in args:
             r['args']['verbose'] = True
         if '-q' in args or '-quiet' in args:

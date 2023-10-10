@@ -2,6 +2,8 @@
 import sys
 import asyncio
 import struct
+import wave
+from subprocess import check_output
 
 from lib.compat import Queue
 
@@ -76,9 +78,10 @@ async def afsk_mod(aprs_q,
 				#pre-message flags
 				#we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
                 if args['args']['vox']:
-                    await afsk_mod.send_flags(1000)
-                else:
                     await afsk_mod.send_flags(500)
+                else:
+                    await afsk_mod.send_flags(4)
+                # await afsk_mod.send_flags(4)
 
                 #generate samples
                 await afsk_mod.to_samples(afsk     = afsk, 
@@ -89,6 +92,9 @@ async def afsk_mod(aprs_q,
                 #of the message
                 await afsk_mod.send_flags(4)
 
+                # end of aprs
+                await afsk_q.put(( None, None))
+
                 aprs_q.task_done()
 
     except asyncio.CancelledError:
@@ -96,32 +102,77 @@ async def afsk_mod(aprs_q,
     except Exception as err:
         print_exc(err)
 
+async def run(cmd):
+    return await asyncio.to_thread(check_output, cmd.split())
+
+def create_wav(wave_filename):
+    wav = wave.open(wave_filename, 'w')
+    wav.setnchannels(1)
+    wav.setsampwidth(2)
+    wav.setframerate(22050)
+    return wav
+
 async def afsk_out(afsk_q,
                    args,
                    ):
     write = sys.stdout.buffer.write
     try:
+
+        # set wave filename
+        is_wave = False
+        wav = None
+        if args['out']['file'][-4:] == '.wav' or\
+           args['out']['file'] == 'play':
+            is_wave = True
+            if args['out']['file'][-4:] == '.wav':
+                wave_filename = args['out']['file']
+            else:
+                wave_filename = 'temp.wav'
+
         while True:
             arr,siz = await afsk_q.get()
             if args['out']['file'] == '-':
-                for i in range(siz):
-                    samp = struct.pack('<h', arr[i])
-                    write(samp) #buffer write binary
+                if arr and siz:
+                    for i in range(siz):
+                        samp = struct.pack('<h', arr[i])
+                        write(samp) #buffer write binary
+            elif args['out']['file'] == 'null':
+                pass
+            elif is_wave:
+                if not wav:
+                    wav = create_wav(wave_filename)
+                if arr and siz:
+                    for i in range(siz):
+                        samp = struct.pack('<h', arr[i])
+                        wav.writeframesraw(samp)
+                else:
+                    wav.close()
+                    eprint('wrote {}'.format(wave_filename))
+                    if args['out']['file'] == 'play':
+                        # play wav
+                        await run('play {}'.format(wave_filename))
+                    wav = None
+
             afsk_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:
         print_exc(err)
     finally:
-        for x in range(100):
-            samp = struct.pack('<h', samp)
-            write(samp)
+        if wav:
+            wav.close()
+            eprint('wrote {}'.format(wave_filename))
+            if args['out']['file'] == 'play':
+                # play wav
+                await run('play {}'.format(wave_filename))
+
         sys.stdout.buffer.flush()
 
 async def main():
     args = mod_parse_args(sys.argv)
 
     eprint('# APRS MOD')
+    # eprint(args)
     eprint('# RATE {}'.format(args['args']['rate']))
     eprint('# IN   {} {}'.format(args['in']['type'], args['in']['file']))
     eprint('# OUT  {} {}'.format(args['out']['type'], args['out']['file']))

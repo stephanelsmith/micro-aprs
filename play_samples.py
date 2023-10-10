@@ -21,9 +21,6 @@ from ax25.callssid import CallSSID
 import lib.defs as defs
 from lib.compat import get_stdin_streamreader
 
-CALL = 'KI5TOF'
-PASSCODE = '17081'
-
 async def run(cmd):
     return await asyncio.to_thread(check_output, cmd.split())
 

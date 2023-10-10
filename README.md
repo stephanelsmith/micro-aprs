@@ -237,6 +237,7 @@ rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t - | python aprs_is.
 
 
 ### Examples
+To be run in Termux.
  
 * Fetch GPS points and generate beacon APRS messages 
 ```

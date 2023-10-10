@@ -248,6 +248,11 @@ python termux_beacon.py
 python termux_beacon.py | python aprs_mod.py -vox -t play -t -
 ```
 
+## :bulb: Future Work
+* Full integration on embedded system with MicroPython
+  * I2S embedded audio interfacing
+* Rx/Tx digipeating
+* Deploy as a :balloon: [HAB](https://amateur.sondehub.org/) payload!
 
 ## :raised_hands: Acknowledgements
 - [Micropython](https://github.com/micropython/micropython) project

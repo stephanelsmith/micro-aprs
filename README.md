@@ -226,7 +226,7 @@ rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t - | python aprs_is.
 ## :iphone: Termux (Android) based APRS Beacon
 
 * One goal is use a cell phone to generate beacon audio samples that can then be passed two a handy radio.  This is accomplished using [Termux](https://termux.dev/en/), a rad feature packed terminal for phones.  You will need to install it from F-Droid and install Termux-Api, which allows for fetching the GPS points. In termux, you can install python3, pypy3, sox, screen and any other goodies that suit your fancy.
-* Modulate and play APRS becaons messages.  You will need
+* Modulate and play APRS becaons messages.  You will need:
   * Type-C to audio cable connected to the mic of your radio
   * Vox activated as we don't have PTT control
   * For my radio, I needed to AC couple the the mic pin like so.  I used 10uF.
@@ -242,6 +242,7 @@ rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t - | python aprs_is.
 python termux_beacon.py
 ```
 
+* Play APRS beacon messages to radio
 ```
 python termux_beacon.py | python aprs_mod.py -vox -t play -t -
 ```

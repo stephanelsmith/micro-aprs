@@ -220,7 +220,8 @@ echo "KI5TOF>APRS:>hello world!" | python aprs_is.py -c KI5TOF -p xxxxx
 
 * A 144.390MHz rx only APRS iGate
 ```
-rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t - | python aprs_is.py -c KI5TOF -p xxxx -lat xxxx -lon xxxx
+rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t - | python aprs_is.py -c KI5TOF-10 -p 17081 -lat xxxx -lon xxxx
+pypy3 aprs_demod.py -t rtl_fm | python aprs_is.py -c KI5TOF-10 -p 17081 -lat xxxx -lon xxxx
 ```
 
 ## :iphone: Termux (Android) based APRS Beacon

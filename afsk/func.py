@@ -128,22 +128,22 @@ def create_fir(coefs, scale):
         return o
     return inner
 
-def create_fir_arr(coefs, scale):
-    #arr in-place
-    ncoefs = len(coefs)
-    coefs = array('i', (coefs[i] for i in range(ncoefs)))
-    bufin = array('i', (0 for x in range(ncoefs)))
-    idx = 0
-    scale = scale or 1
-    def inner(arr,arr_size):
-        nonlocal ncoefs, coefs, bufin, idx, scale
-        for x in range(arr_size):
-            bufin[idx] = arr[x]
-            arr[x] = 0
-            for i in range(ncoefs):
-                arr[x] += (coefs[i] * bufin[(idx-i)%ncoefs]) // scale
-            idx = (idx+1)%ncoefs
-    return inner
+# def create_fir_arr(coefs, scale):
+    # #arr in-place
+    # ncoefs = len(coefs)
+    # coefs = array('i', (coefs[i] for i in range(ncoefs)))
+    # bufin = array('i', (0 for x in range(ncoefs)))
+    # idx = 0
+    # scale = scale or 1
+    # def inner(arr,arr_size):
+        # nonlocal ncoefs, coefs, bufin, idx, scale
+        # for x in range(arr_size):
+            # bufin[idx] = arr[x]
+            # arr[x] = 0
+            # for i in range(ncoefs):
+                # arr[x] += (coefs[i] * bufin[(idx-i)%ncoefs]) // scale
+            # idx = (idx+1)%ncoefs
+    # return inner
 
 def lpf_fir_design(ncoefs,       # filter size
                    fa,           # cut-off f

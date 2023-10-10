@@ -13,7 +13,7 @@ from ax25.ax25 import AX25
 from ax25.callssid import CallSSID
 from lib.gps import aprs_gps_format
 
-CALL = 'KI5TOF'
+CALL = 'KI5TOF-9'
 PASSCODE = '17081'
 
 async def run(cmd):
@@ -31,7 +31,11 @@ async def get_loc():
             r = await run('termux-location')
             d = json.loads(r.decode())
 
-            aprs_loc = aprs_gps_format(d['latitude'], d['longitude'])
+            aprs_loc = aprs_gps_format(lat = d['latitude'], 
+                                       lon = d['longitude'],
+                                       symbol1 = '/', # standard symbol set
+                                       symbol2 = '>', # car,
+                                       )
             msg = 'hello world'
             ax25 = AX25(src  = CALL,
                         dst  = 'APRS',

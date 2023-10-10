@@ -30,6 +30,15 @@ async def set_volume(volume):
     r = await run(cmd)
     return r
 
+async def set_wake_lock():
+    cmd = 'termux-wake-lock'
+    r = await run(cmd)
+    return r
+async def set_wake_unlock():
+    cmd = 'termux-wake-unlock'
+    r = await run(cmd)
+    return r
+
 async def get_loc():
     try:
         while True:
@@ -59,12 +68,15 @@ async def main():
     await set_volume(100)
     tasks = []
     try:
+        await set_wake_lock()
         tasks.append(asyncio.create_task(get_loc()))
         await asyncio.gather(*tasks, return_exceptions=True)
     except asyncio.CancelledError:
         raise
     except Exception as err:
         traceback.print_exc()
+    finally:
+        await set_wake_unlock()
 
 if __name__ == '__main__':
     try:

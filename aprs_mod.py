@@ -80,7 +80,7 @@ async def afsk_mod(aprs_q,
 				#pre-message flags
 				#we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
                 if args['args']['vox']:
-                    await afsk_mod.send_flags(500)
+                    await afsk_mod.send_flags(150)
                 else:
                     await afsk_mod.send_flags(4)
                 # await afsk_mod.send_flags(4)
@@ -95,6 +95,7 @@ async def afsk_mod(aprs_q,
                 await afsk_mod.send_flags(4)
 
                 # end of aprs
+                eprint('APRS mod done: {}'.format(ax25))
                 await afsk_q.put(( None, None))
 
                 aprs_q.task_done()
@@ -105,6 +106,7 @@ async def afsk_mod(aprs_q,
         print_exc(err)
 
 async def run(cmd):
+    print(cmd)
     return await asyncio.to_thread(check_output, cmd.split())
 
 def create_wav(wave_filename):
@@ -145,11 +147,11 @@ async def afsk_out(afsk_q,
             elif is_wave:
                 if not wav:
                     wav = create_wav(wave_filename)
-                if arr and siz:
+                if arr != None and siz != None:
                     for i in range(siz):
                         samp = struct.pack('<h', arr[i])
                         wav.writeframesraw(samp)
-                else:
+                elif wav:
                     wav.close()
                     if args['out']['file'] == 'play':
                         # play wav

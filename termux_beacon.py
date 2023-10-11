@@ -44,13 +44,19 @@ async def get_loc():
         while True:
             eprint('getting gps')
             r = await run('termux-location')
-            d = json.loads(r.decode())
+            try:
+                d = json.loads(r.decode())
+            except json.JSONDecodeError as err:
+                traceback.print_exc()
+                eprint('skipping')
+                continue
             eprint('latlon: {} {}'.format(d['latitude'], d['longitude']))
 
             aprs_loc = aprs_gps_format(lat = d['latitude'], 
                                        lon = d['longitude'],
                                        symbol1 = '/', # standard symbol set
-                                       symbol2 = '>', # car,
+                                       # symbol2 = '>', # car,
+                                       symbol2 = 'v', # van
                                        )
             msg = 'hello world'
             ax25 = AX25(src  = CALL,

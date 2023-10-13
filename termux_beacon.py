@@ -4,6 +4,8 @@ import sys
 from datetime import datetime
 from subprocess import check_output
 
+import lib.upydash as _
+
 import asyncio
 from asyncio import Event
 from asyncio import Queue
@@ -26,7 +28,15 @@ async def start_termux():
     r = await run(cmd)
 
 async def set_volume(volume):
-    cmd = 'termux-volume music {}'.format(volume)
+    r = await run('termux-volume')
+    try:
+        d = json.loads(r.decode())
+        v = _.find(d, lambda v: v['stream'] == 'music')
+        v = int(volume/100*v['max_volume'])
+    except json.JSONDecodeError as err:
+        traceback.print_exc()
+        v = 10
+    cmd = 'termux-volume music {}'.format(v)
     r = await run(cmd)
     return r
 
@@ -65,7 +75,7 @@ async def get_loc():
                         )
             eprint(ax25)
             print(ax25, flush=True)
-            await asyncio.sleep(30)
+            await asyncio.sleep(10)
     except asyncio.CancelledError:
         raise
     except Exception as err:
@@ -75,7 +85,7 @@ async def main():
     #eprint('starting termux')
     #await start_termux()
     eprint('setting volume')
-    await set_volume(100)
+    await set_volume(75)
     tasks = []
     try:
         await set_wake_lock()

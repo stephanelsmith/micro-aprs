@@ -92,7 +92,11 @@ async def afsk_mod(aprs_q,
                 #send post message flags
                 #multimon-ng and direwolf want one additional post flag in addition to the one at the end
                 #of the message
-                await afsk_mod.send_flags(4)
+				#we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
+                if args['args']['vox']:
+                    await afsk_mod.send_flags(4)
+                else:
+                    await afsk_mod.send_flags(4)
 
                 # end of aprs
                 eprint('APRS mod done: {}'.format(ax25))

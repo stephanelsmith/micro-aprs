@@ -42,8 +42,8 @@ class AX25():
         # 'info',
     # )
 
-    def __init__(self, src        = '',
-                       dst        = '',
+    def __init__(self, src        = b'',
+                       dst        = b'',
                        digis      = [],
                        info       = b'',
                        aprs       = None,
@@ -73,22 +73,26 @@ class AX25():
         try:
             return callssid.to_aprs()
         except:
-            return ''
+            return b''
 
     def to_aprs(self):
         src = self.callssid_to_str(self.src)
         dst = self.callssid_to_str(self.dst)
-        dst_digis = ','.join([dst]+[self.callssid_to_str(digi) for digi in self.digis])
+        dst_digis = b','.join([dst]+[self.callssid_to_str(digi) for digi in self.digis])
         if isinstance(self.info, (bytes, bytearray)):
-            try:
-                info = self.info.decode().strip()
-            except UnicodeDecodeError:
-                info = str(self.info).strip()
+            info = self.info.strip()
+            # try:
+                # info = self.info.decode().strip()
+            # except UnicodeDecodeError:
+                # info = str(self.info).strip()
+        elif isinstance(self.info, str):
+            info = self.info.encode().strip()
         else:
-            info = str(self.info).strip()
-        return '{}>{}:{}'.format(src,
-                                 dst_digis,
-                                 info)
+            raise Exception('info unknown type {}'.format(info))
+        # return '{}>{}:{}'.format(src,
+                                 # dst_digis,
+                                 # info)
+        return src + b'>' + dst_digis + b':' + info
 
     # some fancy highlighting if we have rich
     def to_aprs_rich(self):
@@ -108,16 +112,19 @@ class AX25():
     
     def from_aprs(self, aprs):
         # KI5TOF>APRS,WIDE1-1,WIDE2-1:hello world!
-        if isinstance(aprs, (bytes, bytearray)):
-            aprs = aprs.decode('utf')
+        # if isinstance(aprs, (bytes, bytearray)):
+            # aprs = aprs.decode()
+        if isinstance(aprs, str):
+            aprs = aprs.encode()
 
-        i = _.find_index(aprs,'>')
+        # i = _.find_index(aprs, b'>')
+        i = aprs.find(b'>')
         if not i:
             raise Exception('could not find source',aprs)
 
         #find first character, this is to ignore message counters [%d] AX25
         for j in range(i):
-            o = ord(aprs[j])
+            o = aprs[j]
             if o >= ORD_A and o <= ORD_Z or\
                o >= ORD_a and o <= ORD_z:
                 break
@@ -125,16 +132,17 @@ class AX25():
         self.src = CallSSID(aprs = aprs[j:i])
         j = i + 1
 
-        i = _.find_index(aprs,':')
+        # i = _.find_index(aprs, b':')
+        i = aprs.find(b':')
         if not i:
             raise Exception('could not find digis ',aprs)
-        digis = aprs[j:i].split(',')
-        self.dst = CallSSID(aprs = digis.pop(0))
+        digis = aprs[j:i].split(b',')
+        self.dst = CallSSID(aprs  = digis.pop(0))
         self.digis = [CallSSID(aprs = digi) for digi in digis]
         j += i + 1
 
-        # self.info = aprs[i+1:]
-        self.info = aprs[i+1:].encode()
+        self.info = aprs[i+1:]
+        # self.info = aprs[i+1:].encode()
 
 
     def from_frame(self, frame):
@@ -301,9 +309,9 @@ class AX25():
 
         return (frame,stop_bit)
 
-    def encode(self):
-        return self.to_aprs().encode()
+    # def encode(self):
+        # return self.to_aprs().encode()
 
     def __repr__(self):
-        return self.to_aprs()
+        return self.to_aprs().decode()
 

@@ -15,9 +15,9 @@ class CallSSID():
         'ssid',
         #'_frame',
     )
-    def __init__(self, call = None,
-                       ssid = None,
-                       aprs = None,
+    def __init__(self, call = None, # bytes/bytearray
+                       ssid = None, # bytes/bytearry
+                       aprs = None, # str/bytes/bytearray
                        frame = None,
                        ):
         # Initialize a callsign ssid in three ways
@@ -36,19 +36,22 @@ class CallSSID():
     def from_aprs(self, call_ssid):
         #read in formats like KI5TOF-5
         if isinstance(call_ssid, str):
-            call_ssid = call_ssid.split('-')
+            call_ssid = call_ssid.encode()
         elif isinstance(call_ssid, (bytes, bytearray)):
-            call_ssid = call_ssid.decode().split('-')
+            pass
         else:
             raise Exception('unknown format '+str(call_ssid))
+        call_ssid = call_ssid.split(b'-')
         self.call = call_ssid[0].upper()
         self.ssid = int(call_ssid[1]) if len(call_ssid)==2 else 0
 
     def to_aprs(self):
         if self.ssid:
-            return str(self.call)+'-'+str(self.ssid)
+            return self.call+b'-'+self.ssid
+            # return str(self.call)+'-'+str(self.ssid)
         else:
-            return str(self.call)
+            return self.call
+            # return str(self.call)
 
     def from_ax25_frame(self, mv):
         #read from encoded ax25 format 
@@ -62,26 +65,20 @@ class CallSSID():
         for i in range(call_len):
             self.call[i] = self.call[i]>>1
 
-        self.call = self.call.decode()
+        # self.call = self.call.decode()
         self.ssid = (mv[6] & 0x17)>>1
 
     def is_valid(self):
         if not self.call:
             return False
         for x in self.call:
-            x = ord(x)
+            # x = ord(x)
             if x >= ORD_0 and x <= ORD_9 or\
                x >= ORD_A and x <= ORD_Z:
                 pass
             else:
                 return False
         return True
-
-    # @property
-    # def frame(self):
-        # if self._frame:
-            # return self._frame
-        # return self.to_bytes()
 
     def to_bytes(self, mv = None,):
         #optional mv, write in place if provided
@@ -90,11 +87,11 @@ class CallSSID():
             ax25 = bytearray(7)# AX25_ADDR_LEN
             mv = memoryview(ax25)
         for i in range(len(self.call)):
-            mv[i] = ord(self.call[i])
+            mv[i] = self.call[i]
             if i == 6:
                 break
         for i in range(6):
-            mv[i] = ord(self.call[i]) if i < len(self.call) else ord(' ')
+            mv[i] = self.call[i] if i < len(self.call) else ord(' ')
             #shift left in place
             mv[i] = mv[i]<<1
         #SSID is is the 6th bit, shift left by one

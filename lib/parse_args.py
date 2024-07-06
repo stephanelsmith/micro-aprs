@@ -21,7 +21,7 @@ def mod_parse_args(args):
         },
     }
 
-    if '-h' in args or '--help' in args:
+    if '-h' in args or '--help' in args or '-help' in args:
         print('''APRS MOD
 (C) Stephane Smith (KI5TOF) 2023
 
@@ -44,7 +44,7 @@ infile       '-' (default)
 outtype       raw 16 bit samples
 outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' play audio
 ''')
-        exit()
+        return
 
     argstr = ' '.join(args)
     spl = [x.split() for x in ' '.join(args).split('-t')]

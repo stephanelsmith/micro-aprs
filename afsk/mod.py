@@ -13,7 +13,7 @@ from afsk.sin_table import get_sin_table
 from afsk.func import gen_bits_from_bytes
 from afsk.func import create_nrzi
 
-AFSK_SCALE_DOWN = 1
+AFSK_SCALE_DOWN = 2 
 AX25_FLAG       = 0x7e
 AFSK_Q_SIZE     = 22050
 

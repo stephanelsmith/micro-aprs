@@ -103,7 +103,8 @@ class AFSKDemodulator():
 
 
         self.corr = create_corr(ts    = self.ts,
-                                shift = 1)
+                                # shift = 2, # scale down to avoid overflow
+                                )
 
         nmark = int(self.tmark/self.ts)
         lpf_ncoefsbaud = options['lpf_ncoefsbaud']
@@ -136,6 +137,7 @@ class AFSKDemodulator():
         self.sampler = create_sampler(fbaud = self.fbaud,
                                       fs    = self.fs)
         self.unnrzi = create_unnrzi()
+        self.agc = create_agc(sp = 1, depth = 1) # nop
 
         #how much we need to flush internal filters to process all sampled data
         self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(self.tbaud/self.ts))
@@ -154,7 +156,7 @@ class AFSKDemodulator():
         try:
             # Process a chunk of samples
             corr     = self.corr
-            # agc     = self.agc
+            agc      = self.agc
             lpf      = self.lpf
             bandpass = self.bandpass
             sampler  = self.sampler
@@ -166,6 +168,7 @@ class AFSKDemodulator():
 
             bits_q = self.bits_q
             samp_q = self.samples_q
+            shift  = 1 
 
             while True:
                 #fetch next chunk of samples (array)
@@ -174,8 +177,12 @@ class AFSKDemodulator():
 
                 for i in range(arr_size):
                     o = arr[i]
+                    o = agc(o)
                     o = bandpass(o)
-                    o = corr(o)
+                    o = corr(o, shift)
+                    if o > 2**31:
+                        # if correlator is overflowing, increase shift
+                        shift += 1
                     o = lpf(o)
                     bs = sampler(o)
                     if bs != 2: # _NONE

@@ -70,10 +70,11 @@ def create_agc(sp,depth):
     bufin = array('i', (0 for x in range(depth)))
     idx = 0
     def inner(v:int)->int:
+        return v
         nonlocal sp,idx,bufin,depth
         bufin[idx] = v
         m = max(bufin)
-        #sp = scale*m
+        sp = scale*m
         try:
             scale = sp//m
         except:
@@ -96,12 +97,13 @@ def create_squelch():
     return inner
 
 CORRELATOR_DELAY = 446e-6
-def create_corr(ts, shift):
+def create_corr(ts,):
     delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
     dat = array('i', (0 for x in range(delay)))
     idx = 0
-    def inner(v:int)->int:
-        nonlocal idx,dat,delay,shift
+    def inner(v:int, shift:int)->int:
+        nonlocal idx,dat,delay
+        v = v >> shift
         o = v*dat[idx]
         dat[idx] = v
         idx = (idx+1)%delay

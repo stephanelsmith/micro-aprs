@@ -13,7 +13,7 @@ from afsk.sin_table import get_sin_table
 from afsk.func import gen_bits_from_bytes
 from afsk.func import create_nrzi
 
-AFSK_SCALE_DOWN = 2 
+AFSK_SCALE_DOWN = 1
 AX25_FLAG       = 0x7e
 AFSK_Q_SIZE     = 22050
 
@@ -38,7 +38,9 @@ class AFSKModulator():
 
         #pre-compute sine table
         self.sintbl_sz = 1024
-        self.sintbl = get_sin_table(size = self.sintbl_sz)
+        self.sintbl = get_sin_table(size = self.sintbl_sz,
+                                    _range = 2**15,
+                                    )
 
         #get step sizes (integer and residue)
         mark_step     = self.sintbl_sz / (self.tmark/self.ts)

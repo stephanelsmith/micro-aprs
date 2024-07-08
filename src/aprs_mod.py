@@ -128,6 +128,7 @@ async def afsk_out(afsk_q,
                    out_file = '-', # - | null | .wav | play
                    ):
     write = sys.stdout.buffer.write
+    flush = sys.stdout.buffer.flush
     try:
 
         # set wave filename
@@ -150,6 +151,7 @@ async def afsk_out(afsk_q,
                     for i in range(siz):
                         samp = struct.pack('<h', arr[i])
                         write(samp) #buffer write binary
+                    flush()
             elif out_file == 'null':
                 pass
             elif is_wave:
@@ -177,8 +179,6 @@ async def afsk_out(afsk_q,
             if out_file == 'play':
                 # play wav
                 await run('play {}'.format(wave_filename))
-
-        sys.stdout.buffer.flush()
 
 async def main():
     args = mod_parse_args(sys.argv)
@@ -213,6 +213,7 @@ async def main():
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
+        sys.stdout.close()
 
 if __name__ == '__main__':
     try:

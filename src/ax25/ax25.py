@@ -69,16 +69,15 @@ class AX25():
             self.digis      = [CallSSID(aprs = x) for x in digis]
             self.info       = info
 
-    def callssid_to_str(self, callssid):
-        try:
-            return callssid.to_aprs()
-        except:
-            return b''
+    # def callssid_to_str(self, callssid):
+        # try:
+            # return callssid.to_aprs()
+        # except:
+            # return b''
 
     def to_aprs(self):
-        src = self.callssid_to_str(self.src)
-        dst = self.callssid_to_str(self.dst)
-        dst_digis = b','.join([dst]+[self.callssid_to_str(digi) for digi in self.digis])
+        src = self.src.to_aprs()
+        dst_digis = b','.join([self.dst.to_aprs()]+[digi.to_aprs() for digi in self.digis])
         if isinstance(self.info, (bytes, bytearray)):
             info = self.info.strip()
             # try:

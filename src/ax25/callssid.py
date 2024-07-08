@@ -47,7 +47,14 @@ class CallSSID():
 
     def to_aprs(self):
         if self.ssid:
-            return self.call+b'-'+self.ssid
+            # return self.call+b'-'+self.ssid
+            # return self.call+b'-'+bytes([48+self.ssid])
+            lcall = len(self.call)
+            b = bytearray(lcall + 1 + 1)
+            b[:lcall] = self.call
+            b[lcall:lcall+1] = b'-'
+            b[-1] = 48+self.ssid # classic '0'+# trick
+            return b
             # return str(self.call)+'-'+str(self.ssid)
         else:
             return self.call

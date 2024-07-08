@@ -3,6 +3,10 @@ import math
 from array import array
 
 from lib.utils import eprint
+from lib.compat import IS_UPY
+
+if IS_UPY:
+    import micropython
 
 def frange(start, stop, step, rnd=None):
     n = int(math.ceil((stop - start) / step))
@@ -45,25 +49,51 @@ def gen_bits_from_bytes(mv, stop_bit = None):
 
 def create_nrzi():
     #process the bit stream bit-by-bit with closure
-    c = 0
-    def inner(b):
-        nonlocal c
-        if b == 0:
-            c ^= 1 #toggle
-        return c
+    if IS_UPY:
+        c = 0
+        nonlocals = array('B', [c])
+        @micropython.viper
+        def inner(b:int) -> int:
+            nonlocal nonlocals
+            _nonlocals = ptr8(nonlocals)
+            c:int       = _nonlocals[0]
+            if b == 0:
+                c = 1 if c == 0 else 0
+            _nonlocals[0] = c
+            return c
+    else:
+        c = 0
+        def inner(b:int) -> int:
+            nonlocal c
+            if b == 0:
+                c ^= 1 #toggle
+            return c
     return inner
 
 def create_unnrzi():
     #process the bit stream bit-by-bit with closure
-    c = 1
-    def inner(b):
-        nonlocal c
-        if b != c:
+    if IS_UPY:
+        c = 1
+        nonlocals = array('B', [c])
+        @micropython.viper
+        def inner(b:int) -> int:
+            nonlocal nonlocals
+            _nonlocals = ptr8(nonlocals)
+            c:int       = _nonlocals[0]
+            r:int       = 0
+            if b == c:
+                r = 1
+            _nonlocals[0] = b # c = b
+            return r
+    else:
+        c = 1
+        def inner(b):
+            nonlocal c
+            r = 0
+            if b == c:
+                r = 1
             c = b
-            return 0
-        else:
-            c = b
-            return 1
+            return r
     return inner
 
 def create_agc(sp,depth):
@@ -129,23 +159,6 @@ def create_fir(coefs, scale):
         idx = (idx+1)%ncoefs
         return o
     return inner
-
-# def create_fir_arr(coefs, scale):
-    # #arr in-place
-    # ncoefs = len(coefs)
-    # coefs = array('i', (coefs[i] for i in range(ncoefs)))
-    # bufin = array('i', (0 for x in range(ncoefs)))
-    # idx = 0
-    # scale = scale or 1
-    # def inner(arr,arr_size):
-        # nonlocal ncoefs, coefs, bufin, idx, scale
-        # for x in range(arr_size):
-            # bufin[idx] = arr[x]
-            # arr[x] = 0
-            # for i in range(ncoefs):
-                # arr[x] += (coefs[i] * bufin[(idx-i)%ncoefs]) // scale
-            # idx = (idx+1)%ncoefs
-    # return inner
 
 def lpf_fir_design(ncoefs,       # filter size
                    fa,           # cut-off f

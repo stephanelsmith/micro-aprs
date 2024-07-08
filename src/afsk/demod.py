@@ -161,10 +161,6 @@ class AFSKDemodulator():
             bandpass = self.bandpass
             sampler  = self.sampler
             unnrzi   = self.unnrzi
-            # self.o = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
-            # o = self.o
-            # self.bs = array('i', (0 for x in range(defs.SAMPLES_SIZE)))
-            # bs = self.bs
 
             bits_q = self.bits_q
             samp_q = self.samples_q

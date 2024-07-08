@@ -30,28 +30,31 @@ AX25_ADDR_LEN  = 7
 
 async def read_samples_from_pipe(samples_q, 
                              ):
+    unpack = struct.unpack
+    q_put = samples_q.put
+
     try:
         reader = await get_stdin_streamreader()
+        readexactly = reader.readexactly
 
         arr = array('i',range(defs.SAMPLES_SIZE))
         idx = 0
 
         while True:
             try:
-                a = await reader.readexactly(2)
+                a = await readexactly(2)
             except EOFError:
                 break #eof break
-            arr[idx] = struct.unpack('<h', a)[0]
-            # arr[idx] = int.from_bytes(a,'little',signed=True)
+            arr[idx] = unpack('<h', a)[0]
             idx += 1
             if idx%defs.SAMPLES_SIZE == 0:
                 if afsk_detector(arr,idx): #afsk signal detector
-                    await samples_q.put((arr, idx))
-                    await asyncio.sleep(0)
+                    await q_put((arr, idx))
+                    # await asyncio.sleep(0)
                     arr = array('i',range(defs.SAMPLES_SIZE))
                 idx = 0
-        await samples_q.put((arr, idx))
-        await asyncio.sleep(0)
+        await q_put((arr, idx))
+        # await asyncio.sleep(0)
 
     except Exception as err:
         print_exc(err)

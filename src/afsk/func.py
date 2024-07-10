@@ -17,35 +17,58 @@ def frange(start, stop, step, rnd=None):
         for i in range(n):
             yield start+i*step
 
-def afsk_detector(arr, size):
-    pol = True #polarity of the run we are currently tracking
-    run = 0    #current run count (number of consecutive pos/neg samples)
-    act = 0   #count of the number of runs we've seen above a threshold
-    for i in range(size):
-        v = arr[i]
-        if pol and v > 0:
-            run += 1
-        elif pol and v <= 0:
-            if run > 6:  ## single run length constant
-                act += 1
-            pol = not pol
-            run = 1
-        elif not pol and v < 0:
-            run += 1
-        elif not pol and v >= 0:
-            if run > 6: ## single run length constant
-                act += 1
-            pol = not pol
-            run = 1
-    return 1 if act > 10 else 0 # 10 - minimum number of run we need to declare signal detected
-
-
 # generator for iterating over the bits in bytearray
 def gen_bits_from_bytes(mv, stop_bit = None):
     if stop_bit == None:
         stop_bit = len(mv)*8
     for idx in range(stop_bit):
         yield mv[idx//8]&(0x80>>(idx%8))
+
+if IS_UPY:
+    @micropython.viper
+    def afsk_detector(arr:ptr32, size:int)->int:
+        pol:int = 1 #polarity of the run we are currently tracking
+        run:int = 0    #current run count (number of consecutive pos/neg samples)
+        act:int = 0   #count of the number of runs we've seen above a threshold
+        for i in range(size):
+            v:int = arr[i]
+            if pol==1 and v > 0:
+                run += 1
+            elif pol==1 and v <= 0:
+                if run > 6:  ## single run length constant
+                    act += 1
+                pol ^= 1 # no pol
+                run = 1
+            elif pol==0 and v < 0:
+                run += 1
+            elif pol==0 and v >= 0:
+                if run > 6: ## single run length constant
+                    act += 1
+                pol ^= 1 # no pol
+                run = 1
+        return 1 if act > 10 else 0 # 10 - minimum number of run we need to declare signal detected
+else:
+    def afsk_detector(arr, size):
+        pol = True #polarity of the run we are currently tracking
+        run = 0    #current run count (number of consecutive pos/neg samples)
+        act = 0   #count of the number of runs we've seen above a threshold
+        for i in range(size):
+            v = arr[i]
+            if pol and v > 0:
+                run += 1
+            elif pol and v <= 0:
+                if run > 6:  ## single run length constant
+                    act += 1
+                pol = not pol
+                run = 1
+            elif not pol and v < 0:
+                run += 1
+            elif not pol and v >= 0:
+                if run > 6: ## single run length constant
+                    act += 1
+                pol = not pol
+                run = 1
+        return 1 if act > 10 else 0 # 10 - minimum number of run we need to declare signal detected
 
 def create_nrzi():
     #process the bit stream bit-by-bit with closure
@@ -113,32 +136,55 @@ def create_agc(sp,depth):
         return scale*v
     return inner
 
-def create_squelch():
-    def inner(arr, arr_size)->int:
-        m = 0
-        for x in range(arr_size):
-            m = max(m,abs(arr[x]))
-            #print(arr[x],end=' ')
-        #print(m)
-        if m>16000:
-            return True  #squelched, skip this arr
-        else:
-            return False #process this arr
-    return inner
+# def create_squelch():
+    # def inner(arr, arr_size)->int:
+        # m = 0
+        # for x in range(arr_size):
+            # m = max(m,abs(arr[x]))
+            # #print(arr[x],end=' ')
+        # #print(m)
+        # if m>16000:
+            # return True  #squelched, skip this arr
+        # else:
+            # return False #process this arr
+    # return inner
 
 CORRELATOR_DELAY = 446e-6
 def create_corr(ts,):
-    delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
-    dat = array('i', (0 for x in range(delay)))
-    idx = 0
-    def inner(v:int, shift:int)->int:
-        nonlocal idx,dat,delay
-        v = v >> shift
-        o = v*dat[idx]
-        dat[idx] = v
-        idx = (idx+1)%delay
-        return o
-    return inner
+    if IS_UPY:
+        delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
+        idx = 0
+        _dat = array('i', (0 for x in range(delay)))
+        _c = array('i',[idx, delay])
+
+        def inner(v:int, shift:int)->int:
+            nonlocal _dat, _c
+            dat:ptr32 = _dat
+            c:ptr32 = _c
+            idx:int = c[0]
+            delay:int = c[1]
+
+            v:int = v >> shift
+            o:int = v*dat[idx]
+            dat[idx] = v
+            idx = (idx+1)%delay
+
+            c[0] = idx
+
+            return o
+        return inner
+    else:
+        delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
+        dat = array('i', (0 for x in range(delay)))
+        idx = 0
+        def inner(v:int, shift:int)->int:
+            nonlocal idx,dat,delay
+            v = v >> shift
+            o = v*dat[idx]
+            dat[idx] = v
+            idx = (idx+1)%delay
+            return o
+        return inner
 
 def create_fir(coefs, scale):
     #value-by-value fir

@@ -4,9 +4,12 @@ from array import array
 
 from lib.utils import eprint
 from lib.compat import IS_UPY
+from lib.compat import isqrt
+from lib.compat import sign
 
 if IS_UPY:
     import micropython
+    from cvec import to_int32
 
 def frange(start, stop, step, rnd=None):
     n = int(math.ceil((stop - start) / step))
@@ -120,13 +123,13 @@ def create_unnrzi():
     return inner
 
 def create_agc(sp,depth):
-    bufin = array('i', (0 for x in range(depth)))
+    buf = array('i', (0 for x in range(depth)))
     idx = 0
     def inner(v:int)->int:
         return v
-        nonlocal sp,idx,bufin,depth
-        bufin[idx] = v
-        m = max(bufin)
+        nonlocal sp,idx,buf,depth
+        buf[idx] = v
+        m = max(buf)
         sp = scale*m
         try:
             scale = sp//m
@@ -157,22 +160,23 @@ def create_corr(ts,):
         _dat = array('i', (0 for x in range(delay)))
         _c = array('i',[idx, delay])
 
+        @micropython.viper
         def inner(v:int, shift:int)->int:
             nonlocal _dat, _c
-            dat:ptr32 = _dat
-            c:ptr32 = _c
+            dat = ptr32(_dat) # indexing ALWAYS return uint
+            c = ptr32(_c)
             idx:int = c[0]
             delay:int = c[1]
-
-            v:int = v >> shift
-            o:int = v*dat[idx]
+            v = v >> shift
+            # o = v*dat[idx] # !!!! DOES NOT work, dat[idx] is always uint32
+            # d:int = int(_dat[idx])        # cast to negative option a
+            d:int = int(to_int32(dat[idx])) # cast to negative option b
+            o:int = int(isqrt(abs(v*d)))
+            if int(sign(v)) + int(sign(d)) == 0:
+                o *= -1
             dat[idx] = v
-            idx = (idx+1)%delay
-
-            c[0] = idx
-
+            c[0] = (idx+1)%delay # c[0] = idx
             return o
-        return inner
     else:
         delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
         dat = array('i', (0 for x in range(delay)))
@@ -181,29 +185,62 @@ def create_corr(ts,):
             nonlocal idx,dat,delay
             v = v >> shift
             o = v*dat[idx]
+            o = isqrt(abs(v*dat[idx]))
+            if sign(v) + sign(dat[idx]) == 0:
+                o *= -1
             dat[idx] = v
             idx = (idx+1)%delay
             return o
-        return inner
+    return inner
 
 def create_fir(coefs, scale):
-    #value-by-value fir
-    ncoefs = len(coefs)
-    coefs = array('i', (coefs[i] for i in range(ncoefs)))
-    bufin = array('i', (0 for x in range(ncoefs)))
-    idx = 0
-    scale = scale or 1
-    def inner(v:int)->int:
-        nonlocal ncoefs, coefs, bufin, idx, scale
-        try:
-            bufin[idx] = v
-        except OverflowError:
-            bufin[idx] = 2147483647 if v > 0 else -2147483648
-        o = 0
-        for i in range(ncoefs):
-            o += (coefs[i] * bufin[(idx-i)%ncoefs]) // scale
-        idx = (idx+1)%ncoefs
-        return o
+    if IS_UPY:
+        ncoefs = len(coefs)
+        _coefs = array('i', (coefs[i] for i in range(ncoefs)))
+        _buf = array('i', (0 for x in range(ncoefs)))
+        idx = 0
+        scale = scale or 1
+        _c = array('i',[idx, scale, ncoefs])
+
+        @micropython.viper
+        def inner(v:int)->int:
+            nonlocal _coefs, _buf, _c
+
+            buf = ptr32(_buf)     # indexing ALWAYS return uint
+            coefs = ptr32(_coefs) # indexing ALWAYS return uint
+            c = ptr32(_c)
+            idx:int = c[0]
+            scale:int = c[1]
+            ncoefs:int = c[2]
+
+            buf[idx] = v # ok, can assign negative number
+            o:int = 0
+            for i in range(ncoefs):
+                # cast to negatives
+                # either use C function to_int32 to cast uint32 to int32 OR
+                # index directy from the array.array
+                # x:int = int(_buf[(idx-i)%ncoefs])
+                # y:int = int(_coefs[i])
+                x:int = int(to_int32(buf[(idx-i)%ncoefs]))
+                y:int = int(to_int32(coefs[i]))
+                o += (x * y) // scale
+            idx = (idx+1)%ncoefs
+            c[0] = idx
+            return o
+    else:
+        ncoefs = len(coefs)
+        coefs = array('i', (coefs[i] for i in range(ncoefs)))
+        buf = array('i', (0 for x in range(ncoefs)))
+        idx = 0
+        scale = scale or 1
+        def inner(v:int)->int:
+            nonlocal ncoefs, coefs, buf, idx, scale
+            buf[idx] = v
+            o = 0
+            for i in range(ncoefs):
+                o += (coefs[i] * buf[(idx-i)%ncoefs]) // scale
+            idx = (idx+1)%ncoefs
+            return o
     return inner
 
 def lpf_fir_design(ncoefs,       # filter size

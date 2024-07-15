@@ -133,6 +133,8 @@ class AFSKDemodulator():
                                            lpf_ncoefs, 
                                            lpf_width, 
                                            lpf_aboost)
+        # eprint(coefs)
+        # eprint(g)
         self.lpf = create_fir(coefs = coefs, scale = g)
         self.sampler = create_sampler(fbaud = self.fbaud,
                                       fs    = self.fs)
@@ -164,7 +166,6 @@ class AFSKDemodulator():
 
             bits_q = self.bits_q
             samp_q = self.samples_q
-            shift  = 1 
 
             while True:
                 #fetch next chunk of samples (array)
@@ -173,19 +174,16 @@ class AFSKDemodulator():
 
                 for i in range(arr_size):
                     o = arr[i]
-                    o = agc(o)
+                    # o = agc(o)
                     o = bandpass(o)
-                    o = corr(o, shift)
-                    if o > 2**31:
-                        # if correlator is overflowing, increase shift
-                        shift += 1
+                    o = corr(o, 2) # shift 2 to prevent overflow
                     o = lpf(o)
+                    # eprint(o)
                     bs = sampler(o)
                     if bs != 2: # _NONE
                         b = unnrzi(bs)
                         # eprint(b,end='')
                         await bits_q.put(b) #bits_out_q
-                #bandpass(arr, arr_size)
 
                 samp_q.task_done() # done
         except Exception as err:

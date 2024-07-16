@@ -122,22 +122,22 @@ def create_unnrzi():
             return r
     return inner
 
-def create_agc(sp,depth):
-    buf = array('i', (0 for x in range(depth)))
-    idx = 0
-    def inner(v:int)->int:
-        return v
-        nonlocal sp,idx,buf,depth
-        buf[idx] = v
-        m = max(buf)
-        sp = scale*m
-        try:
-            scale = sp//m
-        except:
-            scale = 1
-        idx = (idx+1)%depth
-        return scale*v
-    return inner
+# def create_agc(sp,depth):
+    # buf = array('i', (0 for x in range(depth)))
+    # idx = 0
+    # def inner(v:int)->int:
+        # return v
+        # nonlocal sp,idx,buf,depth
+        # buf[idx] = v
+        # m = max(buf)
+        # sp = scale*m
+        # try:
+            # scale = sp//m
+        # except:
+            # scale = 1
+        # idx = (idx+1)%depth
+        # return scale*v
+    # return inner
 
 # def create_squelch():
     # def inner(arr, arr_size)->int:
@@ -169,11 +169,9 @@ def create_corr(ts,):
             delay:int = c[1]
             v = v >> shift
             # o = v*dat[idx] # !!!! DOES NOT work, dat[idx] is always uint32
-            # d:int = int(_dat[idx])        # cast to negative option a
-            d:int = int(to_int32(dat[idx])) # cast to negative option b
-            o:int = int(isqrt(abs(v*d)))
-            if int(sign(v)) + int(sign(d)) == 0:
-                o *= -1
+            d:int = int(_dat[idx])        # cast to negative option a
+            # d:int = int(to_int32(dat[idx])) # cast to negative option b
+            o:int = int(isqrt(abs(v*d))) * int(sign(v)) * int(sign(d))
             dat[idx] = v
             c[0] = (idx+1)%delay # c[0] = idx
             return o
@@ -185,9 +183,7 @@ def create_corr(ts,):
             nonlocal idx,dat,delay
             v = v >> shift
             o = v*dat[idx]
-            o = isqrt(abs(v*dat[idx]))
-            if sign(v) + sign(dat[idx]) == 0:
-                o *= -1
+            o = isqrt(abs(v*dat[idx])) * sign(v) * sign(dat[idx])
             dat[idx] = v
             idx = (idx+1)%delay
             return o
@@ -219,10 +215,10 @@ def create_fir(coefs, scale):
                 # cast to negatives
                 # either use C function to_int32 to cast uint32 to int32 OR
                 # index directy from the array.array
-                # x:int = int(_buf[(idx-i)%ncoefs])
-                # y:int = int(_coefs[i])
-                x:int = int(to_int32(buf[(idx-i)%ncoefs]))
-                y:int = int(to_int32(coefs[i]))
+                x:int = int(_buf[(idx-i)%ncoefs])
+                y:int = int(_coefs[i])
+                # x:int = int(to_int32(buf[(idx-i)%ncoefs]))
+                # y:int = int(to_int32(coefs[i]))
                 o += (x * y) // scale
             idx = (idx+1)%ncoefs
             c[0] = idx

@@ -14,7 +14,6 @@ from lib.memoize import memoize_loads
 from lib.memoize import memoize_dumps
 
 from afsk.func import create_unnrzi
-from afsk.func import create_agc
 from afsk.func import create_corr
 from afsk.func import lpf_fir_design
 from afsk.func import bandpass_fir_design
@@ -139,7 +138,6 @@ class AFSKDemodulator():
         self.sampler = create_sampler(fbaud = self.fbaud,
                                       fs    = self.fs)
         self.unnrzi = create_unnrzi()
-        self.agc = create_agc(sp = 1, depth = 1) # nop
 
         #how much we need to flush internal filters to process all sampled data
         self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(self.tbaud/self.ts))
@@ -158,7 +156,6 @@ class AFSKDemodulator():
         try:
             # Process a chunk of samples
             corr     = self.corr
-            agc      = self.agc
             lpf      = self.lpf
             bandpass = self.bandpass
             sampler  = self.sampler
@@ -174,9 +171,8 @@ class AFSKDemodulator():
 
                 for i in range(arr_size):
                     o = arr[i]
-                    # o = agc(o)
                     o = bandpass(o)
-                    o = corr(o, 2) # shift 2 to prevent overflow
+                    o = corr(o, 0)
                     o = lpf(o)
                     # eprint(o)
                     bs = sampler(o)

@@ -42,8 +42,8 @@ As many who've gone down this path have mentioned, there's really just not a lot
 Care has been taken to make the source fully compatible across target python versions:
 * Python
 * Micropython
-    * [Viper optimization]() for numeric type loops (FIR)
-    * [C module optimization]() for numeric loops if you are building your own firmware (faster!)
+    * [Viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter) for numeric type loops (FIR)
+    * [C module optimization](https://docs.micropython.org/en/latest/develop/cmodules.html) for numeric loops if you are building your own firmware (faster!)
         * [Building your own firmware is easy](https://github.com/micropython/ports/unix), [use ```make USER_C_MODLES=path_to_c_modules```](build_upy_unix.sh).
 * Pypy3
 

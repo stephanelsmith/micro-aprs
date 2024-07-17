@@ -25,7 +25,7 @@ typedef struct _mp_obj_uctypes_struct_t {
 // csign(-123)
 // csign(123)
 
-
+// SIGN
 int32_t sign(int32_t v){
     return v>=0?1:-1;
 }
@@ -35,12 +35,12 @@ static mp_obj_t mp_csign(mp_obj_t a_obj) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(csign_obj, mp_csign);
 
-
-static mp_obj_t mp_to_int32(mp_obj_t a_obj) {
+// TO INT
+static mp_obj_t mp_uint_to_int(mp_obj_t a_obj) {
     uint32_t a = mp_obj_get_int(a_obj);
-	return mp_obj_new_int((int32_t)a);
+    return mp_obj_new_int((int32_t)a);
 }
-static MP_DEFINE_CONST_FUN_OBJ_1(to_int32_obj, mp_to_int32);
+static MP_DEFINE_CONST_FUN_OBJ_1(uint_to_int_obj, mp_uint_to_int);
 
 // Reference for sqrt implementation
 // https://stackoverflow.com/questions/65986056/is-there-a-non-looping-unsigned-32-bit-integer-square-root-function-c
@@ -85,6 +85,7 @@ static mp_obj_t mp_cisqrt(mp_obj_t a_obj) {
 static MP_DEFINE_CONST_FUN_OBJ_1(cisqrt_obj, mp_cisqrt);
 
 
+// MAG 2
 uint16_t mag2(int32_t a, int32_t b){
     return isqrt32(a*a+b*b);
 }
@@ -95,6 +96,37 @@ static mp_obj_t mp_cmag2(mp_obj_t a_obj, mp_obj_t b_obj) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_2(cmag2_obj, mp_cmag2);
 
+// FIR CORE
+// ARGS: coefs, buf, v, idx, scale
+// OUT : tuple(idx, o)
+static mp_obj_t mp_fir_core(size_t n_args, const mp_obj_t *args) {
+    (void)n_args; // always 5 args: coefs, buf, v, idx, scale
+    mp_obj_array_t *coefs_array = MP_OBJ_TO_PTR(args[0]);
+    mp_obj_array_t *buf_array = MP_OBJ_TO_PTR(args[1]);
+    int32_t v = mp_obj_get_int(args[2]);
+    int32_t idx = mp_obj_get_int(args[3]);
+    int64_t scale = mp_obj_get_int(args[4]);
+
+    int32_t o = 0;
+    int32_t *coefs = coefs_array->items;
+    int32_t *buf = buf_array->items;
+    int32_t ncoefs = coefs_array->len;
+
+    buf[idx] = v;
+    for(int32_t i=0; i<ncoefs; i++){
+        int32_t buf_i = idx-i>=0 ? idx-i : ncoefs+idx-i; // emulate python mod for negative numbers
+        // do 64bit operation to prevent overflow during accumulation
+        o += ((int64_t)coefs[i] * (int64_t)buf[buf_i]) / (int64_t)scale;
+    }
+    idx = (idx+1)%ncoefs;
+
+    mp_obj_t ret = mp_obj_new_tuple(2, NULL);
+    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);
+    tuple->items[0] = mp_obj_new_int(idx);
+    tuple->items[1] = mp_obj_new_int(o);
+    return ret;
+}
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(fir_core_obj, 5, 5, mp_fir_core);
 
 
 // Define all properties of the module.
@@ -107,7 +139,8 @@ static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_cisqrt), MP_ROM_PTR(&cisqrt_obj) },
     { MP_ROM_QSTR(MP_QSTR_cmag2), MP_ROM_PTR(&cmag2_obj) },
     { MP_ROM_QSTR(MP_QSTR_csign), MP_ROM_PTR(&csign_obj) },
-    { MP_ROM_QSTR(MP_QSTR_to_int32), MP_ROM_PTR(&to_int32_obj) },
+    { MP_ROM_QSTR(MP_QSTR_uint_to_int), MP_ROM_PTR(&uint_to_int_obj) },
+    { MP_ROM_QSTR(MP_QSTR_fir_core), MP_ROM_PTR(&fir_core_obj) },
 };
 static MP_DEFINE_CONST_DICT(example_module_globals, example_module_globals_table);
 

@@ -3,13 +3,18 @@ import math
 from array import array
 
 from lib.utils import eprint
-from lib.compat import IS_UPY
-from lib.compat import isqrt
-from lib.compat import sign
+from lib.compat import IS_UPY, HAS_C
 
 if IS_UPY:
     import micropython
-    from cvec import to_int32
+    if HAS_C:
+        from cvec import cisqrt as isqrt
+        from cvec import csign as sign
+        from cvec import uint_to_int
+else:
+    from math import isqrt
+    def sign(a:int)->int:
+        return (a > 0) - (a < 0)
 
 def frange(start, stop, step, rnd=None):
     n = int(math.ceil((stop - start) / step))
@@ -29,12 +34,17 @@ def gen_bits_from_bytes(mv, stop_bit = None):
 
 if IS_UPY:
     @micropython.viper
-    def afsk_detector(arr:ptr32, size:int)->int:
+    def afsk_detector(arr:ptr32, size:int)->bool:
         pol:int = 1 #polarity of the run we are currently tracking
-        run:int = 0    #current run count (number of consecutive pos/neg samples)
-        act:int = 0   #count of the number of runs we've seen above a threshold
+        run:int = 0 #current run count (number of consecutive pos/neg samples)
+        act:int = 0 #count of the number of runs we've seen above a threshold
         for i in range(size):
-            v:int = arr[i]
+            # v:int = arr[i] # WARN, THIS IS ALWAYS U32 (POSITIVE VALUE)
+            # v:int = int(uint_to_int(arr[i]))
+            # we are only checking polarity, so we can HACK a bit and assume any
+            # number < 2**31-1 is positive, anything > 2**31 is suppose to be a negative
+            v:int = 1 if arr[i] <= 2147483647 else -1
+            # eprint(arr[i],v)
             if pol==1 and v > 0:
                 run += 1
             elif pol==1 and v <= 0:
@@ -49,9 +59,9 @@ if IS_UPY:
                     act += 1
                 pol ^= 1 # no pol
                 run = 1
-        return 1 if act > 10 else 0 # 10 - minimum number of run we need to declare signal detected
+        return True if act > 10 else False # 10 - minimum number of run we need to declare signal detected
 else:
-    def afsk_detector(arr, size):
+    def afsk_detector(arr, size:int)->bool:
         pol = True #polarity of the run we are currently tracking
         run = 0    #current run count (number of consecutive pos/neg samples)
         act = 0   #count of the number of runs we've seen above a threshold
@@ -71,7 +81,7 @@ else:
                     act += 1
                 pol = not pol
                 run = 1
-        return 1 if act > 10 else 0 # 10 - minimum number of run we need to declare signal detected
+        return True if act > 10 else False # 10 - minimum number of run we need to declare signal detected
 
 def create_nrzi():
     #process the bit stream bit-by-bit with closure
@@ -82,7 +92,7 @@ def create_nrzi():
         def inner(b:int) -> int:
             nonlocal nonlocals
             _nonlocals = ptr8(nonlocals)
-            c:int       = _nonlocals[0]
+            c:int      = _nonlocals[0]
             if b == 0:
                 c = 1 if c == 0 else 0
             _nonlocals[0] = c
@@ -105,8 +115,8 @@ def create_unnrzi():
         def inner(b:int) -> int:
             nonlocal nonlocals
             _nonlocals = ptr8(nonlocals)
-            c:int       = _nonlocals[0]
-            r:int       = 0
+            c:int      = _nonlocals[0]
+            r:int      = 0
             if b == c:
                 r = 1
             _nonlocals[0] = b # c = b
@@ -122,36 +132,6 @@ def create_unnrzi():
             return r
     return inner
 
-# def create_agc(sp,depth):
-    # buf = array('i', (0 for x in range(depth)))
-    # idx = 0
-    # def inner(v:int)->int:
-        # return v
-        # nonlocal sp,idx,buf,depth
-        # buf[idx] = v
-        # m = max(buf)
-        # sp = scale*m
-        # try:
-            # scale = sp//m
-        # except:
-            # scale = 1
-        # idx = (idx+1)%depth
-        # return scale*v
-    # return inner
-
-# def create_squelch():
-    # def inner(arr, arr_size)->int:
-        # m = 0
-        # for x in range(arr_size):
-            # m = max(m,abs(arr[x]))
-            # #print(arr[x],end=' ')
-        # #print(m)
-        # if m>16000:
-            # return True  #squelched, skip this arr
-        # else:
-            # return False #process this arr
-    # return inner
-
 CORRELATOR_DELAY = 446e-6
 def create_corr(ts,):
     if IS_UPY:
@@ -160,29 +140,45 @@ def create_corr(ts,):
         _dat = array('i', (0 for x in range(delay)))
         _c = array('i',[idx, delay])
 
-        @micropython.viper
-        def inner(v:int, shift:int)->int:
-            nonlocal _dat, _c
-            dat = ptr32(_dat) # indexing ALWAYS return uint
-            c = ptr32(_c)
-            idx:int = c[0]
-            delay:int = c[1]
-            v = v >> shift
-            # o = v*dat[idx] # !!!! DOES NOT work, dat[idx] is always uint32
-            d:int = int(_dat[idx])        # cast to negative option a
-            # d:int = int(to_int32(dat[idx])) # cast to negative option b
-            o:int = int(isqrt(abs(v*d))) * int(sign(v)) * int(sign(d))
-            dat[idx] = v
-            c[0] = (idx+1)%delay # c[0] = idx
-            return o
+        if HAS_C and False:
+            # C OPTIMIZED
+            @micropython.viper
+            def inner(v:int)->int:
+                nonlocal _dat, _c
+                dat = ptr32(_dat) # indexing ALWAYS return UINT
+                c = ptr32(_c)
+                idx:int = c[0]
+                delay:int = c[1]
+                # o = v*dat[idx] # !!!! DOES NOT work, dat[idx] is always uint32
+                d:int = int(uint_to_int(dat[idx])) # cast to int32
+                o:int = int(isqrt(abs(v*d))) * int(sign(v)) * int(sign(d))
+                dat[idx] = v
+                c[0] = (idx+1)%delay # c[0] = idx
+                return o
+        else:
+            # VIPER OPTIMIZED
+            @micropython.viper
+            def inner(v:int)->int:
+                nonlocal _dat, _c
+                dat = ptr32(_dat) # indexing ALWAYS return UINT
+                c = ptr32(_c)
+                idx:int = c[0]
+                delay:int = c[1]
+                v >>= 2 # shift to prevent overflow, do this as we don't have a isqrt viper yet TODO!
+                # o = v*dat[idx]       # !!!! DOES NOT work, dat[idx] is always uint32
+                d:int = int(_dat[idx]) # get int value from array
+                o:int = v*d 
+                dat[idx] = v
+                c[0] = (idx+1)%delay # c[0] = idx
+                return o
     else:
+        # PYTHON
         delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
         dat = array('i', (0 for x in range(delay)))
         idx = 0
-        def inner(v:int, shift:int)->int:
+        def inner(v:int)->int:
             nonlocal idx,dat,delay
-            v = v >> shift
-            o = v*dat[idx]
+            # o = v*dat[idx]
             o = isqrt(abs(v*dat[idx])) * sign(v) * sign(dat[idx])
             dat[idx] = v
             idx = (idx+1)%delay
@@ -191,39 +187,53 @@ def create_corr(ts,):
 
 def create_fir(coefs, scale):
     if IS_UPY:
-        ncoefs = len(coefs)
-        _coefs = array('i', (coefs[i] for i in range(ncoefs)))
-        _buf = array('i', (0 for x in range(ncoefs)))
-        idx = 0
-        scale = scale or 1
-        _c = array('i',[idx, scale, ncoefs])
+        if HAS_C and False:
+            # C OPTIMIZED
+            from cvec import fir_core
+            ncoefs = len(coefs)
+            coefs = array('i', (coefs[i] for i in range(ncoefs)))
+            buf = array('i', (0 for x in range(ncoefs)))
+            idx = 0
+            scale = scale or 1
+            def inner(v:int)->int:
+                nonlocal ncoefs, coefs, buf, idx, scale
+                idx, o = fir_core(coefs, buf, v, idx, scale) # CALL C
+                # eprint(o)
+                return o
+        else:
+            # VIPER OPTIMIZED
+            ncoefs = len(coefs)
+            _coefs = array('i', (coefs[i] for i in range(ncoefs)))
+            _buf = array('i', (0 for x in range(ncoefs)))
+            idx = 0
+            scale = scale or 1
+            _c = array('i',[idx, scale, ncoefs])
 
-        @micropython.viper
-        def inner(v:int)->int:
-            nonlocal _coefs, _buf, _c
+            @micropython.viper
+            def inner(v:int)->int:
+                nonlocal _coefs, _buf, _c
 
-            buf = ptr32(_buf)     # indexing ALWAYS return uint
-            coefs = ptr32(_coefs) # indexing ALWAYS return uint
-            c = ptr32(_c)
-            idx:int = c[0]
-            scale:int = c[1]
-            ncoefs:int = c[2]
+                buf = ptr32(_buf)     # indexing ALWAYS return uint
+                coefs = ptr32(_coefs) # indexing ALWAYS return uint
+                c = ptr32(_c)
+                idx:int = c[0]
+                scale:int = c[1]
+                ncoefs:int = c[2]
 
-            buf[idx] = v # ok, can assign negative number
-            o:int = 0
-            for i in range(ncoefs):
-                # cast to negatives
-                # either use C function to_int32 to cast uint32 to int32 OR
-                # index directy from the array.array
-                x:int = int(_buf[(idx-i)%ncoefs])
-                y:int = int(_coefs[i])
-                # x:int = int(to_int32(buf[(idx-i)%ncoefs]))
-                # y:int = int(to_int32(coefs[i]))
-                o += (x * y) // scale
-            idx = (idx+1)%ncoefs
-            c[0] = idx
-            return o
+                buf[idx] = v # ok, can assign negative number
+                o:int = 0
+                for i in range(ncoefs):
+                    # cast to negatives
+                    # index directy from the array.array
+                    x:int = int(_buf[(idx-i)%ncoefs])
+                    y:int = int(_coefs[i])
+                    o += (x * y) // scale
+                idx = (idx+1)%ncoefs
+                c[0] = idx
+                # eprint(o)
+                return o
     else:
+        # PYTHON
         ncoefs = len(coefs)
         coefs = array('i', (coefs[i] for i in range(ncoefs)))
         buf = array('i', (0 for x in range(ncoefs)))

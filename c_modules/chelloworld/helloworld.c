@@ -32,7 +32,7 @@ typedef struct _mp_obj_uctypes_struct_t {
 
 // *************************************************
 // This is the function which will be called from Python as cexample.add_ints(a, b).
-static mp_obj_t add_ints(mp_obj_t a_obj, mp_obj_t b_obj) {
+static mp_obj_t mp_add_ints(mp_obj_t a_obj, mp_obj_t b_obj) {
 // *************************************************
     // Extract the ints from the micropython input objects.
     int a = mp_obj_get_int(a_obj);
@@ -41,7 +41,21 @@ static mp_obj_t add_ints(mp_obj_t a_obj, mp_obj_t b_obj) {
     // Calculate the addition and convert to MicroPython object.
     return mp_obj_new_int(a + b);
 }
-static MP_DEFINE_CONST_FUN_OBJ_2(add_ints_obj, add_ints);
+static MP_DEFINE_CONST_FUN_OBJ_2(add_ints_obj, mp_add_ints);
+
+
+// return a tuple
+static mp_obj_t mp_ret_tuple(mp_obj_t a_obj, mp_obj_t b_obj) {
+    int a = mp_obj_get_int(a_obj);
+    int b = mp_obj_get_int(b_obj);
+    mp_obj_t ret = mp_obj_new_tuple(2, NULL);
+    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);
+    tuple->items[0] = mp_obj_new_int(a);
+    tuple->items[1] = mp_obj_new_int(b);
+    return ret;
+}
+static MP_DEFINE_CONST_FUN_OBJ_2(ret_tuple_obj, mp_ret_tuple);
+
 
 // *************************************************
 // TEST creating new bytearray
@@ -203,6 +217,7 @@ static MP_DEFINE_CONST_FUN_OBJ_1(test_struct_obj, test_struct);
 static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_chelloworld) },
     { MP_ROM_QSTR(MP_QSTR_add_ints), MP_ROM_PTR(&add_ints_obj) },
+    { MP_ROM_QSTR(MP_QSTR_ret_tuple), MP_ROM_PTR(&ret_tuple_obj) },
     { MP_ROM_QSTR(MP_QSTR_test_str), MP_ROM_PTR(&test_string_obj) },
     { MP_ROM_QSTR(MP_QSTR_test_int), MP_ROM_INT(MAGIC_CONSTANT) },
     { MP_ROM_QSTR(MP_QSTR_test_tuple), MP_ROM_PTR(&test_tuple_obj) },

@@ -98,12 +98,10 @@ class AFSKDemodulator():
                                            bandpass_width, 
                                            bandpass_amark, 
                                            bandpass_aspace)
-        self.bandpass = create_fir(coefs = coefs, scale = g)
+        self.bpf = create_fir(coefs = coefs, scale = g)
 
 
-        self.corr = create_corr(ts    = self.ts,
-                                # shift = 2, # scale down to avoid overflow
-                                )
+        self.corr = create_corr(ts    = self.ts,)
 
         nmark = int(self.tmark/self.ts)
         lpf_ncoefsbaud = options['lpf_ncoefsbaud']
@@ -157,7 +155,7 @@ class AFSKDemodulator():
             # Process a chunk of samples
             corr     = self.corr
             lpf      = self.lpf
-            bandpass = self.bandpass
+            bpf      = self.bpf
             sampler  = self.sampler
             unnrzi   = self.unnrzi
 
@@ -171,8 +169,8 @@ class AFSKDemodulator():
 
                 for i in range(arr_size):
                     o = arr[i]
-                    o = bandpass(o)
-                    o = corr(o, 0)
+                    o = bpf(o)
+                    o = corr(o)
                     o = lpf(o)
                     # eprint(o)
                     bs = sampler(o)

@@ -46,6 +46,7 @@ async def read_samples_from_pipe(samples_q,
             except EOFError:
                 break #eof break
             arr[idx] = unpack('<h', a)[0]
+            # eprint(arr[idx])
             idx += 1
             if idx%defs.SAMPLES_SIZE == 0:
                 if afsk_detector(arr,idx): #afsk signal detector
@@ -53,8 +54,8 @@ async def read_samples_from_pipe(samples_q,
                     # await asyncio.sleep(0)
                     arr = array('i',range(defs.SAMPLES_SIZE))
                 idx = 0
+        #if afsk_detector(arr,idx): # alway process tail
         await q_put((arr, idx))
-        # await asyncio.sleep(0)
 
     except Exception as err:
         print_exc(err)

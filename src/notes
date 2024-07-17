@@ -9,8 +9,8 @@ echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v -t null -t -
 
 #mod
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t - -t - | multimon-ng -t raw -A -a AFSK1200 -
+echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v -t - -t - | multimon-ng -t raw -A -a AFSK1200 - # not working, likely related to pipe EOF
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox | multimon-ng -t raw -A -a AFSK1200 -
-echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 -  # something with piping, sometimes works first time
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t test/test.wav -t -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/test.wav
 atest test/test.wav

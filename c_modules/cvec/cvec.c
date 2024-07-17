@@ -20,20 +20,19 @@ typedef struct _mp_obj_uctypes_struct_t {
 
 /////////////////////////
 // from cvec import *
-// cisqrt(100)
-// cmag2(12,34)
-// csign(-123)
-// csign(123)
+// isqrt(100)
+// sign(-123)
+// sign(123)
 
 // SIGN
 int32_t sign(int32_t v){
     return v>=0?1:-1;
 }
-static mp_obj_t mp_csign(mp_obj_t a_obj) {
+static mp_obj_t mp_sign(mp_obj_t a_obj) {
     int a = mp_obj_get_int(a_obj);
 	return mp_obj_new_int(sign(a));
 }
-static MP_DEFINE_CONST_FUN_OBJ_1(csign_obj, mp_csign);
+static MP_DEFINE_CONST_FUN_OBJ_1(sign_obj, mp_sign);
 
 // TO INT
 static mp_obj_t mp_uint_to_int(mp_obj_t a_obj) {
@@ -78,23 +77,12 @@ uint16_t isqrt32(uint32_t x){
     y -= x < (uint32_t)y * y;
     return y >> (lz >> 1);
 }
-static mp_obj_t mp_cisqrt(mp_obj_t a_obj) {
+static mp_obj_t mp_isqrt(mp_obj_t a_obj) {
     int32_t a = mp_obj_get_int(a_obj);
 	return mp_obj_new_int(isqrt32(a));
 }
-static MP_DEFINE_CONST_FUN_OBJ_1(cisqrt_obj, mp_cisqrt);
+static MP_DEFINE_CONST_FUN_OBJ_1(isqrt_obj, mp_isqrt);
 
-
-// MAG 2
-uint16_t mag2(int32_t a, int32_t b){
-    return isqrt32(a*a+b*b);
-}
-static mp_obj_t mp_cmag2(mp_obj_t a_obj, mp_obj_t b_obj) {
-    int32_t a = mp_obj_get_int(a_obj);
-    int32_t b = mp_obj_get_int(b_obj);
-	return mp_obj_new_int(mag2(a, b));
-}
-static MP_DEFINE_CONST_FUN_OBJ_2(cmag2_obj, mp_cmag2);
 
 // FIR CORE
 // ARGS: coefs, buf, v, idx, scale
@@ -136,9 +124,8 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(fir_core_obj, 5, 5, mp_fir_core);
 // optimized to word-sized integers by the build system (interned strings).
 static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_cvec) },
-    { MP_ROM_QSTR(MP_QSTR_cisqrt), MP_ROM_PTR(&cisqrt_obj) },
-    { MP_ROM_QSTR(MP_QSTR_cmag2), MP_ROM_PTR(&cmag2_obj) },
-    { MP_ROM_QSTR(MP_QSTR_csign), MP_ROM_PTR(&csign_obj) },
+    { MP_ROM_QSTR(MP_QSTR_isqrt), MP_ROM_PTR(&isqrt_obj) },
+    { MP_ROM_QSTR(MP_QSTR_sign), MP_ROM_PTR(&sign_obj) },
     { MP_ROM_QSTR(MP_QSTR_uint_to_int), MP_ROM_PTR(&uint_to_int_obj) },
     { MP_ROM_QSTR(MP_QSTR_fir_core), MP_ROM_PTR(&fir_core_obj) },
 };

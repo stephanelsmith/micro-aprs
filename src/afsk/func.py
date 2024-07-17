@@ -8,8 +8,8 @@ from lib.compat import IS_UPY, HAS_C
 if IS_UPY:
     import micropython
     if HAS_C:
-        from cvec import cisqrt as isqrt
-        from cvec import csign as sign
+        from cvec import isqrt
+        from cvec import sign
         from cvec import uint_to_int
 else:
     from math import isqrt

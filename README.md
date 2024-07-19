@@ -89,11 +89,11 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
  	* Multimon-ng
   	* aprs_demod
 ```
-echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test.wav
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t test.wav -t -
-atest test.wav
-sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
-sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
+echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test/test.wav
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t test/test.wav -t -
+atest test/test.wav
+sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
+sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t play -t -
 ```
 
@@ -102,6 +102,7 @@ echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t play -t -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -t - -t aprs - | multimon-ng -t raw -A -a AFSK1200 -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t -
+echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t -
 ```
 
 
@@ -150,8 +151,8 @@ echo "KI5TOF>APRS:>hello world!" | pypy3 aprs_mod.py -v | pypy3 aprs_demod.py -v
 
 * Decode Direwolf generated sample
 ```
-gen_packets -r 22050 -o test.wav
-sox -t wav test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
+gen_packets -r 22050 -o test/test.wav
+sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
 ```
 ```
 WB2OSZ-11>TEST:,The quick brown fox jumps over the lazy dog!  1 of 4

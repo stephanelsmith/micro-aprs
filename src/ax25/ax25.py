@@ -259,7 +259,9 @@ class AX25():
         idx += len(self.info)
 
         #crc
-        crc = struct.pack('<H',crc16_ccit(mv[flags_pre*AX25_FLAG_LEN:idx]))
+        cm = mv[flags_pre*AX25_FLAG_LEN:idx]
+        cc = crc16_ccit(cm)
+        crc = struct.pack('<H',cc)
         mv[idx:idx+AX25_CRC_LEN] = crc
         idx += AX25_CRC_LEN
 

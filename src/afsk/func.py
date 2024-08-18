@@ -87,15 +87,15 @@ def create_nrzi():
     #process the bit stream bit-by-bit with closure
     if IS_UPY:
         c = 0
-        nonlocals = array('B', [c])
+        nl = array('B', [c])
         @micropython.viper
         def inner(b:int) -> int:
-            nonlocal nonlocals
-            _nonlocals = ptr8(nonlocals)
-            c:int      = _nonlocals[0]
+            nonlocal nl
+            _nl = ptr8(nl)
+            c:int      = _nl[0]
             if b == 0:
                 c = 1 if c == 0 else 0
-            _nonlocals[0] = c
+            _nl[0] = c
             return c
     else:
         c = 0
@@ -110,16 +110,16 @@ def create_unnrzi():
     #process the bit stream bit-by-bit with closure
     if IS_UPY:
         c = 1
-        nonlocals = array('B', [c])
+        nl = array('B', [c])
         @micropython.viper
         def inner(b:int) -> int:
-            nonlocal nonlocals
-            _nonlocals = ptr8(nonlocals)
-            c:int      = _nonlocals[0]
+            nonlocal nl
+            _nl = ptr8(nl)
+            c:int      = _nl[0]
             r:int      = 0
             if b == c:
                 r = 1
-            _nonlocals[0] = b # c = b
+            _nl[0] = b # c = b
             return r
     else:
         c = 1

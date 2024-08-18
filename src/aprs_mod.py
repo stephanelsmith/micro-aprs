@@ -56,6 +56,8 @@ async def afsk_mod(aprs_q,
         async with AFSKModulator(sampling_rate = rate,
                                  afsk_q        = afsk_q,
                                  verbose       = verbose) as afsk_mod:
+            # afskmod will dump (array['i'], size) to afsk_q
+            # will put (None, None) when done
 
             while True:
                 #get aprs from input
@@ -192,7 +194,7 @@ async def main():
     eprint('# OUT  {}'.format(args['out']['file']))
 
     aprs_q = Queue() #aprs input queue
-    afsk_q = Queue() #afsk output queue
+    afsk_q = Queue() #afsk output queue (array['i'], size)
     tasks = []
     try:
         tasks.append(asyncio.create_task(afsk_out(afsk_q, 

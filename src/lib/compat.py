@@ -10,6 +10,12 @@ if sys.implementation.name == 'micropython':
 else:
     IS_UPY = False
 
+if IS_UPY:
+    from micropython import const
+else:
+    const = lambda x:x
+
+
 # if micropython, do we have c modules?
 if IS_UPY:
     try:

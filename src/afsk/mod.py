@@ -5,26 +5,28 @@ import asyncio
 import lib.upydash as _
 from array import array
 
-from array import array
-
 from lib.utils import eprint
+from lib.compat import const
 
 from afsk.sin_table import get_sin_table
 from afsk.func import gen_bits_from_bytes
 from afsk.func import create_nrzi
 
-AFSK_SCALE_DOWN = 1
-AX25_FLAG       = 0x7e
-AFSK_Q_SIZE     = 22050
+_AFSK_SCALE_DOWN = const(1)
+_AX25_FLAG       = const(0x7e)
+_AFSK_Q_SIZE     = const(22050)
 
 
 class AFSKModulator():
 
     def __init__(self, sampling_rate = 22050,
                        afsk_q        = None,
+                       signed        = True,
                        verbose       = False,):
+
         self.verbose = verbose 
         self.afsk_q = afsk_q
+        self.arr_t  = 'h' if signed else 'H'
 
         self.fmark = 1200
         self.tmark = 1/self.fmark
@@ -39,7 +41,7 @@ class AFSKModulator():
         #pre-compute sine table
         self.sintbl_sz = 1024
         self.sintbl = get_sin_table(size = self.sintbl_sz,
-                                    _range = 2**15,
+                                    signed = signed,
                                     )
 
         #get step sizes (integer and residue)
@@ -78,7 +80,7 @@ class AFSKModulator():
         zpad_ms = 1
         siz = int(zpad_ms/1000/self.ts)
         await self.afsk_q.put( (
-            array('i',[0 for x in range(siz)]), 
+            array(self.arr_t,[0 for x in range(siz)]), 
             siz
         ))
 
@@ -112,15 +114,14 @@ class AFSKModulator():
         # initial flags
         flags = bytearray(count)
         for i in range(count):
-            flags[i] = AX25_FLAG
+            flags[i] = _AX25_FLAG
         await self.to_samples(afsk     = flags,
                               stop_bit = count*8)
 
     async def to_samples(self, afsk, #bytes
                                stop_bit,
-                               # zpad_ms = 0,
                                ):
-        arr = array('i', range(AFSK_Q_SIZE))
+        arr = array(self.arr_t, range(_AFSK_Q_SIZE))
         idx = 0
 
         nrzi_dbg_i = 0
@@ -148,11 +149,11 @@ class AFSKModulator():
                         eprint('')
 
                 for sample in gen_samples(b):
-                    arr[idx] = sample//AFSK_SCALE_DOWN
+                    arr[idx] = sample//_AFSK_SCALE_DOWN
                     idx += 1
-                    if idx == AFSK_Q_SIZE:
+                    if idx == _AFSK_Q_SIZE:
                         await afsk_q_put((arr, idx))
-                        arr = array('i', range(AFSK_Q_SIZE))
+                        arr = array(self.arr_t, range(_AFSK_Q_SIZE))
                         idx = 0
 
             await afsk_q_put((arr, idx))

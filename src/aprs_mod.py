@@ -54,10 +54,7 @@ async def afsk_mod(aprs_q,
                    ):
     try:
         async with AFSKModulator(sampling_rate = rate,
-                                 afsk_q        = afsk_q,
                                  verbose       = verbose) as afsk_mod:
-            # afskmod will dump (array['i'], size) to afsk_q
-            # will put (None, None) when done
 
             while True:
                 #get aprs from input
@@ -104,9 +101,11 @@ async def afsk_mod(aprs_q,
                 else:
                     await afsk_mod.send_flags(4)
 
-                # end of aprs
+                # flush the output array and size and put on afsk_q
+                arr,s = await afsk_mod.flush()
+                await afsk_q.put((arr,s))
                 # eprint('APRS mod done: {}'.format(ax25))
-                await afsk_q.put(( None, None))
+                # await afsk_q.put(( None, None))
 
                 aprs_q.task_done()
 

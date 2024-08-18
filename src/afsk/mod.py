@@ -2,8 +2,11 @@
 import sys
 import math
 import asyncio
-import lib.upydash as _
+
 from array import array
+
+import lib.upydash as _
+from lib.compat import Queue
 
 from lib.utils import eprint
 from lib.compat import const
@@ -14,18 +17,17 @@ from afsk.func import create_nrzi
 
 _AFSK_SCALE_DOWN = const(1)
 _AX25_FLAG       = const(0x7e)
-_AFSK_Q_SIZE     = const(22050)
+_AFSK_Q_SIZE     = const(22050//10) # internal q size
 
 
 class AFSKModulator():
 
     def __init__(self, sampling_rate = 22050,
-                       afsk_q        = None,
                        signed        = True,
                        verbose       = False,):
 
         self.verbose = verbose 
-        self.afsk_q = afsk_q
+        self._q      = Queue() # internal queue
         self.arr_t  = 'h' if signed else 'H'
 
         self.fmark = 1200
@@ -79,7 +81,7 @@ class AFSKModulator():
     async def zero_padding(self):
         zpad_ms = 1
         siz = int(zpad_ms/1000/self.ts)
-        await self.afsk_q.put( (
+        await self._q.put( (
             array(self.arr_t,[0 for x in range(siz)]), 
             siz
         ))
@@ -121,13 +123,13 @@ class AFSKModulator():
     async def to_samples(self, afsk, #bytes
                                stop_bit,
                                ):
-        arr = array(self.arr_t, range(_AFSK_Q_SIZE))
+        arr = array(self.arr_t, (0 for i in range(_AFSK_Q_SIZE)))
         idx = 0
 
         nrzi_dbg_i = 0
 
         nrzi = self.nrzi
-        afsk_q_put = self.afsk_q.put
+        _q_put = self._q.put
         gen_samples = self.gen_baud_period_samples
         verbose = self.verbose
 
@@ -152,14 +154,29 @@ class AFSKModulator():
                     arr[idx] = sample//_AFSK_SCALE_DOWN
                     idx += 1
                     if idx == _AFSK_Q_SIZE:
-                        await afsk_q_put((arr, idx))
-                        arr = array(self.arr_t, range(_AFSK_Q_SIZE))
+                        await _q_put((arr, idx))
+                        arr = array(self.arr_t, (0 for i in range(_AFSK_Q_SIZE)))
                         idx = 0
 
-            await afsk_q_put((arr, idx))
+            await _q_put((arr, idx))
 
             if verbose:
                 eprint('\n')
         except Exception as err:
             traceback.print_exc()
+
+    # return the array and size
+    async def flush(self):
+        ls = []
+        s = 0
+        while not self._q.empty():
+            a_s = await self._q.get() # array,size
+            ls.append(a_s)
+            s += a_s[1]
+        arr = array(self.arr_t, range(s))
+        s = 0
+        for a_s in ls:
+            arr[s:s+a_s[1]] = a_s[0]
+            s += a_s[1]
+        return arr,s
 

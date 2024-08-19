@@ -43,7 +43,10 @@ if IS_UPY:
             # v:int = int(uint_to_int(arr[i]))
             # we are only checking polarity, so we can HACK a bit and assume any
             # number < 2**31-1 is positive, anything > 2**31 is suppose to be a negative
-            v:int = 1 if arr[i] <= 2147483647 else -1
+            # v:int = 1 if arr[i] <= 2147483647 else -1
+            v:int = arr[i]
+            if v > int(2147483647):
+                v *= -1
             # eprint(arr[i],v)
             if pol==1 and v > 0:
                 run += 1

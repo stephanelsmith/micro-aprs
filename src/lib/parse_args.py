@@ -23,7 +23,7 @@ def mod_parse_args(args):
 
     if '-h' in args or '--help' in args or '-help' in args:
         print('''APRS MOD
-(C) Stephane Smith (KI5TOF) 2023
+(C) Stephane Smith (KI5TOF) 2024
 
 Usage: 
 aprs_mod.py [options] (-t outfile) (-t infile)

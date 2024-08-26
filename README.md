@@ -31,21 +31,23 @@ In practice this means we:
 
 ## :mortar_board: Tutorials
 
-As many who've gone down this path have mentioned, there's really just not a lot of information out there covering these topics.  I hope these tutorial sections will provide you additional information on getting started!
+As many who've gone down this path have mentioned, there's surprisingly little useful information out there covering these topics.  I hope these tutorial sections will provide you additional information on getting started!
 * [AFSK Demodulation](docs/demod/README.md). Convert raw AFSK samples to bits.
 * [AFSK Modulation](docs/mod/README.md). Convert byte arrays to AFSK samples
 * [AX25/APRS Encoding and Decoding](docs/encdec/README.md). Step-by-step encoding/decoding APRS and AX25.
 * [144.39MHz 1/4 Wave Ground Plane Antenna Design](docs/ant/README.md).
+* [Build Micrpython Firware](docs/upy/README.md)
 
 
 ## :snake: Python Compatibility
 Care has been taken to make the source fully compatible across target python versions:
-* Python
+* Python/Pypy3
+    * Run examples below from the [src](src/) folder.
 * Micropython
-    * [Viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter) for numeric type loops (FIR)
-    * [C module optimization](https://docs.micropython.org/en/latest/develop/cmodules.html) for numeric loops if you are building your own firmware (faster!)
-        * [Building your own firmware is easy](https://github.com/micropython/ports/unix), [use ```make USER_C_MODLES=path_to_c_modules```](build_upy_unix.sh).
-* Pypy3
+    * With Micropython, special optimizations are made:
+        * [Viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter) for numeric type loops (FIR)
+        * [C module optimization](https://docs.micropython.org/en/latest/develop/cmodules.html) for numeric loops if you are building your own firmware (faster!)
+            * [Building your own firmware is easy](https://github.com/micropython/ports/unix), [use ```make USER_C_MODLES=path_to_c_modules```](build_upy_unix.sh).
 
 
 ## :satellite: APRS to AFSK Modulation
@@ -60,7 +62,7 @@ python aprs_mod.py -h
 ```
 ```
 APRS MOD
-(C) Stephane Smith (KI5TOF) 2023
+(C) Stephane Smith (KI5TOF) 2024
 
 Usage:
 aprs_mod.py [options] (-t outfile) (-t infile)
@@ -119,7 +121,7 @@ python aprs_demod.py -h
 ```
 ```
 APRS DEMOD
-(C) Stephane Smith (KI5TOF) 2023
+(C) Stephane Smith (KI5TOF) 2024
 
 Usage:
 aprs_demod.py [options] (-t outfile) (-t infile)
@@ -202,7 +204,7 @@ python aprs_is.py -h
 ```
 ```
 APRS IS GATEWAY
-(C) Stephane Smith (KI5TOF) 2023
+(C) Stephane Smith (KI5TOF) 2024
 
 Usage: python aprs_is.py [OPTIONS]
 aprs_is.py sends aprs commands from stdin to aprs is servers.

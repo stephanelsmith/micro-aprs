@@ -40,8 +40,8 @@ def closure_cb(pwm, arr, siz, done):
         _arr = ptr16(arr) # uint
         i:int = _nl[0]
         pwm.duty_u16(_arr[i])
-        i+=1
-        if i == int(siz):
+        i = (i+1)%int(siz)
+        if i == 0:
             done.set()
         _nl[0] = i
     return cb
@@ -73,12 +73,16 @@ async def start():
         tsf = ThreadSafeFlag()
         tim1 = Timer(1)
         tim1.init(freq=_FOUT, mode=Timer.PERIODIC, callback=closure_cb(pwm, arr, siz, tsf))
-        await tsf.wait()
-        print('DONE')
-        await asynio.sleep_ms(1)
-        tim1.deinit()
-        await asynio.sleep_ms(1)
-        pwm.deinit()
+        try:
+            while True:
+                print('loop')
+                await tsf.wait()
+                tsf.clear()
+        finally:
+            await asyncio.sleep_ms(1)
+            tim1.deinit()
+            await asyncio.sleep_ms(1)
+            pwm.deinit()
 
     except Exception as err:
         sys.print_exception(err)

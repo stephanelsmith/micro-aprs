@@ -11,6 +11,8 @@ For encoding APRS and AX25, there are in fact lots of great references which doc
 
 ## Encoding AX25 to Output Samples for Modulation
 
+To run the examples, change your working directry to the src folder.
+
 Here are the steps, in order, to generate AFSK samples:
 - Convert to AX25 bytes
 - Reverse the bytes

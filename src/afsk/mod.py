@@ -27,6 +27,7 @@ class AFSKModulator():
                        verbose       = False,):
 
         self.verbose = verbose 
+        self.signed  = signed
         self._q      = Queue() # internal queue
         self.arr_t  = 'h' if signed else 'H'
 
@@ -71,18 +72,19 @@ class AFSKModulator():
 
     async def __aenter__(self):
         #zero-pad
-        await self.zero_padding()
         return self
 
     async def __aexit__(self, *args):
-        #zero-pad
-        await self.zero_padding()
+        pass
 
-    async def zero_padding(self):
+    async def pad_zeros(self, ms=1):
         zpad_ms = 1
         siz = int(zpad_ms/1000/self.ts)
+        v = 0
+        if not self.signed:
+            v = 0x7FFF
         await self._q.put( (
-            array(self.arr_t,[0 for x in range(siz)]), 
+            array(self.arr_t,[v for x in range(siz)]), 
             siz
         ))
 

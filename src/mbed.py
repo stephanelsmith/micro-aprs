@@ -40,9 +40,10 @@ def closure_cb(pwm, arr, siz, done):
         _arr = ptr16(arr) # uint
         i:int = _nl[0]
         pwm.duty_u16(_arr[i])
-        i = (i+1)%int(siz)
-        if i == 0:
+        i += 1
+        if i == int(siz):
             done.set()
+            i -=1 # stall on done, no loop
         _nl[0] = i
     return cb
 
@@ -61,27 +62,29 @@ async def start():
             afsk,stop_bit = ax25.to_afsk()
             # print(afsk)
 
-            await afsk_mod.send_flags(4)
-            #generate samples
+            await afsk_mod.pad_zeros(ms = 100)
+            await afsk_mod.send_flags(10)
+            await afsk_mod.pad_zeros(ms = 100)
             await afsk_mod.to_samples(afsk     = afsk, 
                                         stop_bit = stop_bit,
                                         )
-            await afsk_mod.send_flags(4)
+            await afsk_mod.send_flags(10)
+            await afsk_mod.pad_zeros(ms = 10)
             arr,siz = await afsk_mod.flush()
 
-        pwm = PWM(Pin(1), freq=_FPWM, duty_u16=0) # resolution = 26.2536 - 1.4427 log(fpwm)
-        tsf = ThreadSafeFlag()
-        tim1 = Timer(1)
-        tim1.init(freq=_FOUT, mode=Timer.PERIODIC, callback=closure_cb(pwm, arr, siz, tsf))
         try:
+            pwm = PWM(Pin(1), freq=_FPWM, duty_u16=0) # resolution = 26.2536 - 1.4427 log(fpwm)
+            tsf = ThreadSafeFlag()
             while True:
-                print('loop')
-                await tsf.wait()
-                tsf.clear()
+                tim1 = Timer(1)
+                try:
+                    tim1.init(freq=_FOUT, mode=Timer.PERIODIC, callback=closure_cb(pwm, arr, siz, tsf))
+                    print('loop')
+                    await tsf.wait()
+                finally:
+                    tim1.deinit()
+                    await asyncio.sleep_ms(1000)
         finally:
-            await asyncio.sleep_ms(1)
-            tim1.deinit()
-            await asyncio.sleep_ms(1)
             pwm.deinit()
 
     except Exception as err:

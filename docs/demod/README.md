@@ -31,7 +31,7 @@ We find the output is:
 $$ H(t) = \frac{1}{2} cos(\omega_{mark} d) - \frac{1}{2} cos((d+2t)\omega_{mark})$$
 
 
-The first term, the DC component, ie. $` \frac{1}{2} cos(\omega_{mark} d) `$ , is our signal detect.  Graphically, here we can see all the terms together.
+The first term, the DC component, ie. $` \frac{1}{2} cos(\omega_{mark} d) `$ , is our signal.  Graphically, here we can see all the terms together.
 
 <p align="center">
   <br>
@@ -44,7 +44,7 @@ Next step is to detect both mark and space frequencies.  A clever concept I foun
 
 $$ MarkSpace(t) = \frac{1}{2} cos(\omega_{mark} d_{optimal}) - \frac{1}{2} cos(\omega_{space} d_{optimal}) $$
 
-where $` d_{optimal} `$ is chosen to _maximize_ $` MarkSpace(t) `$.  Below, we show MarkSpace(t), Mark, and Space.  Searching iteratively, we find  $` d_{optimal} = 446 \micro s `$.  Graphically, $` d_{optimal} = 446 \micro s `$ is indicated by the red dashed line.  If you watch carefully, you will notice the DC level for mark and space are at their extremes.
+where $` d_{optimal} `$ is chosen to _maximize_ $` MarkSpace(t) `$.  Below, we show MarkSpace(t), Mark, and Space.  Scanning $` d_{optimal} `$, we find  $` d_{optimal} = 446 \micro s `$.  Graphically, $` d_{optimal} = 446 \micro s `$ is indicated by the red dashed line.  If you watch carefully, you will notice the DC level for mark and space are at their extremes.
 
 <p align="center">
     <br>

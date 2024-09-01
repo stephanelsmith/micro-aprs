@@ -62,13 +62,12 @@ async def start():
             afsk,stop_bit = ax25.to_afsk()
             # print(afsk)
 
-            await afsk_mod.pad_zeros(ms = 100)
+            await afsk_mod.pad_zeros(ms = 10)
             await afsk_mod.send_flags(10)
-            await afsk_mod.pad_zeros(ms = 100)
             await afsk_mod.to_samples(afsk     = afsk, 
-                                        stop_bit = stop_bit,
-                                        )
-            await afsk_mod.send_flags(10)
+                                      stop_bit = stop_bit,
+                                      )
+            await afsk_mod.send_flags(2)
             await afsk_mod.pad_zeros(ms = 10)
             arr,siz = await afsk_mod.flush()
 

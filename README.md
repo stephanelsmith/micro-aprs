@@ -47,7 +47,12 @@ Care has been taken to make the source fully compatible across target python ver
     * With Micropython, special optimizations are made:
         * [Viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter) for numeric type loops (FIR)
         * [C module optimization](https://docs.micropython.org/en/latest/develop/cmodules.html) for numeric loops if you are building your own firmware (faster!)
-            * [Building your own firmware is easy](https://github.com/micropython/ports/unix), [use ```make USER_C_MODLES=path_to_c_modules```](build_upy_unix.sh).
+    * Unix/Linux Port
+        * [Getting Started](docs/upy/unix/README.md) + build instructions
+        * TerMux (command line for cell phones)
+    * ESP32 Ports
+        * [ProS3](docs/upy/pros3/README.md)
+        * [LilyGo T-TWR Plus](docs/upy/lilygottwr/README.md)
 
 
 ## :satellite: APRS to AFSK Modulation

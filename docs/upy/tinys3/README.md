@@ -69,3 +69,5 @@ Start afsk "hello world" example
 import tinys3
 ```
 
+The output is on Pin 1.
+

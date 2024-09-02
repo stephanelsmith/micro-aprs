@@ -9,9 +9,10 @@ That said, there are many benefits to a custom Micropython build:
 - Byte frozen code for faster load/start time
 - Easier (in my opinion) code iteration
 
-## [Unix Port](unix/README.md)
+## Unix Port
+- [Build intructions](unix/README.md)
 
 ## Embedded Ports (ESP32)
-- [ProS3](pros3/README.md)
+- [TinyS3](tinys3/README.md)
 - [Lilygottwr](lilygottwr/README.md)
 

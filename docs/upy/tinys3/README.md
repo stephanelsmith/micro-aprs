@@ -61,7 +61,7 @@ Finally, click ```reset``` again to begin execution.
 
 Fire up a terminal
 ```
-import tinys3
+py -m serial.tools.miniterm COM18
 ```
 
 Start afsk "hello world" example

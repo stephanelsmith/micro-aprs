@@ -1,6 +1,4 @@
-<p>
-<img src="tinys3-logo.png?raw=true" alt="" width="300">  
-</p>
+# TinyS3
 
 This port is included to provide:
 - A "hello world" of building and running custom micropython on an ESP32S3 board.
@@ -10,6 +8,10 @@ This port is included to provide:
 I've chosen to use [TinyS3](https://unexpectedmaker.com/shop.html#!/TinyS3/p/577100101/category=154217256) because is uses the ESP32S3 chip, it's tiny, versatile, easy to purchase, and I have a drawer full of them!  The [ESP32S3 chip by Espressif](https://www.espressif.com/en/products/socs/esp32-s3) is a 240MHz dual-core embedded proessor with built-in wifi, bluetooth, and usb support.  The TinyS3 adds 8Mb flash, 8Mb ram and pretty much everything else you need for a project.  
 
 TinyS3 is available through [UnexpectedMaker's store](https://unexpectedmaker.com/) directy, Mouser Digkey, Sparkfun and others. He's got tons of other great boards to check out to!
+
+<p align="center">
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/upy/tinys3/pins_tinys3.jpg?raw=true" alt="" width="600"/>
+</p>
 
 Finally, ESP32S3 is a great choice because the [LilyGo T-Twr port](../lilygottwr/README.md) also uses the esp32s3 (and also includes the radio!)
 
@@ -72,7 +74,11 @@ import tinys3
 ```
 
 The output is on ```IO1```.
-<p align="center">
-  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/upy/tinys3/pins_tinys3.jpg?raw=true" alt="" width="800"/>
-</p>
+
+
+
+
+## :raised_hands: Acknowledgements
+- Images and information from [TinyS3 and the Unexpected Maker Store](https://esp32s3.com/tinys3.html).  Go buy some kit!
+
 

@@ -12,7 +12,7 @@ The LilyGo T-TWR is a commerically available dev kit including ESP32S3 + [NiceRF
   - [sa868.cpp](https://github.com/Xinyuan-LilyGO/T-TWR/blob/master/lib/LilyGo_TWR_Library/src/sa868.cpp) Reference firmware
 - X Powers AXP2101 PMU
   - ![Datasheet](https://www.lcsc.com/datasheet/lcsc_datasheet_2305060916_X-Powers-Tech-AXP2101_C3036461.pdf')
-  - ![Library](https://github.com/lewisxhe/XPowersLib) 
+  - ![Xpower/Lilygo Library for Micropython](https://github.com/lewisxhe/XPowersLib) 
 
 ## :raised_hands: Acknowledgements
 - Images and information from [LilyGo T-TWR Store](https://www.lilygo.cc/products/t-twr-plus?srsltid=AfmBOooEmV2bkOz1-0ceEJCwkFkITOXYzLGBPkWvyBfF2cm7XqGT4BYH).

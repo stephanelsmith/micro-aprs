@@ -71,6 +71,7 @@ rtl_fm -f 144.390M -s 22050 -g 1 - | sox -t raw -b 16 -e signed-integer -c 1 -v 
 sox -t wav test/static_and_aprs.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 rtl_fm -f 144.390M -s 22050 -g 1 - | sox -t raw -b 16 -e signed-integer -c 1 -v 1 -r 22050 -  -t wav static.wav
 rtl_fm -f 144.390M -s 22050 -g 1 - | python aprs_demod.py -t -
+rtl_fm -f 144.390M -s 22050 -g 1 - | pypy3 aprs_demod.py -t -
 
 #STATIC
 sox -t wav test/static.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python squelch_test.py

@@ -12,7 +12,12 @@ if IS_UPY:
         from cvec import sign
         from cvec import uint_to_int
 else:
-    from math import isqrt
+    try:
+        from math import isqrt
+    except ImportError:
+        from math import sqrt
+        def isqrt(x):
+            return int(sqrt(x))
     def sign(a:int)->int:
         return (a > 0) - (a < 0)
 

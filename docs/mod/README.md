@@ -7,7 +7,7 @@ Modulation and generation of the AFSK signal is a fairly straight forward proces
 
 ## Ideal waveform generation
 
-First step is to generate the mark (1200Hz) and space (2200Hz) waveforms.  As a continuous functions:
+First step is to generate the $`f_{mark}`$ (1200Hz) and $`f_{space}`$ (2200Hz) waveforms.  As a continuous functions:
   
 ![AFSK Mark](mark.png?raw=true "Mark Waveform")
 ![AFSK Space](space.png?raw=true "Space Waveform")

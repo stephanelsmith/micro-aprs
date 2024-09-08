@@ -1,19 +1,16 @@
 # LilyGo T-TWR
 
-This port is included to provide:
-- A functional example with radio (TODO)
-- Demonstrate becaon mode with GPS (TODO)
-- Demonstrate demod with I gate funcionality (TODO)
-
-The LilyGo T-TWR is a commerically available dev kit including ESP32S3 + [NiceRF SA868 Wireless Transceiver](https://www.nicerf.com/walkie-talkie-module/2w-embedded-walkie-talkie-module-sa868.html).  The T-TWR comes in a few flavors, the one I've chosen is the VHF (covering APRS 144.39MHz) normal edition.  I passed on the "Open Edition" as fiddling around with this module's firmware is out of scope for this project.
-
+The LilyGo T-TWR is a commerically available dev kit including ESP32S3 + [NiceRF SA868 Wireless Transceiver](https://www.nicerf.com/walkie-talkie-module/2w-embedded-walkie-talkie-module-sa868.html).  The T-TWR comes in a few flavors, the one I've chosen is the VHF (covering APRS 144.39MHz) normal edition. 
 <p align="center">
   <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/upy/lilygottwr/T-TWR_Plus_600x600.webp?raw=true" alt="" width="600"/>
 </p>
 
-In additional to processor and transceiver, the LilyGo T-TWR also includes GPS module, a screen (which I currently don't intend on implementing), and power management.
-
-
+- [sa868.cpp](https://github.com/Xinyuan-LilyGO/T-TWR/blob/master/lib/LilyGo_TWR_Library/src/sa868.cpp) Reference firmware
+- [Pin map](https://github.com/Xinyuan-LilyGO/T-TWR/blob/master/lib/LilyGo_TWR_Library/src/utilities.h)
+- [Schematic](https://github.com/Xinyuan-LilyGO/T-TWR/blob/master/schematic/T-TWR-Plus_Rev2.0.pdf)
+- X Powers AXP2101 PMU
+  - ![Datasheet](https://www.lcsc.com/datasheet/lcsc_datasheet_2305060916_X-Powers-Tech-AXP2101_C3036461.pdf')
+  - ![Library](https://github.com/lewisxhe/XPowersLib') 
 
 ## :raised_hands: Acknowledgements
 - Images and information from [LilyGo T-TWR Store](https://www.lilygo.cc/products/t-twr-plus?srsltid=AfmBOooEmV2bkOz1-0ceEJCwkFkITOXYzLGBPkWvyBfF2cm7XqGT4BYH).

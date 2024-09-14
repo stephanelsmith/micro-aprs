@@ -5,12 +5,15 @@ The LilyGo T-TWR is a commerically available dev kit including ESP32S3 + [NiceRF
   <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/upy/lilygottwr/T-TWR_Plus_600x600.webp?raw=true" alt="" width="600"/>
 </p>
 
-- [sa868.cpp](https://github.com/Xinyuan-LilyGO/T-TWR/blob/master/lib/LilyGo_TWR_Library/src/sa868.cpp) Reference firmware
-- [Pin map](https://github.com/Xinyuan-LilyGO/T-TWR/blob/master/lib/LilyGo_TWR_Library/src/utilities.h)
-- [Schematic](https://github.com/Xinyuan-LilyGO/T-TWR/blob/master/schematic/T-TWR-Plus_Rev2.0.pdf)
+- LilyGo T-TWR
+  - [Pin map](https://github.com/Xinyuan-LilyGO/T-TWR/blob/master/lib/LilyGo_TWR_Library/src/utilities.h)
+  - [Schematic](https://github.com/Xinyuan-LilyGO/T-TWR/blob/master/schematic/T-TWR-Plus_Rev2.0.pdf)
+- SA868 wireless transceiver
+  - [Datasheet](SA868.pdf)
+  - [sa868.cpp](https://github.com/Xinyuan-LilyGO/T-TWR/blob/master/lib/LilyGo_TWR_Library/src/sa868.cpp) Reference firmware
 - X Powers AXP2101 PMU
   - ![Datasheet](https://www.lcsc.com/datasheet/lcsc_datasheet_2305060916_X-Powers-Tech-AXP2101_C3036461.pdf')
-  - ![Library](https://github.com/lewisxhe/XPowersLib') 
+  - ![Xpower/Lilygo Library for Micropython](https://github.com/lewisxhe/XPowersLib) 
 
 
 Build micropython port with C modules

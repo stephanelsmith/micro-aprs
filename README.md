@@ -43,7 +43,7 @@ As many who've gone down this path have mentioned, there's surprisingly little u
 Care has been taken to make the source fully compatible across target python versions:
 * Python/Pypy3
     * Run examples below from the [src](src/) folder.
-* Micropython
+* Micropython (See micropython ports below)
     * [Viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter) for numeric type loops (FIR)
     * [C module optimization](https://docs.micropython.org/en/latest/develop/cmodules.html) for numeric loops if you are building your own firmware (faster!)
 

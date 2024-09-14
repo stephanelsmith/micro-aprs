@@ -1,6 +1,6 @@
-#define MICROPY_HW_BOARD_NAME               "SSAPRS"
+#define MICROPY_HW_BOARD_NAME               "SSTINYS3"
 #define MICROPY_HW_MCU_NAME                 "ESP32-S3-FN8"
-#define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT "SSAPRS"
+#define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT "SSTINYS3"
 
 // turn-off unused
 // https://github.com/orgs/micropython/discussions/14473

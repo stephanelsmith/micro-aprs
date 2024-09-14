@@ -12,6 +12,13 @@ The LilyGo T-TWR is a commerically available dev kit including ESP32S3 + [NiceRF
   - ![Datasheet](https://www.lcsc.com/datasheet/lcsc_datasheet_2305060916_X-Powers-Tech-AXP2101_C3036461.pdf')
   - ![Library](https://github.com/lewisxhe/XPowersLib') 
 
+
+Build micropython port with C modules
+```
+make BOARD=SS_TTWR USER_C_MODULES=~/micro-aprs/c_modules/esp32s3.cmake
+```
+
+
 ## :raised_hands: Acknowledgements
 - Images and information from [LilyGo T-TWR Store](https://www.lilygo.cc/products/t-twr-plus?srsltid=AfmBOooEmV2bkOz1-0ceEJCwkFkITOXYzLGBPkWvyBfF2cm7XqGT4BYH).
 - [LilyGo T-TWR Github Page](https://github.com/Xinyuan-LilyGO/T-TWR)

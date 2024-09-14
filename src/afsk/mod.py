@@ -15,7 +15,7 @@ from afsk.sin_table import get_sin_table
 from afsk.func import gen_bits_from_bytes
 from afsk.func import create_nrzi
 
-_AFSK_SCALE_DOWN = const(1)
+# _AFSK_SCALE_DOWN = const(1)
 _AX25_FLAG       = const(0x7e)
 _AFSK_Q_SIZE     = const(22050//10) # internal q size
 
@@ -24,6 +24,7 @@ class AFSKModulator():
 
     def __init__(self, sampling_rate = 22050,
                        signed        = True,
+                       amplitude     = 0x7fff,
                        verbose       = False,):
 
         self.verbose = verbose 
@@ -43,8 +44,9 @@ class AFSKModulator():
 
         #pre-compute sine table
         self.sintbl_sz = 1024
-        self.sintbl = get_sin_table(size = self.sintbl_sz,
+        self.sintbl = get_sin_table(size   = self.sintbl_sz,
                                     signed = signed,
+                                    ampli  = amplitude,
                                     )
 
         #get step sizes (integer and residue)
@@ -153,7 +155,7 @@ class AFSKModulator():
                         eprint('')
 
                 for sample in gen_samples(b):
-                    arr[idx] = sample//_AFSK_SCALE_DOWN
+                    arr[idx] = sample#//_AFSK_SCALE_DOWN
                     idx += 1
                     if idx == _AFSK_Q_SIZE:
                         await _q_put((arr, idx))

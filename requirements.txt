@@ -1,0 +1,4 @@
+numpy
+gnuradio
+osmosdr
+ttkbootstrap

@@ -1,3 +1,5 @@
+# core.py
+
 import threading
 import asyncio
 import socket
@@ -6,6 +8,7 @@ import wave
 import struct
 import subprocess
 import numpy as np
+import re
 
 # Try to import external dependencies, handle ImportError gracefully
 try:
@@ -17,7 +20,6 @@ except ImportError as e:
     gr = None  # Set to None to prevent errors if used
     blocks = None
     filter = None
-    sink = None
     analog = None
     audio = None
     firdes = None
@@ -66,6 +68,49 @@ def add_silence(input_wav, output_wav, silence_duration_before, silence_duration
     with wave.open(output_wav, 'wb') as wav_out:
         wav_out.setparams(params)
         wav_out.writeframes(new_frames)
+
+def list_hackrf_devices():
+    """
+    List all connected HackRF devices using hackrf_info.
+    Returns a list of dictionaries with 'serial' and 'index'.
+    """
+    try:
+        # Run hackrf_info command
+        result = subprocess.run(['hackrf_info', '-s'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        if result.returncode != 0:
+            print(f"hackrf_info error: {result.stderr}")
+            return []
+        
+        devices = []
+        # Split output into lines
+        lines = result.stdout.splitlines()
+        current_device = None
+        
+        # Parse each line to extract relevant details
+        for line in lines:
+            # Match for "Index: <number>"
+            index_match = re.match(r'Index:\s+(\d+)', line)
+            if index_match:
+                # Start a new device entry
+                current_device = {'index': int(index_match.group(1)), 'serial': None}
+                devices.append(current_device)
+            
+            # Match for "Serial number: <serial>"
+            serial_match = re.match(r'Serial number:\s+([0-9a-fA-F]+)', line)
+            if serial_match and current_device:
+                # Add serial to the current device
+                current_device['serial'] = serial_match.group(1)
+        
+        print(f"Detected HackRF devices: {devices}")
+        return devices
+    
+    except FileNotFoundError:
+        print("hackrf_info not found. Ensure HackRF tools are installed.")
+        return []
+    except Exception as e:
+        print(f"Error listing HackRF devices: {e}")
+        return []
 
 # GNU Radio class
 if gr is not None:
@@ -259,7 +304,8 @@ if gr is not None and osmosdr is not None:
         def __init__(self, samples_q, center_freq=143.890e6, offset_freq=500e3,
                      sample_rate=960000, audio_rate=48000,
                      rf_gain=0, if_gain=40, bb_gain=14,
-                     demod_gain=5.0, squelch_threshold=-40, device_index=0):
+                     demod_gain=5.0, squelch_threshold=-40,
+                     device_index=0):
             super(AFSKReceiver, self).__init__()
 
             ##################################################
@@ -328,7 +374,7 @@ if gr is not None and osmosdr is not None:
                         self.blocks_float_to_short_0]:
                 blk.set_max_output_buffer(480)
 
-            print(f"AFSK Receiver is configured and running.")
+            print(f"AFSK Receiver is configured and running on device {device_index}.")
 
         def stop_and_wait(self):
             """Gracefully stop the flowgraph."""
@@ -341,7 +387,6 @@ if gr is not None and osmosdr is not None:
                 self.disconnect(self.osmosdr_source_0, self.freq_xlating_fir_filter_xxx_0)
                 self.disconnect(self.freq_xlating_fir_filter_xxx_0, self.analog_simple_squelch_cc_0)
                 self.disconnect(self.analog_simple_squelch_cc_0, self.analog_quadrature_demod_cf_0)
-                self.osmosdr_source_0
             except Exception as e:
                 print(f"Error during disconnect: {e}")
             self.stop()
@@ -444,4 +489,12 @@ if gr is not None and osmosdr is not None:
         return receiver_thread
 
 # Expose start_receiver function and other necessary components
-__all__ = ['ResampleAndSend', 'generate_aprs_wav', 'udp_listener', 'Frequency', 'ThreadSafeVariable', 'start_receiver']
+__all__ = [
+    'ResampleAndSend',
+    'generate_aprs_wav',
+    'udp_listener',
+    'Frequency',
+    'ThreadSafeVariable',
+    'start_receiver',
+    'list_hackrf_devices'
+]

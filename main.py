@@ -1,3 +1,5 @@
+# main.py
+
 import tkinter as tk
 from ttkbootstrap import Style, ttk
 from ttkbootstrap.constants import *
@@ -19,6 +21,7 @@ from core import (
     Frequency,
     ThreadSafeVariable,
     start_receiver,
+    list_hackrf_devices
 )
 
 class Application(ttk.Frame):
@@ -31,15 +34,18 @@ class Application(ttk.Frame):
         stop_event, 
         gain_var, 
         if_gain_var,
-        device_index_var,
+        receiver_stop_event,
+        receiver_thread,
         received_message_queue,
+        device_index_var,
         *args, 
         **kwargs
     ):
         super().__init__(master, *args, **kwargs)
+        
+        # Initialize variables
         self.gain_var = gain_var
         self.if_gain_var = if_gain_var
-        self.device_index_var = device_index_var
         self.master = master
         self.frequency_var = frequency_var
         self.transmitting_var = transmitting_var
@@ -48,14 +54,42 @@ class Application(ttk.Frame):
         self.num_flags_after = tk.IntVar(value=4)    # Default value
         self.stop_event = stop_event
         self.received_message_queue = received_message_queue
+        self.device_index_var = device_index_var
+        self.receiver_stop_event = receiver_stop_event
+        self.receiver_thread = receiver_thread
 
+        # Pack the main frame
         self.pack(fill=BOTH, expand=True, padx=20, pady=20)
 
-        # Initialize GUI components first to set up status_var
-        self.create_widgets()
+        # Initialize status variables
+        self.status_var = tk.StringVar(value="Ready")
+        self.receiver_status_var = tk.StringVar(value="Receiver Running")
 
-        # Then load icons
+        # Create the scrollable canvas
+        self.canvas = tk.Canvas(self, borderwidth=0)
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.canvas)
+
+        # Configure the canvas
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        # Pack the canvas and scrollbar
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+
+        # Load icons
+        self.send_icon = None
+        self.transmitting_icon = None
+        self.idle_icon = None
         self.load_icons()
+
+        # Initialize GUI components within the scrollable frame
+        self.create_widgets()
 
         # Start checking transmission status
         self.check_transmission_status()
@@ -70,9 +104,6 @@ class Application(ttk.Frame):
             os.makedirs(assets_path)
             # Notify the user within the GUI
             self.status_var.set(f"'assets' directory created at {assets_path}. Please add required icon files.")
-            self.send_icon = None
-            self.transmitting_icon = None
-            self.idle_icon = None
             return
 
         try:
@@ -87,35 +118,62 @@ class Application(ttk.Frame):
 
     def create_widgets(self):
         # Header
-        header = ttk.Label(self, text="APRS Transmission Control", font=("Helvetica", 18, "bold"))
-        header.grid(row=0, column=0, columnspan=4, pady=(0, 20))
+        header = ttk.Label(
+            self.scrollable_frame, 
+            text="APRS Transmission Control", 
+            font=("Helvetica", 18, "bold")
+        )
+        header.grid(row=0, column=0, columnspan=4, pady=(0, 20), sticky="w")
+
+        # HackRF Device Selection Frame
+        device_frame = ttk.Labelframe(
+            self.scrollable_frame, 
+            text="HackRF Device Selection", 
+            padding=20
+        )
+        device_frame.grid(row=1, column=0, columnspan=4, sticky="ew", padx=0, pady=(0, 20))
+        device_frame.columnconfigure(1, weight=1)
+
+        ttk.Label(device_frame, text="Select HackRF Device:").grid(row=0, column=0, sticky="w")
+        self.device_combobox = ttk.Combobox(device_frame, state="readonly")
+        self.device_combobox.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
+        self.populate_device_combobox()
 
         # HackRF Settings Frame
-        hackrf_frame = ttk.Labelframe(self, text="HackRF Settings", padding=20)
+        hackrf_frame = ttk.Labelframe(
+            self.scrollable_frame, 
+            text="HackRF Settings", 
+            padding=20
+        )
         hackrf_frame.grid(row=2, column=0, columnspan=2, sticky="ew", padx=(0,10), pady=(0, 20))
         hackrf_frame.columnconfigure(1, weight=1)
 
-        ttk.Label(hackrf_frame, text="Device Index:").grid(row=0, column=0, sticky="w")
-        self.device_index_entry = ttk.Entry(hackrf_frame, width=10)
-        self.device_index_entry.grid(row=0, column=1, pady=5, padx=10, sticky="w")
-        self.device_index_entry.insert(0, str(self.device_index_var.get()))
-
-        ttk.Label(hackrf_frame, text="Gain:").grid(row=1, column=0, sticky="w")
+        ttk.Label(hackrf_frame, text="Gain:").grid(row=0, column=0, sticky="w")
         self.gain_entry = ttk.Entry(hackrf_frame, width=20)
-        self.gain_entry.grid(row=1, column=1, pady=5, padx=10, sticky="ew")
+        self.gain_entry.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
         self.gain_entry.insert(0, str(self.gain_var.get()))
 
-        ttk.Label(hackrf_frame, text="IF Gain:").grid(row=2, column=0, sticky="w")
+        ttk.Label(hackrf_frame, text="IF Gain:").grid(row=1, column=0, sticky="w")
         self.if_gain_entry = ttk.Entry(hackrf_frame, width=20)
-        self.if_gain_entry.grid(row=2, column=1, pady=5, padx=10, sticky="ew")
+        self.if_gain_entry.grid(row=1, column=1, pady=5, padx=10, sticky="ew")
         self.if_gain_entry.insert(0, str(self.if_gain_var.get()))
 
-        self.apply_hackrf_button = ttk.Button(hackrf_frame, text="Apply", command=self.update_hackrf_settings, bootstyle=PRIMARY)
-        self.apply_hackrf_button.grid(row=3, column=0, columnspan=2, pady=(10,0))
+        self.apply_hackrf_button = ttk.Button(
+            hackrf_frame, 
+            text="Apply", 
+            command=self.update_hackrf_settings
+            # If using ttkbootstrap, uncomment and adjust bootstyle
+            # bootstyle=PRIMARY
+        )
+        self.apply_hackrf_button.grid(row=2, column=0, columnspan=2, pady=(10,0))
 
         # Frequency Settings Frame
-        freq_frame = ttk.Labelframe(self, text="Frequency Settings", padding=20)
-        freq_frame.grid(row=1, column=0, sticky="ew", padx=(0,10), pady=(0, 20))
+        freq_frame = ttk.Labelframe(
+            self.scrollable_frame, 
+            text="Frequency Settings", 
+            padding=20
+        )
+        freq_frame.grid(row=2, column=2, columnspan=2, sticky="ew", padx=(10,0), pady=(0, 20))
         freq_frame.columnconfigure(1, weight=1)
 
         ttk.Label(freq_frame, text="Frequency (MHz):").grid(row=0, column=0, sticky="w")
@@ -126,12 +184,22 @@ class Application(ttk.Frame):
         self.freq_notification = ttk.Label(freq_frame, text="", foreground="red")
         self.freq_notification.grid(row=1, column=0, columnspan=2, sticky="w")
 
-        self.apply_button = ttk.Button(freq_frame, text="Apply", command=self.update_frequency, bootstyle=PRIMARY)
+        self.apply_button = ttk.Button(
+            freq_frame, 
+            text="Apply", 
+            command=self.update_frequency
+            # If using ttkbootstrap, uncomment and adjust bootstyle
+            # bootstyle=PRIMARY
+        )
         self.apply_button.grid(row=2, column=0, columnspan=2, pady=(10,0))
 
         # Callsign Settings Frame
-        callsign_frame = ttk.Labelframe(self, text="Callsign Settings", padding=20)
-        callsign_frame.grid(row=1, column=1, sticky="ew", padx=(10,0), pady=(0, 20))
+        callsign_frame = ttk.Labelframe(
+            self.scrollable_frame, 
+            text="Callsign Settings", 
+            padding=20
+        )
+        callsign_frame.grid(row=3, column=0, columnspan=4, sticky="ew", padx=0, pady=(0, 20))
         callsign_frame.columnconfigure(1, weight=1)
 
         ttk.Label(callsign_frame, text="Callsign:").grid(row=0, column=0, sticky="w")
@@ -149,76 +217,141 @@ class Application(ttk.Frame):
         self.flags_after_entry.grid(row=2, column=1, pady=5, padx=10, sticky="ew")
         self.flags_after_entry.insert(0, str(self.num_flags_after.get()))
 
-
         self.callsign_notification = ttk.Label(callsign_frame, text="", foreground="red")
         self.callsign_notification.grid(row=3, column=0, columnspan=2, sticky="w")
 
         # Test Message Button
         self.test_button = ttk.Button(
-            self, 
+            self.scrollable_frame, 
             text="Send Test APRS Message", 
-            command=self.queue_test_message, 
-            bootstyle=SUCCESS, 
-            image=None,  # Placeholder until icons are loaded
-            compound=LEFT
+            command=self.queue_test_message
+            # If using ttkbootstrap, uncomment and adjust bootstyle and image
+            # bootstyle=SUCCESS, 
+            # image=self.send_icon if self.send_icon else None,
+            # compound=LEFT
         )
-        self.test_button.grid(row=3, column=0, columnspan=4, pady=(0, 20), ipadx=10, ipady=5)
+        self.test_button.grid(row=4, column=0, columnspan=4, pady=(0, 20), ipadx=10, ipady=5, sticky="ew")
 
         # Transmission Status Frame
-        status_frame = ttk.Frame(self)
-        status_frame.grid(row=4, column=0, columnspan=4, sticky="ew", pady=(0, 10))
+        status_frame = ttk.Frame(self.scrollable_frame)
+        status_frame.grid(row=5, column=0, columnspan=4, sticky="ew", pady=(0, 10))
         status_frame.columnconfigure(1, weight=1)
 
         ttk.Label(status_frame, text="Status:", font=("Helvetica", 12, "bold")).grid(row=0, column=0, sticky="w")
-        self.transmission_label = ttk.Label(status_frame, text="Idle", font=("Helvetica", 12), background="#6c757d", foreground="white", padding=5)
+        self.transmission_label = ttk.Label(
+            status_frame, 
+            text="Idle", 
+            font=("Helvetica", 12), 
+            background="#6c757d", 
+            foreground="white", 
+            padding=5
+        )
         self.transmission_label.grid(row=0, column=1, sticky="w", padx=10)
         self.transmission_icon_label = None  # Will be set after icons are loaded
 
         # Progress Bar
-        self.progress = ttk.Progressbar(self, mode='indeterminate')
-        self.progress.grid(row=5, column=0, columnspan=4, sticky="ew", pady=(0, 10))
+        self.progress = ttk.Progressbar(self.scrollable_frame, mode='indeterminate')
+        self.progress.grid(row=6, column=0, columnspan=4, sticky="ew", pady=(0, 10))
         self.progress.stop()
 
         # Received Messages Frame
-        messages_frame = ttk.Labelframe(self, text="Received Messages", padding=20)
-        messages_frame.grid(row=6, column=0, columnspan=4, sticky="nsew", pady=(0, 10))
+        messages_frame = ttk.Labelframe(
+            self.scrollable_frame, 
+            text="Received Messages", 
+            padding=20
+        )
+        messages_frame.grid(row=7, column=0, columnspan=4, sticky="nsew", pady=(0, 10))
         messages_frame.columnconfigure(0, weight=1)
         messages_frame.rowconfigure(0, weight=1)
 
         self.messages_text = tk.Text(messages_frame, wrap='word', height=10)
         self.messages_text.grid(row=0, column=0, sticky="nsew")
 
-        # Add a scrollbar
+        # Add a scrollbar to the messages text
         scrollbar = ttk.Scrollbar(messages_frame, orient='vertical', command=self.messages_text.yview)
         scrollbar.grid(row=0, column=1, sticky='ns')
         self.messages_text['yscrollcommand'] = scrollbar.set
 
         # Status Bar
-        self.status_var = tk.StringVar()
-        self.status_var.set("Ready")
-        status_bar = ttk.Label(self, textvariable=self.status_var, relief=SUNKEN, anchor='w')
-        status_bar.grid(row=7, column=0, columnspan=4, sticky="ew")
+        status_bar = ttk.Label(
+            self.scrollable_frame, 
+            textvariable=self.status_var, 
+            relief=SUNKEN, 
+            anchor='w'
+        )
+        status_bar.grid(row=8, column=0, columnspan=4, sticky="ew")
 
         # Receiver Status Bar
-        self.receiver_status_var = tk.StringVar()
-        self.receiver_status_var.set("Receiver Running")
-        receiver_status_bar = ttk.Label(self, textvariable=self.receiver_status_var, relief=SUNKEN, anchor='w')
-        receiver_status_bar.grid(row=8, column=0, columnspan=4, sticky="ew")
+        receiver_status_bar = ttk.Label(
+            self.scrollable_frame, 
+            textvariable=self.receiver_status_var, 
+            relief=SUNKEN, 
+            anchor='w'
+        )
+        receiver_status_bar.grid(row=9, column=0, columnspan=4, sticky="ew")
+
+        # Configure grid weights for resizing
+        self.scrollable_frame.grid_rowconfigure(7, weight=1)
+        self.scrollable_frame.grid_columnconfigure(3, weight=1)
+
+    def populate_device_combobox(self):
+        devices = list_hackrf_devices()
+        if not devices:
+            self.device_combobox['values'] = ["No HackRF devices found"]
+            self.device_combobox.current(0)
+            self.device_combobox.config(state="disabled")
+            self.status_var.set("No HackRF devices detected. Please connect a device.")
+        else:
+            device_list = [f"HackRF {dev['index']}" for dev in devices]
+            self.device_combobox['values'] = device_list
+            self.device_combobox.current(0)
+            self.device_combobox.bind("<<ComboboxSelected>>", self.on_device_selected)
+            # Set the initial device index
+            self.device_index_var.set(devices[0]['index'])
+            self.status_var.set(f"Detected {len(devices)} HackRF device(s).")
+
+    def on_device_selected(self, event):
+        selection = self.device_combobox.current()
+        devices = list_hackrf_devices()
+        if devices:
+            if selection < len(devices):
+                selected_device = devices[selection]
+                self.device_index_var.set(selected_device['index'])
+                self.status_var.set(f"Selected HackRF Device {selected_device['index']} - Serial: {selected_device['serial']}")
+                print(f"Selected HackRF Device {selected_device['index']} - Serial: {selected_device['serial']}")
+                self.receiver_stop_event.set()  # Signal to stop
+                self.receiver_thread.join()  # Wait for thread to finish
+                time.sleep(1)
+
+                # Restart the receiver with the new device index
+                self.receiver_stop_event.clear()  # Reset the stop event
+                self.receiver_thread = start_receiver_thread(
+                    self.receiver_stop_event,
+                    self.received_message_queue,
+                    self.device_index_var.get()  # Use updated device index
+                )
+                self.receiver_status_var.set("Receiver Running")
+                self.status_var.set(f"Receiver restarted for device {selected_device['index']}.")
+                print(f"Receiver restarted for device {selected_device['index']}.")
+            else:
+                self.status_var.set("Selected device index out of range.")
+                print("Selected device index out of range.")
+        else:
+            self.device_index_var.set(0)
+            self.status_var.set("No HackRF devices detected.")
 
     def update_hackrf_settings(self):
         try:
-            device_index = int(self.device_index_entry.get())
             gain = float(self.gain_entry.get())
             if_gain = float(self.if_gain_entry.get())
             # Optional: Validate gain values (e.g., within acceptable ranges)
-            self.device_index_var.set(device_index)
             self.gain_var.set(gain)
             self.if_gain_var.set(if_gain)
-            self.status_var.set(f"HackRF settings updated: Device Index={device_index}, Gain={gain}, IF Gain={if_gain}")
-            print(f"HackRF settings updated: Device Index={device_index}, Gain={gain}, IF Gain={if_gain}")
+            self.status_var.set(f"HackRF settings updated: Gain={gain}, IF Gain={if_gain}")
+            print(f"HackRF settings updated: Gain={gain}, IF Gain={if_gain}")
         except ValueError as ve:
-            self.status_var.set(f"Invalid input values: {ve}")
-            print(f"Invalid input values: {ve}")
+            self.status_var.set(f"Invalid gain values: {ve}")
+            print(f"Invalid gain values: {ve}")
 
     def update_frequency(self):
         try:
@@ -254,13 +387,16 @@ class Application(ttk.Frame):
             print("Invalid flags input.")
             return
 
+        # Get selected device index
+        device_index = self.device_index_var.get()
+
         # Construct the APRS message with the provided callsign
         aprs_message = f"{callsign}>APRS:TEST 123!"
-        self.message_queue.put((aprs_message, flags_before, flags_after))
+        self.message_queue.put((aprs_message, flags_before, flags_after, device_index))
 
         self.callsign_notification.config(text="Test message queued.", foreground="green")
         self.status_var.set(f"Test message queued with callsign: {aprs_message}")
-        print(f"Test message queued with callsign: {aprs_message} and flags_before: {flags_before}, flags_after: {flags_after}")
+        print(f"Test message queued with callsign: {aprs_message} and flags_before: {flags_before}, flags_after: {flags_after}, device_index: {device_index}")
 
     def validate_callsign(self, callsign):
         # Simple validation: length and alphanumeric
@@ -269,20 +405,26 @@ class Application(ttk.Frame):
     def check_transmission_status(self):
         if self.transmitting_var.is_set():
             self.transmission_label.config(text="Transmitting", background="#28a745")
-            if hasattr(self, 'transmitting_icon') and self.transmitting_icon:
+            if self.transmitting_icon:
                 if not self.transmission_icon_label:
-                    self.transmission_icon_label = ttk.Label(self, image=self.transmitting_icon)
-                    self.transmission_icon_label.grid(row=3, column=4, sticky="w")
+                    self.transmission_icon_label = ttk.Label(
+                        self.scrollable_frame, 
+                        image=self.transmitting_icon
+                    )
+                    self.transmission_icon_label.grid(row=5, column=4, sticky="w", padx=(10,0))
                 else:
                     self.transmission_icon_label.config(image=self.transmitting_icon)
             self.progress.start(10)
             self.status_var.set("Transmitting...")
         else:
             self.transmission_label.config(text="Idle", background="#6c757d")
-            if hasattr(self, 'idle_icon') and self.idle_icon:
+            if self.idle_icon:
                 if not self.transmission_icon_label:
-                    self.transmission_icon_label = ttk.Label(self, image=self.idle_icon)
-                    self.transmission_icon_label.grid(row=3, column=4, sticky="w")
+                    self.transmission_icon_label = ttk.Label(
+                        self.scrollable_frame, 
+                        image=self.idle_icon
+                    )
+                    self.transmission_icon_label.grid(row=5, column=4, sticky="w", padx=(10,0))
                 else:
                     self.transmission_icon_label.config(image=self.idle_icon)
             self.progress.stop()
@@ -313,21 +455,22 @@ def stop_receiver(stop_event, receiver_thread):
     receiver_thread.join()
 
 def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_var, if_gain_var, 
-              device_index_var, receiver_stop_event, receiver_thread, received_message_queue, gui_app):
+              receiver_stop_event, receiver_thread, received_message_queue, gui_app):
     while not stop_event.is_set():
         try:
             message = message_queue.get_nowait()
             print(f"Processing message: {message}")
 
-            if isinstance(message, tuple):
-                aprs_message, flags_before, flags_after = message
+            if isinstance(message, tuple) and len(message) == 4:
+                aprs_message, flags_before, flags_after, device_index = message
             else:
                 # For messages received via UDP listener without flags
                 aprs_message = message
                 flags_before = 10  # Default number of flags before
                 flags_after = 4    # Default number of flags after
+                device_index = 0   # Default device index
 
-            print(f"Processing message: {aprs_message}, flags_before: {flags_before}, flags_after: {flags_after}")
+            print(f"Processing message: {aprs_message}, flags_before: {flags_before}, flags_after: {flags_after}, device_index: {device_index}")
             
             # Stop the receiver before transmission
             print("Stopping receiver before transmission...")
@@ -353,7 +496,6 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
 
             gain = gain_var.get()
             if_gain = if_gain_var.get()
-            device_index = device_index_var.get()
 
             # Reset and Initialize HackRF
             reset_hackrf()
@@ -379,7 +521,7 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
             receiver_thread = start_receiver_thread(
                 receiver_stop_event, 
                 received_message_queue, 
-                device_index
+                device_index=device_index
             )
             gui_app.receiver_status_var.set("Receiver Running")
             print("Receiver restarted.")
@@ -416,17 +558,19 @@ if __name__ == "__main__":
         frequency_var = Frequency(144.39e6)  # Default frequency in Hz
         gain_var = ThreadSafeVariable(14)     # Default gain
         if_gain_var = ThreadSafeVariable(47)  # Default IF gain
-        device_index_var = ThreadSafeVariable(0)  # Default HackRF device index
 
         # Create stop event and received message queue for receiver
         receiver_stop_event = threading.Event()
         received_message_queue = queue.Queue()
 
-        # Start the AFSK Receiver
+        # Device index variable
+        device_index_var = ThreadSafeVariable(0)  # Default device index
+
+        # Start the AFSK Receiver with default device index
         receiver_thread = start_receiver_thread(
             receiver_stop_event, 
             received_message_queue, 
-            device_index_var.get()
+            device_index=device_index_var.get()
         )
 
         # Start the UDP Listener
@@ -439,7 +583,7 @@ if __name__ == "__main__":
 
         root = style.master
         root.title("APRS Transmission Control")
-        root.geometry("800x800")
+        root.geometry("600x800")  # Increased width for better layout
         root.resizable(True, True)
 
         app = Application(
@@ -450,10 +594,13 @@ if __name__ == "__main__":
             stop_event, 
             gain_var, 
             if_gain_var,
-            device_index_var,
-            received_message_queue
+            receiver_stop_event,
+            receiver_thread,
+            received_message_queue,
+            device_index_var
         )
 
+        # Start the main loop in a separate thread
         gui_thread = threading.Thread(
             target=main_loop, 
             args=(
@@ -463,7 +610,6 @@ if __name__ == "__main__":
                 stop_event, 
                 gain_var, 
                 if_gain_var, 
-                device_index_var,
                 receiver_stop_event, 
                 receiver_thread, 
                 received_message_queue,
@@ -479,10 +625,12 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("KeyboardInterrupt received. Exiting gracefully.")
         stop_event.set()
+        receiver_thread.stop_and_wait()
         sys.exit(0)
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         stop_event.set()
+        receiver_thread.stop_and_wait()
         sys.exit(1)
     finally:
         print("Application has been closed.")

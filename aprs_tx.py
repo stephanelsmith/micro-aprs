@@ -18,6 +18,7 @@ from core import (
     udp_listener,
     Frequency,
     ThreadSafeVariable,
+    start_receiver,
 )
 
 class Application(ttk.Frame):
@@ -29,7 +30,8 @@ class Application(ttk.Frame):
         message_queue, 
         stop_event, 
         gain_var, 
-        if_gain_var, 
+        if_gain_var,
+        received_message_queue,
         *args, 
         **kwargs
     ):
@@ -43,6 +45,7 @@ class Application(ttk.Frame):
         self.num_flags_before = tk.IntVar(value=10)  # Default value
         self.num_flags_after = tk.IntVar(value=4)    # Default value
         self.stop_event = stop_event
+        self.received_message_queue = received_message_queue
 
         self.pack(fill=BOTH, expand=True, padx=20, pady=20)
 
@@ -54,6 +57,9 @@ class Application(ttk.Frame):
 
         # Start checking transmission status
         self.check_transmission_status()
+
+        # Start checking for received messages
+        self.check_received_messages()
 
     def load_icons(self):
         # Ensure the assets directory exists
@@ -165,11 +171,25 @@ class Application(ttk.Frame):
         self.progress.grid(row=5, column=0, columnspan=3, sticky="ew", pady=(0, 10))
         self.progress.stop()
 
+        # Received Messages Frame
+        messages_frame = ttk.Labelframe(self, text="Received Messages", padding=20)
+        messages_frame.grid(row=6, column=0, columnspan=3, sticky="nsew", pady=(0, 10))
+        messages_frame.columnconfigure(0, weight=1)
+        messages_frame.rowconfigure(0, weight=1)
+
+        self.messages_text = tk.Text(messages_frame, wrap='word', height=10)
+        self.messages_text.grid(row=0, column=0, sticky="nsew")
+
+        # Add a scrollbar
+        scrollbar = ttk.Scrollbar(messages_frame, orient='vertical', command=self.messages_text.yview)
+        scrollbar.grid(row=0, column=1, sticky='ns')
+        self.messages_text['yscrollcommand'] = scrollbar.set
+
         # Status Bar
         self.status_var = tk.StringVar()
         self.status_var.set("Ready")
         status_bar = ttk.Label(self, textvariable=self.status_var, relief=SUNKEN, anchor='w')
-        status_bar.grid(row=6, column=0, columnspan=3, sticky="ew")
+        status_bar.grid(row=7, column=0, columnspan=3, sticky="ew")
 
     def update_hackrf_settings(self):
         try:
@@ -226,7 +246,6 @@ class Application(ttk.Frame):
         self.status_var.set(f"Test message queued with callsign: {aprs_message}")
         print(f"Test message queued with callsign: {aprs_message} and flags_before: {flags_before}, flags_after: {flags_after}")
 
-
     def validate_callsign(self, callsign):
         # Simple validation: length and alphanumeric
         return 3 <= len(callsign) <= 6 and callsign.isalnum()
@@ -252,8 +271,17 @@ class Application(ttk.Frame):
                     self.transmission_icon_label.config(image=self.idle_icon)
             self.progress.stop()
             self.status_var.set("Idle.")
-        # Corrected the recursion by passing the function reference without calling it
         self.after(500, self.check_transmission_status)
+
+    def check_received_messages(self):
+        try:
+            while True:
+                message = self.received_message_queue.get_nowait()
+                self.messages_text.insert('end', message + '\n')
+                self.messages_text.see('end')  # Scroll to the end
+        except queue.Empty:
+            pass
+        self.after(500, self.check_received_messages)
 
 def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_var, if_gain_var):
 
@@ -313,8 +341,9 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
         except Exception as e:
             print(f"Unexpected error in main_loop: {e}")
 
-def on_closing(app, stop_event):
+def on_closing(app, stop_event, receiver_stop_event):
     stop_event.set()
+    receiver_stop_event.set()
     app.master.destroy()
 
 def handle_signal(signum, frame):
@@ -338,6 +367,14 @@ if __name__ == "__main__":
         gain_var = ThreadSafeVariable(14)     # Default gain
         if_gain_var = ThreadSafeVariable(47)  # Default IF gain
 
+        # Create stop event and received message queue for receiver
+        receiver_stop_event = threading.Event()
+        received_message_queue = queue.Queue()
+
+        # Start the receiver
+        # We can use the same frequency, or specify a different one
+        start_receiver(receiver_stop_event, received_message_queue, frequency_var.get(), gain_var.get(), if_gain_var.get())
+
         gui_thread = threading.Thread(target=main_loop, args=(frequency_var, transmitting_var, message_queue, stop_event, gain_var, if_gain_var), daemon=True)
         gui_thread.start()
 
@@ -353,11 +390,12 @@ if __name__ == "__main__":
             message_queue, 
             stop_event, 
             gain_var, 
-            if_gain_var
+            if_gain_var,
+            received_message_queue
         )
 
 
-        root.protocol("WM_DELETE_WINDOW", lambda: on_closing(app, stop_event))
+        root.protocol("WM_DELETE_WINDOW", lambda: on_closing(app, stop_event, receiver_stop_event))
         app.mainloop()
 
     except KeyboardInterrupt:

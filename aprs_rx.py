@@ -104,7 +104,8 @@ class AFSKReceiver(gr.top_block):
         ##################################################
         # Blocks
         ##################################################
-
+        
+        # Source SDR
         self.osmosdr_source_0 = osmosdr.source(
             args="numchan=" + str(1) + " " + 'hackrf=0'
         )
@@ -120,28 +121,40 @@ class AFSKReceiver(gr.top_block):
         self.osmosdr_source_0.set_bb_gain(bb_gain, 0)
         self.osmosdr_source_0.set_antenna('', 0)
         self.osmosdr_source_0.set_bandwidth(0, 0)
+
+        # Décalage fréquentiel
         self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(
             1,
             firdes.low_pass(1.0, samp_rate, 10e3, 5e3, 6),
             offset_freq,
             samp_rate
         )
+
+        # Filtrage audio
         self.fir_filter_xxx_0 = filter.fir_filter_fff(
             int(samp_rate / audio_rate),
             firdes.low_pass(1.0, samp_rate, 3.5e3, 500, 6)
         )
         self.fir_filter_xxx_0.declare_sample_delay(0)
+
+        # Démodulation et amplification
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(demod_gain)
         self.blocks_float_to_short_0 = blocks.float_to_short(1, 32767)
+
+        # Sortie audio
         self.audio_sink_1 = audio.sink(int(audio_rate), '', True)
+
+        # Squelch
         self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(squelch_threshold, 1)
+
+        # Démodulation quadrature
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(1)
 
-        # Use the custom QueueSink block
+        # Utilisation d'une QueueSink pour les données
         self.queue_sink_0 = QueueSink(samples_q)
 
         ##################################################
-        # Connections
+        # Connexions
         ##################################################
         self.connect((self.osmosdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.analog_simple_squelch_cc_0, 0))
@@ -152,16 +165,19 @@ class AFSKReceiver(gr.top_block):
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_float_to_short_0, 0))
         self.connect((self.blocks_float_to_short_0, 0), (self.queue_sink_0, 0))
 
-        # Reduce max_noutput_items to reduce latency
-        self.set_max_noutput_items(480)  # Corresponds to 10ms at 48kHz
+        ##################################################
+        # Optimisations de latence
+        ##################################################
+        self.set_max_noutput_items(480)  # Correspond à 10 ms à 48 kHz
 
-        # Reduce buffer sizes to minimize latency
+        # Réduction des tailles de buffers pour minimiser la latence
         for blk in [self.osmosdr_source_0, self.freq_xlating_fir_filter_xxx_0,
                     self.fir_filter_xxx_0, self.blocks_multiply_const_vxx_0,
                     self.blocks_float_to_short_0]:
             blk.set_max_output_buffer(480)
 
         print(f"AFSK Receiver is configured and running.")
+
 
 async def read_samples_from_file(samples_q, file):
     try:

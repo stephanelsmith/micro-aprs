@@ -5,25 +5,37 @@ import queue
 import wave
 import struct
 import subprocess
+import numpy as np
 
 # Try to import external dependencies, handle ImportError gracefully
 try:
-    from gnuradio import gr, blocks, filter
-    from osmosdr import sink
+    from gnuradio import gr, blocks, filter, analog, audio
+    from gnuradio.filter import firdes
+    import osmosdr
 except ImportError as e:
     print(f"Warning: Could not import GNU Radio modules. Some functionality may be limited. {e}")
     gr = None  # Set to None to prevent errors if used
     blocks = None
     filter = None
     sink = None
+    analog = None
+    audio = None
+    firdes = None
+    osmosdr = None
 
 try:
     from afsk.mod import AFSKModulator
+    from afsk.demod import AFSKDemodulator
+    from afsk.func import afsk_detector
     from ax25.ax25 import AX25
+    from ax25.from_afsk import AX25FromAFSK
 except ImportError as e:
     print(f"Warning: Could not import AFSK or AX.25 modules. Some functionality may be limited. {e}")
     AFSKModulator = None
+    AFSKDemodulator = None
+    afsk_detector = None
     AX25 = None
+    AX25FromAFSK = None
 
 # Reset HackRF
 def reset_hackrf():
@@ -76,7 +88,7 @@ if gr is not None:
             """Initialize HackRF sink."""
             try:
                 print("Initializing HackRF...")
-                self.sink = sink(args="hackrf=1")
+                self.sink = osmosdr.sink(args="hackrf=1")
                 self.sink.set_sample_rate(self.output_rate)
                 self.sink.set_center_freq(144.39e6)  # Will be set later in main_loop
                 self.sink.set_gain(gain)
@@ -140,7 +152,6 @@ async def generate_aprs_wav(aprs_message, output_wav, flags_before=10, flags_aft
     except Exception as e:
         print(f"Error generating APRS WAV: {e}")
 
-
 # UDP Listener
 def udp_listener(host, port, message_queue, stop_event):
     """Listen for APRS messages over UDP and add them to the message queue."""
@@ -190,3 +201,189 @@ class ThreadSafeVariable:
     def set(self, value):
         with self._lock:
             self._value = value
+
+# Receiver Classes and Functions
+if gr is not None and osmosdr is not None:
+    class QueueSink(gr.sync_block):
+        """
+        A custom GNU Radio block that puts samples into an asyncio queue.
+        Includes signal detection to process samples only when audio is present.
+        """
+        def __init__(self, samples_q, threshold=500):
+            gr.sync_block.__init__(
+                self,
+                name='QueueSink',
+                in_sig=[np.int16],
+                out_sig=None
+            )
+            self.samples_q = samples_q
+            self.loop = asyncio.get_event_loop()
+            self.set_output_multiple(480)  # Process smaller chunks to reduce latency
+            self.threshold = threshold  # Threshold for detecting audio signal
+
+        def work(self, input_items, output_items):
+            in0 = input_items[0]
+            # Calculate the mean absolute value of the samples
+            energy = np.mean(np.abs(in0))
+            if energy > self.threshold:
+                # Copy the samples to avoid issues with memory management
+                samples = in0.copy()
+                idx = len(samples)
+                asyncio.run_coroutine_threadsafe(
+                    self.samples_q.put((samples, idx)),
+                    self.loop
+                )
+            return len(in0)
+
+    class AFSKReceiver(gr.top_block):
+        def __init__(self, samples_q, center_freq=143.890e6, offset_freq=500e3,
+                     sample_rate=960000, audio_rate=48000,
+                     rf_gain=0, if_gain=40, bb_gain=14,
+                     demod_gain=5.0, squelch_threshold=-40):
+            super(AFSKReceiver, self).__init__()
+
+            ##################################################
+            # Variables
+            ##################################################
+            self.samp_rate = samp_rate = sample_rate
+            self.audio_rate = audio_rate
+
+            ##################################################
+            # Blocks
+            ##################################################
+
+            self.osmosdr_source_0 = osmosdr.source(
+                args="numchan=" + str(1) + " " + 'hackrf=0'
+            )
+            self.osmosdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
+            self.osmosdr_source_0.set_sample_rate(samp_rate)
+            self.osmosdr_source_0.set_center_freq(center_freq, 0)
+            self.osmosdr_source_0.set_freq_corr(0, 0)
+            self.osmosdr_source_0.set_dc_offset_mode(0, 0)
+            self.osmosdr_source_0.set_iq_balance_mode(0, 0)
+            self.osmosdr_source_0.set_gain_mode(False, 0)
+            self.osmosdr_source_0.set_gain(rf_gain, 0)
+            self.osmosdr_source_0.set_if_gain(if_gain, 0)
+            self.osmosdr_source_0.set_bb_gain(bb_gain, 0)
+            self.osmosdr_source_0.set_antenna('', 0)
+            self.osmosdr_source_0.set_bandwidth(0, 0)
+            self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(
+                1,
+                firdes.low_pass(1.0, samp_rate, 10e3, 5e3, 6),
+                offset_freq,
+                samp_rate
+            )
+            self.fir_filter_xxx_0 = filter.fir_filter_fff(
+                int(samp_rate / audio_rate),
+                firdes.low_pass(1.0, samp_rate, 3.5e3, 500, 6)
+            )
+            self.fir_filter_xxx_0.declare_sample_delay(0)
+            self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(demod_gain)
+            self.blocks_float_to_short_0 = blocks.float_to_short(1, 32767)
+            self.audio_sink_1 = audio.sink(int(audio_rate), '', True)
+            self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(squelch_threshold, 1)
+            self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(1)
+
+            # Use the custom QueueSink block
+            self.queue_sink_0 = QueueSink(samples_q)
+
+            ##################################################
+            # Connections
+            ##################################################
+            self.connect((self.osmosdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
+            self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.analog_simple_squelch_cc_0, 0))
+            self.connect((self.analog_simple_squelch_cc_0, 0), (self.analog_quadrature_demod_cf_0, 0))
+            self.connect((self.analog_quadrature_demod_cf_0, 0), (self.fir_filter_xxx_0, 0))
+            self.connect((self.fir_filter_xxx_0, 0), (self.blocks_multiply_const_vxx_0, 0))
+            self.connect((self.blocks_multiply_const_vxx_0, 0), (self.audio_sink_1, 0))
+            self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_float_to_short_0, 0))
+            self.connect((self.blocks_float_to_short_0, 0), (self.queue_sink_0, 0))
+
+            # Reduce max_noutput_items to reduce latency
+            self.set_max_noutput_items(480)  # Corresponds to 10ms at 48kHz
+
+            # Reduce buffer sizes to minimize latency
+            for blk in [self.osmosdr_source_0, self.freq_xlating_fir_filter_xxx_0,
+                        self.fir_filter_xxx_0, self.blocks_multiply_const_vxx_0,
+                        self.blocks_float_to_short_0]:
+                blk.set_max_output_buffer(480)
+
+            print(f"AFSK Receiver is configured and running.")
+
+    async def consume_ax25(ax25_q, received_message_queue):
+        try:
+            while True:
+                ax25 = await ax25_q.get()
+                ax25_q.task_done()
+                if ax25 is None:
+                    break
+                received_message_queue.put(str(ax25))
+                await asyncio.sleep(0)
+        except asyncio.CancelledError:
+            pass
+        except Exception as err:
+            print(f"Error in consume_ax25: {err}")
+
+    async def demod_core(samples_q, bits_q, ax25_q):
+        try:
+            if AFSKDemodulator is None or AX25FromAFSK is None:
+                print("Warning: AFSKDemodulator or AX25FromAFSK is not available.")
+                return
+            async with AFSKDemodulator(
+                sampling_rate=48000,
+                samples_in_q=samples_q,
+                bits_out_q=bits_q,
+                verbose=False,
+            ) as afsk_demod:
+                async with AX25FromAFSK(
+                    bits_in_q=bits_q,
+                    ax25_q=ax25_q,
+                    verbose=False
+                ) as bits2ax25:
+                    # Keep the coroutine alive indefinitely
+                    while True:
+                        await asyncio.sleep(1)
+        except asyncio.CancelledError:
+            pass
+        except Exception as err:
+            print(f"Error in demod_core: {err}")
+
+    def start_receiver(stop_event, received_message_queue, rx_frequency, rx_gain, rx_if_gain):
+        if gr is None or osmosdr is None:
+            print("GNU Radio or osmosdr is not available. Cannot start receiver.")
+            return
+
+        import asyncio
+
+        def run_receiver():
+            # This function will run in a separate thread
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            samples_q = asyncio.Queue()
+            bits_q = asyncio.Queue()
+            ax25_q = asyncio.Queue()
+
+            tb = AFSKReceiver(samples_q=samples_q)
+            tb.start()
+
+            tasks = []
+            tasks.append(loop.create_task(consume_ax25(ax25_q=ax25_q, received_message_queue=received_message_queue)))
+            tasks.append(loop.create_task(demod_core(samples_q, bits_q, ax25_q)))
+
+            try:
+                while not stop_event.is_set():
+                    loop.run_until_complete(asyncio.sleep(1))
+            finally:
+                for task in tasks:
+                    task.cancel()
+                tb.stop()
+                tb.wait()
+                loop.close()
+
+        # Start the receiver in a separate thread
+        receiver_thread = threading.Thread(target=run_receiver)
+        receiver_thread.start()
+
+# Expose start_receiver function
+__all__ = ['ResampleAndSend', 'generate_aprs_wav', 'udp_listener', 'Frequency', 'ThreadSafeVariable', 'start_receiver']

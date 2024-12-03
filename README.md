@@ -3,6 +3,8 @@
 
 This project is a HackRF-based APRS (Automatic Packet Reporting System) implementation to handle the reception and transmission of APRS signals. It utilizes the HackRF device as an SDR (Software Defined Radio) for receiving and transmitting packets. This project is based on the excellent work from [micro-aprs](https://github.com/stephanelsmith/micro-aprs).
 
+![image](https://github.com/user-attachments/assets/e1caabe6-4f9e-43e2-8c9f-90dff6370495)
+
 ---
 
 ## Features

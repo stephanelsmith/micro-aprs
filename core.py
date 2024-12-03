@@ -70,7 +70,7 @@ def add_silence(input_wav, output_wav, silence_duration_before, silence_duration
 # GNU Radio class
 if gr is not None:
     class ResampleAndSend(gr.top_block):
-        def __init__(self, input_file, output_rate):
+        def __init__(self, input_file, output_rate, device_index=0):
             gr.top_block.__init__(self, "Resample and Send")
 
             self.file_source = blocks.wavfile_source(input_file, repeat=False)
@@ -79,6 +79,7 @@ if gr is not None:
             self.float_to_complex = blocks.float_to_complex()
             self.sink = None
             self.output_rate = output_rate
+            self.device_index = device_index
 
             self.connect(self.file_source, self.resampler)
             self.connect(self.resampler, self.amplitude_scaling)
@@ -87,14 +88,15 @@ if gr is not None:
         def initialize_hackrf(self, gain, if_gain):
             """Initialize HackRF sink."""
             try:
-                print("Initializing HackRF...")
-                self.sink = osmosdr.sink(args="hackrf=1")
+                print(f"Initializing HackRF device {self.device_index}...")
+                self.sink = osmosdr.sink(args=f"hackrf={self.device_index}")
                 self.sink.set_sample_rate(self.output_rate)
-                self.sink.set_center_freq(144.39e6)  # Will be set later in main_loop
-                self.sink.set_gain(gain)
-                self.sink.set_if_gain(if_gain)
-                self.sink.set_bb_gain(20)
-                self.sink.set_antenna("TX/RX")
+                # Center frequency will be set externally after initialization
+                self.sink.set_center_freq(144.39e6, 0)  # Default; can be changed later
+                self.sink.set_gain(gain, 0)
+                self.sink.set_if_gain(if_gain, 0)
+                self.sink.set_bb_gain(20, 0)
+                self.sink.set_antenna("TX/RX", 0)
                 print("HackRF initialized successfully.")
                 self.connect(self.float_to_complex, self.sink)
                 return True
@@ -102,23 +104,41 @@ if gr is not None:
                 print(f"Error initializing HackRF: {e}")
                 return False
 
+        def set_center_freq(self, freq_hz):
+            """Set the center frequency of the HackRF."""
+            if self.sink:
+                self.sink.set_center_freq(freq_hz, 0)
+                print(f"HackRF center frequency set to {freq_hz / 1e6} MHz.")
+
         def stop_and_wait(self):
-            """Gracefully stop the flowgraph."""
+            """Gracefully stop the flowgraph and release resources."""
             try:
-                self.disconnect_all()
+                # Disconnect blocks if the sink is initialized
+                if self.sink:
+                    print("Disconnecting HackRF sink...")
+                    self.disconnect(self.float_to_complex, self.sink)
+                    self.sink = None  # Explicitly release the sink resource
+
+                print("Stopping the flowgraph...")
+                self.stop()
+                print("Waiting for the flowgraph to terminate...")
+                self.wait()
+                print("Flowgraph stopped and resources released.")
             except Exception as e:
-                print(f"Error during disconnect: {e}")
-            self.stop()
-            self.wait()
+                print(f"Error during stop and wait: {e}")
+
 else:
     # Provide a dummy class if gr is not available
     class ResampleAndSend:
-        def __init__(self, input_file, output_rate):
+        def __init__(self, input_file, output_rate, device_index=0):
             print("Warning: GNU Radio is not available. ResampleAndSend functionality is disabled.")
 
-        def initialize_hackrf(self):
+        def initialize_hackrf(self, gain, if_gain):
             print("Warning: Cannot initialize HackRF without GNU Radio.")
             return False
+
+        def set_center_freq(self, freq_hz):
+            pass
 
         def stop_and_wait(self):
             pass
@@ -239,7 +259,7 @@ if gr is not None and osmosdr is not None:
         def __init__(self, samples_q, center_freq=143.890e6, offset_freq=500e3,
                      sample_rate=960000, audio_rate=48000,
                      rf_gain=0, if_gain=40, bb_gain=14,
-                     demod_gain=5.0, squelch_threshold=-40):
+                     demod_gain=5.0, squelch_threshold=-40, device_index=0):
             super(AFSKReceiver, self).__init__()
 
             ##################################################
@@ -253,7 +273,7 @@ if gr is not None and osmosdr is not None:
             ##################################################
 
             self.osmosdr_source_0 = osmosdr.source(
-                args="numchan=" + str(1) + " " + 'hackrf=0'
+                args=f"numchan={1} hackrf={device_index}"
             )
             self.osmosdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
             self.osmosdr_source_0.set_sample_rate(samp_rate)
@@ -265,7 +285,7 @@ if gr is not None and osmosdr is not None:
             self.osmosdr_source_0.set_gain(rf_gain, 0)
             self.osmosdr_source_0.set_if_gain(if_gain, 0)
             self.osmosdr_source_0.set_bb_gain(bb_gain, 0)
-            self.osmosdr_source_0.set_antenna('', 0)
+            self.osmosdr_source_0.set_antenna("TX/RX", 0)
             self.osmosdr_source_0.set_bandwidth(0, 0)
             self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(
                 1,
@@ -310,6 +330,23 @@ if gr is not None and osmosdr is not None:
 
             print(f"AFSK Receiver is configured and running.")
 
+        def stop_and_wait(self):
+            """Gracefully stop the flowgraph."""
+            try:
+                self.disconnect(self.analog_quadrature_demod_cf_0, self.fir_filter_xxx_0)
+                self.disconnect(self.fir_filter_xxx_0, self.blocks_multiply_const_vxx_0)
+                self.disconnect(self.blocks_multiply_const_vxx_0, self.audio_sink_1)
+                self.disconnect(self.blocks_multiply_const_vxx_0, self.blocks_float_to_short_0)
+                self.disconnect(self.blocks_float_to_short_0, self.queue_sink_0)
+                self.disconnect(self.osmosdr_source_0, self.freq_xlating_fir_filter_xxx_0)
+                self.disconnect(self.freq_xlating_fir_filter_xxx_0, self.analog_simple_squelch_cc_0)
+                self.disconnect(self.analog_simple_squelch_cc_0, self.analog_quadrature_demod_cf_0)
+                self.osmosdr_source_0
+            except Exception as e:
+                print(f"Error during disconnect: {e}")
+            self.stop()
+            self.wait()
+
     async def consume_ax25(ax25_q, received_message_queue):
         try:
             while True:
@@ -348,10 +385,11 @@ if gr is not None and osmosdr is not None:
         except Exception as err:
             print(f"Error in demod_core: {err}")
 
-    def start_receiver(stop_event, received_message_queue, rx_frequency, rx_gain, rx_if_gain):
+    def start_receiver(stop_event, received_message_queue, device_index=0):
+        """Start the AFSK Receiver in a separate thread."""
         if gr is None or osmosdr is None:
             print("GNU Radio or osmosdr is not available. Cannot start receiver.")
-            return
+            return None
 
         import asyncio
 
@@ -364,9 +402,23 @@ if gr is not None and osmosdr is not None:
             bits_q = asyncio.Queue()
             ax25_q = asyncio.Queue()
 
-            tb = AFSKReceiver(samples_q=samples_q)
+            # Initialize the AFSK Receiver with the provided frequency and gains
+            tb = AFSKReceiver(
+                samples_q=samples_q,
+                center_freq=143.89e6,
+                offset_freq=500e3,  # Example offset; adjust as needed
+                sample_rate=960000,
+                audio_rate=48000,
+                rf_gain=0,
+                if_gain=40,
+                bb_gain=14,
+                demod_gain=5.0,
+                squelch_threshold=-40,
+                device_index=device_index
+            )
             tb.start()
 
+            # Create asyncio tasks
             tasks = []
             tasks.append(loop.create_task(consume_ax25(ax25_q=ax25_q, received_message_queue=received_message_queue)))
             tasks.append(loop.create_task(demod_core(samples_q, bits_q, ax25_q)))
@@ -374,16 +426,22 @@ if gr is not None and osmosdr is not None:
             try:
                 while not stop_event.is_set():
                     loop.run_until_complete(asyncio.sleep(1))
+            except Exception as e:
+                print(f"Receiver encountered an exception: {e}")
             finally:
                 for task in tasks:
                     task.cancel()
-                tb.stop()
-                tb.wait()
+                loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
+                tb.stop_and_wait()
+                loop.stop()
                 loop.close()
+                print("Receiver thread has been stopped.") 
 
         # Start the receiver in a separate thread
-        receiver_thread = threading.Thread(target=run_receiver)
+        receiver_thread = threading.Thread(target=run_receiver, daemon=True)
         receiver_thread.start()
+        print("Receiver thread started.")
+        return receiver_thread
 
-# Expose start_receiver function
+# Expose start_receiver function and other necessary components
 __all__ = ['ResampleAndSend', 'generate_aprs_wav', 'udp_listener', 'Frequency', 'ThreadSafeVariable', 'start_receiver']

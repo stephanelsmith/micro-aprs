@@ -31,6 +31,7 @@ class Application(ttk.Frame):
         stop_event, 
         gain_var, 
         if_gain_var,
+        device_index_var,
         received_message_queue,
         *args, 
         **kwargs
@@ -38,6 +39,7 @@ class Application(ttk.Frame):
         super().__init__(master, *args, **kwargs)
         self.gain_var = gain_var
         self.if_gain_var = if_gain_var
+        self.device_index_var = device_index_var
         self.master = master
         self.frequency_var = frequency_var
         self.transmitting_var = transmitting_var
@@ -86,25 +88,31 @@ class Application(ttk.Frame):
     def create_widgets(self):
         # Header
         header = ttk.Label(self, text="APRS Transmission Control", font=("Helvetica", 18, "bold"))
-        header.grid(row=0, column=0, columnspan=3, pady=(0, 20))
+        header.grid(row=0, column=0, columnspan=4, pady=(0, 20))
 
         # HackRF Settings Frame
         hackrf_frame = ttk.Labelframe(self, text="HackRF Settings", padding=20)
         hackrf_frame.grid(row=2, column=0, columnspan=2, sticky="ew", padx=(0,10), pady=(0, 20))
         hackrf_frame.columnconfigure(1, weight=1)
 
-        ttk.Label(hackrf_frame, text="Gain:").grid(row=0, column=0, sticky="w")
+        ttk.Label(hackrf_frame, text="Device Index:").grid(row=0, column=0, sticky="w")
+        self.device_index_entry = ttk.Entry(hackrf_frame, width=10)
+        self.device_index_entry.grid(row=0, column=1, pady=5, padx=10, sticky="w")
+        self.device_index_entry.insert(0, str(self.device_index_var.get()))
+
+        ttk.Label(hackrf_frame, text="Gain:").grid(row=1, column=0, sticky="w")
         self.gain_entry = ttk.Entry(hackrf_frame, width=20)
-        self.gain_entry.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
+        self.gain_entry.grid(row=1, column=1, pady=5, padx=10, sticky="ew")
         self.gain_entry.insert(0, str(self.gain_var.get()))
 
-        ttk.Label(hackrf_frame, text="IF Gain:").grid(row=1, column=0, sticky="w")
+        ttk.Label(hackrf_frame, text="IF Gain:").grid(row=2, column=0, sticky="w")
         self.if_gain_entry = ttk.Entry(hackrf_frame, width=20)
-        self.if_gain_entry.grid(row=1, column=1, pady=5, padx=10, sticky="ew")
+        self.if_gain_entry.grid(row=2, column=1, pady=5, padx=10, sticky="ew")
         self.if_gain_entry.insert(0, str(self.if_gain_var.get()))
 
         self.apply_hackrf_button = ttk.Button(hackrf_frame, text="Apply", command=self.update_hackrf_settings, bootstyle=PRIMARY)
-        self.apply_hackrf_button.grid(row=2, column=0, columnspan=2, pady=(10,0))
+        self.apply_hackrf_button.grid(row=3, column=0, columnspan=2, pady=(10,0))
+
         # Frequency Settings Frame
         freq_frame = ttk.Labelframe(self, text="Frequency Settings", padding=20)
         freq_frame.grid(row=1, column=0, sticky="ew", padx=(0,10), pady=(0, 20))
@@ -154,11 +162,11 @@ class Application(ttk.Frame):
             image=None,  # Placeholder until icons are loaded
             compound=LEFT
         )
-        self.test_button.grid(row=3, column=0, columnspan=3, pady=(0, 20), ipadx=10, ipady=5)
+        self.test_button.grid(row=3, column=0, columnspan=4, pady=(0, 20), ipadx=10, ipady=5)
 
         # Transmission Status Frame
         status_frame = ttk.Frame(self)
-        status_frame.grid(row=4, column=0, columnspan=3, sticky="ew", pady=(0, 10))
+        status_frame.grid(row=4, column=0, columnspan=4, sticky="ew", pady=(0, 10))
         status_frame.columnconfigure(1, weight=1)
 
         ttk.Label(status_frame, text="Status:", font=("Helvetica", 12, "bold")).grid(row=0, column=0, sticky="w")
@@ -168,12 +176,12 @@ class Application(ttk.Frame):
 
         # Progress Bar
         self.progress = ttk.Progressbar(self, mode='indeterminate')
-        self.progress.grid(row=5, column=0, columnspan=3, sticky="ew", pady=(0, 10))
+        self.progress.grid(row=5, column=0, columnspan=4, sticky="ew", pady=(0, 10))
         self.progress.stop()
 
         # Received Messages Frame
         messages_frame = ttk.Labelframe(self, text="Received Messages", padding=20)
-        messages_frame.grid(row=6, column=0, columnspan=3, sticky="nsew", pady=(0, 10))
+        messages_frame.grid(row=6, column=0, columnspan=4, sticky="nsew", pady=(0, 10))
         messages_frame.columnconfigure(0, weight=1)
         messages_frame.rowconfigure(0, weight=1)
 
@@ -189,20 +197,28 @@ class Application(ttk.Frame):
         self.status_var = tk.StringVar()
         self.status_var.set("Ready")
         status_bar = ttk.Label(self, textvariable=self.status_var, relief=SUNKEN, anchor='w')
-        status_bar.grid(row=7, column=0, columnspan=3, sticky="ew")
+        status_bar.grid(row=7, column=0, columnspan=4, sticky="ew")
+
+        # Receiver Status Bar
+        self.receiver_status_var = tk.StringVar()
+        self.receiver_status_var.set("Receiver Running")
+        receiver_status_bar = ttk.Label(self, textvariable=self.receiver_status_var, relief=SUNKEN, anchor='w')
+        receiver_status_bar.grid(row=8, column=0, columnspan=4, sticky="ew")
 
     def update_hackrf_settings(self):
         try:
+            device_index = int(self.device_index_entry.get())
             gain = float(self.gain_entry.get())
             if_gain = float(self.if_gain_entry.get())
             # Optional: Validate gain values (e.g., within acceptable ranges)
+            self.device_index_var.set(device_index)
             self.gain_var.set(gain)
             self.if_gain_var.set(if_gain)
-            self.status_var.set(f"HackRF settings updated: Gain={gain}, IF Gain={if_gain}")
-            print(f"HackRF settings updated: Gain={gain}, IF Gain={if_gain}")
+            self.status_var.set(f"HackRF settings updated: Device Index={device_index}, Gain={gain}, IF Gain={if_gain}")
+            print(f"HackRF settings updated: Device Index={device_index}, Gain={gain}, IF Gain={if_gain}")
         except ValueError as ve:
-            self.status_var.set(f"Invalid gain values: {ve}")
-            print(f"Invalid gain values: {ve}")
+            self.status_var.set(f"Invalid input values: {ve}")
+            print(f"Invalid input values: {ve}")
 
     def update_frequency(self):
         try:
@@ -221,7 +237,7 @@ class Application(ttk.Frame):
     def queue_test_message(self):
         callsign = self.callsign_entry.get().strip()
         if not self.validate_callsign(callsign):
-            self.callsign_notification.config(text="Callsign must be 3-6 alphanumeric characters.")
+            self.callsign_notification.config(text="Callsign must be 3-6 alphanumeric characters.", foreground="red")
             self.status_var.set("Invalid callsign input.")
             print("Invalid callsign input.")
             return
@@ -256,7 +272,7 @@ class Application(ttk.Frame):
             if hasattr(self, 'transmitting_icon') and self.transmitting_icon:
                 if not self.transmission_icon_label:
                     self.transmission_icon_label = ttk.Label(self, image=self.transmitting_icon)
-                    self.transmission_icon_label.grid(row=3, column=2, sticky="w")
+                    self.transmission_icon_label.grid(row=3, column=4, sticky="w")
                 else:
                     self.transmission_icon_label.config(image=self.transmitting_icon)
             self.progress.start(10)
@@ -266,7 +282,7 @@ class Application(ttk.Frame):
             if hasattr(self, 'idle_icon') and self.idle_icon:
                 if not self.transmission_icon_label:
                     self.transmission_icon_label = ttk.Label(self, image=self.idle_icon)
-                    self.transmission_icon_label.grid(row=3, column=2, sticky="w")
+                    self.transmission_icon_label.grid(row=3, column=4, sticky="w")
                 else:
                     self.transmission_icon_label.config(image=self.idle_icon)
             self.progress.stop()
@@ -283,11 +299,21 @@ class Application(ttk.Frame):
             pass
         self.after(500, self.check_received_messages)
 
-def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_var, if_gain_var):
+def start_receiver_thread(receiver_stop_event, received_message_queue, device_index):
+    receiver_thread = threading.Thread(
+        target=start_receiver, 
+        args=(receiver_stop_event, received_message_queue, device_index),
+        daemon=True
+    )
+    receiver_thread.start()
+    return receiver_thread
 
-    udp_thread = threading.Thread(target=udp_listener, args=("127.0.0.1", 14580, message_queue, stop_event), daemon=True)
-    udp_thread.start()
+def stop_receiver(stop_event, receiver_thread):
+    stop_event.set()
+    receiver_thread.join()
 
+def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_var, if_gain_var, 
+              device_index_var, receiver_stop_event, receiver_thread, received_message_queue, gui_app):
     while not stop_event.is_set():
         try:
             message = message_queue.get_nowait()
@@ -302,6 +328,15 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
                 flags_after = 4    # Default number of flags after
 
             print(f"Processing message: {aprs_message}, flags_before: {flags_before}, flags_after: {flags_after}")
+            
+            # Stop the receiver before transmission
+            print("Stopping receiver before transmission...")
+            receiver_stop_event.set()  # Signal the AFSK Receiver to stop
+            receiver_thread.join()      # Wait for the AFSK Receiver to stop
+            time.sleep(1)
+            print("Receiver stopped.")
+            gui_app.receiver_status_var.set("Receiver Stopped")
+
             # Generate WAV file
             raw_wav = "raw_output.wav"
             processed_wav = "processed_output.wav"
@@ -318,13 +353,14 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
 
             gain = gain_var.get()
             if_gain = if_gain_var.get()
+            device_index = device_index_var.get()
 
             # Reset and Initialize HackRF
             reset_hackrf()
-            tb = ResampleAndSend(processed_wav, 2205000)
+            tb = ResampleAndSend(processed_wav, 2205000, device_index=device_index)
             if tb.initialize_hackrf(gain, if_gain):
                 current_frequency = frequency_var.get()
-                tb.sink.set_center_freq(current_frequency)
+                tb.set_center_freq(current_frequency)
                 print(f"Frequency set to {current_frequency / 1e6} MHz. Starting transmission...")
                 transmitting_var.set()
                 tb.start()
@@ -336,14 +372,28 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
                     print("Transmission completed.")
             else:
                 print("HackRF initialization failed.")
+
+            # Restart the receiver after transmission
+            print("Restarting receiver after transmission...")
+            receiver_stop_event.clear()
+            receiver_thread = start_receiver_thread(
+                receiver_stop_event, 
+                received_message_queue, 
+                device_index
+            )
+            gui_app.receiver_status_var.set("Receiver Running")
+            print("Receiver restarted.")
+
         except queue.Empty:
             time.sleep(0.1)  # Prevent tight loop when queue is empty
         except Exception as e:
             print(f"Unexpected error in main_loop: {e}")
 
-def on_closing(app, stop_event, receiver_stop_event):
+def on_closing(app, stop_event, receiver_stop_event, receiver_thread, udp_thread):
     stop_event.set()
     receiver_stop_event.set()
+    stop_receiver(receiver_stop_event, receiver_thread)
+    udp_thread.join()
     app.master.destroy()
 
 def handle_signal(signum, frame):
@@ -366,21 +416,30 @@ if __name__ == "__main__":
         frequency_var = Frequency(144.39e6)  # Default frequency in Hz
         gain_var = ThreadSafeVariable(14)     # Default gain
         if_gain_var = ThreadSafeVariable(47)  # Default IF gain
+        device_index_var = ThreadSafeVariable(0)  # Default HackRF device index
 
         # Create stop event and received message queue for receiver
         receiver_stop_event = threading.Event()
         received_message_queue = queue.Queue()
 
-        # Start the receiver
-        # We can use the same frequency, or specify a different one
-        start_receiver(receiver_stop_event, received_message_queue, frequency_var.get(), gain_var.get(), if_gain_var.get())
+        # Start the AFSK Receiver
+        receiver_thread = start_receiver_thread(
+            receiver_stop_event, 
+            received_message_queue, 
+            device_index_var.get()
+        )
 
-        gui_thread = threading.Thread(target=main_loop, args=(frequency_var, transmitting_var, message_queue, stop_event, gain_var, if_gain_var), daemon=True)
-        gui_thread.start()
+        # Start the UDP Listener
+        udp_thread = threading.Thread(
+            target=udp_listener, 
+            args=("127.0.0.1", 14580, message_queue, stop_event), 
+            daemon=True
+        )
+        udp_thread.start()
 
         root = style.master
         root.title("APRS Transmission Control")
-        root.geometry("700x700")
+        root.geometry("800x800")
         root.resizable(True, True)
 
         app = Application(
@@ -391,11 +450,30 @@ if __name__ == "__main__":
             stop_event, 
             gain_var, 
             if_gain_var,
+            device_index_var,
             received_message_queue
         )
 
+        gui_thread = threading.Thread(
+            target=main_loop, 
+            args=(
+                frequency_var, 
+                transmitting_var, 
+                message_queue, 
+                stop_event, 
+                gain_var, 
+                if_gain_var, 
+                device_index_var,
+                receiver_stop_event, 
+                receiver_thread, 
+                received_message_queue,
+                app  # Pass the GUI application instance for status updates
+            ), 
+            daemon=True
+        )
+        gui_thread.start()
 
-        root.protocol("WM_DELETE_WINDOW", lambda: on_closing(app, stop_event, receiver_stop_event))
+        root.protocol("WM_DELETE_WINDOW", lambda: on_closing(app, stop_event, receiver_stop_event, receiver_thread, udp_thread))
         app.mainloop()
 
     except KeyboardInterrupt:

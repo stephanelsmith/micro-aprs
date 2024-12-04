@@ -18,33 +18,109 @@ This project is a HackRF-based APRS (Automatic Packet Reporting System) implemen
 
 ## Prerequisites
 
-Make sure you have the following installed on your system:
+Before you begin, ensure your system meets the following requirements:
 
-- Python 3.x
-- Required Python modules (installable via `pip`):
-  ```bash
-  pip install -r requirements.txt
-  ```
-- GNU Radio and its dependencies.
-- HackRF tools (e.g., `hackrf_transfer`).
-- Tkinter and ttkbootstrap for the GUI.
-
----
+- **Operating System:** Ubuntu/Linux (instructions are tailored for Ubuntu. For other OS, refer to respective documentation)
+- **Git:** Installed for cloning the repository
+- **Python 3:** Version 3.6 or later
+- **pip:** Python package installer
+- **Virtual Environment Module:** `venv` (comes pre-installed with Python 3. If not, install it using your package manager)
 
 ## Installation
 
-1. Clone the repository:
+Follow these steps to set up the `hackrf-aprsc` project on your system.
+
+### 1. Clone the Repository
+
+Begin by cloning the `hackrf-aprsc` repository from GitHub and navigating into the project directory:
+
+```bash
+git clone https://github.com/fpoisson2/hackrf-aprsc.git
+cd hackrf-aprsc
+```
+
+### 2. Install GNU Radio
+
+**GNU Radio** is an essential toolkit for building software-defined radios. The installation process varies based on your operating system. Below are instructions for Ubuntu/Linux. For other operating systems, refer to the [GNU Radio Installation Guide](https://wiki.gnuradio.org/index.php/InstallingGR).
+
+#### For Ubuntu/Linux:
+
+1. **Update Package Lists:**
+
    ```bash
-   git clone https://github.com/fpoisson2/hackrf-aprsc.git
-   cd hackrf-aprsc
+   sudo apt-get update
    ```
 
-   2. Install GNU Radio
-   3. Install osmosdr
-   4. python3 -m venv .venv --system-site-packages
-   5. source .venv/bin/activate
-   6. pip install ttkbootstrap
-   7. pip install numpy
+2. **Install GNU Radio:**
+
+   Install GNU Radio using the package manager:
+
+   ```bash
+   sudo apt-get install gnuradio
+   ```
+
+   *This command installs the latest stable version available in the Ubuntu repositories.*
+
+3. **Verify Installation:**
+
+   After installation, verify it by checking the version:
+
+   ```bash
+   gnuradio-companion --version
+   ```
+
+   This should display the installed GNU Radio version.
+
+### 3. Install Osmocom's osmosdr
+
+**Osmocom's osmosdr** provides drivers and modules for various SDR hardware, making it essential for this project.
+
+#### For Ubuntu/Linux:
+
+1. **Install Pre-built Packages:**
+
+   ```bash
+   sudo apt-get install libosmosdr-dev gr-osmosdr
+   ```
+
+2. **Verify Installation:**
+
+   Launch GNU Radio Companion (GRC) and search for osmosdr-related blocks to ensure they are available.
+
+### 4. Set Up a Python Virtual Environment
+
+Creating a virtual environment ensures that project-specific dependencies are isolated from the system-wide Python installation.
+
+1. **Create the Virtual Environment:**
+
+   ```bash
+   python3 -m venv .venv --system-site-packages
+   ```
+
+### 5. Activate the Virtual Environment
+
+Activate the virtual environment to start using it.
+
+```bash
+source .venv/bin/activate
+```
+
+### 6. Install Python Dependencies
+
+With the virtual environment activated, install the necessary Python packages using `pip`.
+
+1. **Install `ttkbootstrap`:**
+
+   ```bash
+   pip install ttkbootstrap
+   ```
+
+2. **Install `numpy`:**
+
+   ```bash
+   pip install numpy
+   ```
+
 
 
 

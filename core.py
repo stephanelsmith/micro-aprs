@@ -52,6 +52,7 @@ def reset_hackrf():
 # Add silence to WAV
 def add_silence(input_wav, output_wav, silence_duration_before, silence_duration_after):
     """Add silence before and after a WAV file."""
+<<<<<<< HEAD
     try:
         with wave.open(input_wav, 'rb') as wav_in:
             params = wav_in.getparams()
@@ -76,6 +77,27 @@ def add_silence(input_wav, output_wav, silence_duration_before, silence_duration
         print(f"Silence added to WAV file: {output_wav}")
     except Exception as e:
         print(f"Error adding silence to WAV: {e}")
+=======
+    with wave.open(input_wav, 'rb') as wav_in:
+        params = wav_in.getparams()
+        sample_rate = wav_in.getframerate()
+        num_channels = wav_in.getnchannels()
+        sampwidth = wav_in.getsampwidth()
+
+        audio_frames = wav_in.readframes(wav_in.getnframes())
+
+    num_silence_frames_before = int(silence_duration_before * sample_rate)
+    num_silence_frames_after = int(silence_duration_after * sample_rate)
+
+    silence_before = (b'\x00' * sampwidth * num_channels) * num_silence_frames_before
+    silence_after = (b'\x00' * sampwidth * num_channels) * num_silence_frames_after
+
+    new_frames = silence_before + audio_frames + silence_after
+
+    with wave.open(output_wav, 'wb') as wav_out:
+        wav_out.setparams(params)
+        wav_out.writeframes(new_frames)
+>>>>>>> parent of 5839f67 (Automatic detection of Hack RF)
 
 # GNU Radio class
 if gr is not None:

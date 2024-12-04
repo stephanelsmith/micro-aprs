@@ -423,6 +423,7 @@ if __name__ == "__main__":
         received_message_queue = queue.Queue()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         # Device index variable
         device_index_var = ThreadSafeVariable(0)  # Default device index
 
@@ -437,6 +438,8 @@ if __name__ == "__main__":
             self.device_index_var.set("1")
             print("erreur")
 =======
+=======
+>>>>>>> parent of 5839f67 (Automatic detection of Hack RF)
         # Start the AFSK Receiver
         receiver_thread = start_receiver_thread(
             receiver_stop_event, 

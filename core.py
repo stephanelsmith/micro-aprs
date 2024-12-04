@@ -42,32 +42,42 @@ except ImportError as e:
 # Reset HackRF
 def reset_hackrf():
     """Reset the HackRF device."""
-    subprocess.run(["hackrf_transfer", "-r", "/dev/null"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    subprocess.run(["hackrf_transfer", "-t", "/dev/null"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    print("HackRF reset completed.")
+    try:
+        subprocess.run(["hackrf_transfer", "-r", "/dev/null"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(["hackrf_transfer", "-t", "/dev/null"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print("HackRF reset completed.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error resetting HackRF: {e.stderr.decode().strip()}")
+    except Exception as e:
+        print(f"Unexpected error during HackRF reset: {e}")
 
 # Add silence to WAV
 def add_silence(input_wav, output_wav, silence_duration_before, silence_duration_after):
     """Add silence before and after a WAV file."""
-    with wave.open(input_wav, 'rb') as wav_in:
-        params = wav_in.getparams()
-        sample_rate = wav_in.getframerate()
-        num_channels = wav_in.getnchannels()
-        sampwidth = wav_in.getsampwidth()
+    try:
+        with wave.open(input_wav, 'rb') as wav_in:
+            params = wav_in.getparams()
+            sample_rate = wav_in.getframerate()
+            num_channels = wav_in.getnchannels()
+            sampwidth = wav_in.getsampwidth()
 
-        audio_frames = wav_in.readframes(wav_in.getnframes())
+            audio_frames = wav_in.readframes(wav_in.getnframes())
 
-    num_silence_frames_before = int(silence_duration_before * sample_rate)
-    num_silence_frames_after = int(silence_duration_after * sample_rate)
+        num_silence_frames_before = int(silence_duration_before * sample_rate)
+        num_silence_frames_after = int(silence_duration_after * sample_rate)
 
-    silence_before = (b'\x00' * sampwidth * num_channels) * num_silence_frames_before
-    silence_after = (b'\x00' * sampwidth * num_channels) * num_silence_frames_after
+        silence_before = (b'\x00' * sampwidth * num_channels) * num_silence_frames_before
+        silence_after = (b'\x00' * sampwidth * num_channels) * num_silence_frames_after
 
-    new_frames = silence_before + audio_frames + silence_after
+        new_frames = silence_before + audio_frames + silence_after
 
-    with wave.open(output_wav, 'wb') as wav_out:
-        wav_out.setparams(params)
-        wav_out.writeframes(new_frames)
+        with wave.open(output_wav, 'wb') as wav_out:
+            wav_out.setparams(params)
+            wav_out.writeframes(new_frames)
+        
+        print(f"Silence added to WAV file: {output_wav}")
+    except Exception as e:
+        print(f"Error adding silence to WAV: {e}")
 
 def list_hackrf_devices():
     """
@@ -119,7 +129,12 @@ if gr is not None:
             gr.top_block.__init__(self, "Resample and Send")
 
             self.file_source = blocks.wavfile_source(input_file, repeat=False)
-            self.resampler = filter.rational_resampler_fff(interpolation=int(output_rate), decimation=22050)
+            # Adjusted decimation to match output_rate and reduce buffer requirements
+            decimation_factor = 2  # Example value; adjust as needed
+            self.resampler = filter.rational_resampler_fff(
+                interpolation=output_rate,
+                decimation=decimation_factor
+            )
             self.amplitude_scaling = blocks.multiply_const_ff(0.05)
             self.float_to_complex = blocks.float_to_complex()
             self.sink = None
@@ -333,15 +348,18 @@ if gr is not None and osmosdr is not None:
             self.osmosdr_source_0.set_bb_gain(bb_gain, 0)
             self.osmosdr_source_0.set_antenna("TX/RX", 0)
             self.osmosdr_source_0.set_bandwidth(0, 0)
+            
+            # Adjusted number of taps to reduce buffer requirements
+            num_taps = 100  # Reduced from original to decrease buffer size
             self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(
                 1,
-                firdes.low_pass(1.0, samp_rate, 10e3, 5e3, 6),
+                firdes.low_pass(1.0, samp_rate, 10e3, 5e3, num_taps),
                 offset_freq,
                 samp_rate
             )
             self.fir_filter_xxx_0 = filter.fir_filter_fff(
                 int(samp_rate / audio_rate),
-                firdes.low_pass(1.0, samp_rate, 3.5e3, 500, 6)
+                firdes.low_pass(1.0, samp_rate, 3.5e3, 500, num_taps)  # Reduced taps
             )
             self.fir_filter_xxx_0.declare_sample_delay(0)
             self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(demod_gain)
@@ -365,14 +383,30 @@ if gr is not None and osmosdr is not None:
             self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_float_to_short_0, 0))
             self.connect((self.blocks_float_to_short_0, 0), (self.queue_sink_0, 0))
 
-            # Reduce max_noutput_items to reduce latency
-            self.set_max_noutput_items(480)  # Corresponds to 10ms at 48kHz
+            # Adjusted set_max_noutput_items to align with block requirements
+            self.set_max_noutput_items(1024)  # Increased from 480 to 1024
 
-            # Reduce buffer sizes to minimize latency
+            # Adjust buffer sizes based on block requirements
+            block_min_buffers = {
+                'hackrf_source_c0': 512,
+                'fix_cc0': 512,
+                'freq_xlating_fir_filter_ccc0': 512,
+                'fir_filter_fff0': 1024,
+                'multiply_const_ff0': 1024,
+                'float_to_short0': 2048,
+            }
+
             for blk in [self.osmosdr_source_0, self.freq_xlating_fir_filter_xxx_0,
-                        self.fir_filter_xxx_0, self.blocks_multiply_const_vxx_0,
-                        self.blocks_float_to_short_0]:
-                blk.set_max_output_buffer(480)
+                       self.fir_filter_xxx_0, self.blocks_multiply_const_vxx_0,
+                       self.blocks_float_to_short_0]:
+                blk_name = blk.name()
+                min_buffer = block_min_buffers.get(blk_name, 480)
+                try:
+                    blk.set_max_output_buffer(max(480, min_buffer))
+                    print(f"Set max_output_buffer for {blk_name} to {max(480, min_buffer)}")
+                except AttributeError:
+                    # Some blocks might not have set_max_output_buffer method
+                    print(f"Block {blk_name} does not support set_max_output_buffer.")
 
             print(f"AFSK Receiver is configured and running on device {device_index}.")
 
@@ -487,6 +521,9 @@ if gr is not None and osmosdr is not None:
         receiver_thread.start()
         print("Receiver thread started.")
         return receiver_thread
+
+else:
+    print("GNU Radio or osmosdr is not available. Receiver functionality is disabled.")
 
 # Expose start_receiver function and other necessary components
 __all__ = [

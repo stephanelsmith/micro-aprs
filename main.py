@@ -324,8 +324,10 @@ class Application(ttk.Frame):
                 time.sleep(1)
 
                 # Restart the receiver with the new device index
+                current_frequency = frequency_var.get()
                 self.receiver_stop_event.clear()  # Reset the stop event
                 self.receiver_thread = start_receiver_thread(
+                    current_frequency,
                     self.receiver_stop_event,
                     self.received_message_queue,
                     self.device_index_var.get()  # Use updated device index
@@ -441,10 +443,10 @@ class Application(ttk.Frame):
             pass
         self.after(500, self.check_received_messages)
 
-def start_receiver_thread(receiver_stop_event, received_message_queue, device_index):
+def start_receiver_thread(current_frequency, receiver_stop_event, received_message_queue, device_index):
     receiver_thread = threading.Thread(
         target=start_receiver, 
-        args=(receiver_stop_event, received_message_queue, device_index),
+        args=(current_frequency, receiver_stop_event, received_message_queue, device_index),
         daemon=True
     )
     receiver_thread.start()
@@ -480,7 +482,8 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
             print("Receiver stopped.")
             gui_app.receiver_status_var.set("Receiver Stopped")
 
-            # Generate WAV file
+            #Generate WAV file
+            print(f"Current Working Directory: {os.getcwd()}")
             raw_wav = "raw_output.wav"
             processed_wav = "processed_output.wav"
             silence_before = 0
@@ -507,7 +510,7 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
                 transmitting_var.set()
                 tb.start()
                 try:
-                    time.sleep(2)  # Transmit for 2 seconds
+                    time.sleep(silence_before+2+silence_after)  # Transmit for 2 seconds
                 finally:
                     tb.stop_and_wait()
                     transmitting_var.clear()
@@ -516,9 +519,11 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
                 print("HackRF initialization failed.")
 
             # Restart the receiver after transmission
+            current_frequency = frequency_var.get()
             print("Restarting receiver after transmission...")
             receiver_stop_event.clear()
             receiver_thread = start_receiver_thread(
+                current_frequency,
                 receiver_stop_event, 
                 received_message_queue, 
                 device_index=device_index
@@ -568,6 +573,7 @@ if __name__ == "__main__":
 
         # Start the AFSK Receiver with default device index
         receiver_thread = start_receiver_thread(
+            144.39e6,
             receiver_stop_event, 
             received_message_queue, 
             device_index=device_index_var.get()

@@ -125,10 +125,24 @@ if gr is not None:
             self.sink = None
             self.output_rate = output_rate
             self.device_index = device_index
+            self.blocks_add_xx_0 = blocks.add_vff(1)
+            self.analog_noise_source_x_0 = analog.noise_source_f(analog.GR_GAUSSIAN, 1, 0)
+            self.high_pass_filter_0 = filter.interp_fir_filter_fff(
+                1,
+                firdes.high_pass(
+                    1,
+                    22050,
+                    8e3,
+                    1e3,
+                    1,
+                    6.76))
 
-            self.connect(self.file_source, self.resampler)
+            self.connect((self.analog_noise_source_x_0, 0), (self.high_pass_filter_0, 0))
+            self.connect((self.blocks_add_xx_0, 0), self.resampler)
             self.connect(self.resampler, self.amplitude_scaling)
             self.connect(self.amplitude_scaling, self.float_to_complex)
+            self.connect(self.file_source, (self.blocks_add_xx_0, 0))
+            self.connect((self.high_pass_filter_0, 0), (self.blocks_add_xx_0, 1))
 
         def initialize_hackrf(self, gain, if_gain):
             """Initialize HackRF sink."""
@@ -335,20 +349,20 @@ if gr is not None and osmosdr is not None:
             self.osmosdr_source_0.set_bandwidth(0, 0)
             self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(
                 1,
-                firdes.low_pass(1.0, samp_rate, 10e3, 5e3, 6),
+                firdes.low_pass(1.0, samp_rate, 5e3, 5e3, 6),
                 offset_freq,
                 samp_rate
             )
             self.fir_filter_xxx_0 = filter.fir_filter_fff(
                 int(samp_rate / audio_rate),
-                firdes.low_pass(1.0, samp_rate, 3.5e3, 500, 6)
+                firdes.low_pass(1.0, samp_rate, 2.5e3, 500, 6)
             )
             self.fir_filter_xxx_0.declare_sample_delay(0)
-            self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(demod_gain)
+            self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(2)
             self.blocks_float_to_short_0 = blocks.float_to_short(1, 32767)
             self.audio_sink_1 = audio.sink(int(audio_rate), '', True)
             self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(squelch_threshold, 1)
-            self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(1)
+            self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(demod_gain)
 
             # Use the custom QueueSink block
             self.queue_sink_0 = QueueSink(samples_q)
@@ -430,8 +444,8 @@ if gr is not None and osmosdr is not None:
         except Exception as err:
             print(f"Error in demod_core: {err}")
 
-    def start_receiver(stop_event, received_message_queue, device_index=0):
-        """Start the AFSK Receiver in a separate thread."""
+    def start_receiver(current_frequency,stop_event, received_message_queue, device_index=0):
+        """Start t he AFSK Receiver in a separate thread."""
         if gr is None or osmosdr is None:
             print("GNU Radio or osmosdr is not available. Cannot start receiver.")
             return None
@@ -447,10 +461,12 @@ if gr is not None and osmosdr is not None:
             bits_q = asyncio.Queue()
             ax25_q = asyncio.Queue()
 
+            print(current_frequency)
+
             # Initialize the AFSK Receiver with the provided frequency and gains
             tb = AFSKReceiver(
                 samples_q=samples_q,
-                center_freq=143.89e6,
+                center_freq=current_frequency-500e3,
                 offset_freq=500e3,  # Example offset; adjust as needed
                 sample_rate=960000,
                 audio_rate=48000,

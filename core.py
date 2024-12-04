@@ -1,511 +1,636 @@
+# main.py
+
+import tkinter as tk
+from ttkbootstrap import Style, ttk
+from ttkbootstrap.constants import *
 import threading
 import asyncio
-import socket
 import queue
-import wave
-import struct
-import subprocess
-import numpy as np
+import time
+import os
+import sys
+import signal
 
-# Try to import external dependencies, handle ImportError gracefully
-try:
-    from gnuradio import gr, blocks, filter, analog, audio
-    from gnuradio.filter import firdes
-    import osmosdr
-except ImportError as e:
-    print(f"Warning: Could not import GNU Radio modules. Some functionality may be limited. {e}")
-    gr = None  # Set to None to prevent errors if used
-    blocks = None
-    filter = None
-    sink = None
-    analog = None
-    audio = None
-    firdes = None
-    osmosdr = None
+# Import from core.py
+from core import (
+    reset_hackrf,
+    add_silence,
+    ResampleAndSend,
+    generate_aprs_wav,
+    udp_listener,
+    Frequency,
+    ThreadSafeVariable,
+    start_receiver,
+    list_hackrf_devices
+)
 
-try:
-    from afsk.mod import AFSKModulator
-    from afsk.demod import AFSKDemodulator
-    from afsk.func import afsk_detector
-    from ax25.ax25 import AX25
-    from ax25.from_afsk import AX25FromAFSK
-except ImportError as e:
-    print(f"Warning: Could not import AFSK or AX.25 modules. Some functionality may be limited. {e}")
-    AFSKModulator = None
-    AFSKDemodulator = None
-    afsk_detector = None
-    AX25 = None
-    AX25FromAFSK = None
-
-# Reset HackRF
-def reset_hackrf():
-    """Reset the HackRF device."""
-    try:
-        subprocess.run(["hackrf_transfer", "-r", "/dev/null"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        subprocess.run(["hackrf_transfer", "-t", "/dev/null"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print("HackRF reset completed.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error resetting HackRF: {e.stderr.decode().strip()}")
-    except Exception as e:
-        print(f"Unexpected error during HackRF reset: {e}")
-
-# Add silence to WAV
-def add_silence(input_wav, output_wav, silence_duration_before, silence_duration_after):
-    """Add silence before and after a WAV file."""
-<<<<<<< HEAD
-    try:
-        with wave.open(input_wav, 'rb') as wav_in:
-            params = wav_in.getparams()
-            sample_rate = wav_in.getframerate()
-            num_channels = wav_in.getnchannels()
-            sampwidth = wav_in.getsampwidth()
-
-            audio_frames = wav_in.readframes(wav_in.getnframes())
-
-        num_silence_frames_before = int(silence_duration_before * sample_rate)
-        num_silence_frames_after = int(silence_duration_after * sample_rate)
-
-        silence_before = (b'\x00' * sampwidth * num_channels) * num_silence_frames_before
-        silence_after = (b'\x00' * sampwidth * num_channels) * num_silence_frames_after
-
-        new_frames = silence_before + audio_frames + silence_after
-
-        with wave.open(output_wav, 'wb') as wav_out:
-            wav_out.setparams(params)
-            wav_out.writeframes(new_frames)
+class Application(ttk.Frame):
+    def __init__(
+        self, 
+        master, 
+        frequency_var, 
+        transmitting_var, 
+        message_queue, 
+        stop_event, 
+        gain_var, 
+        if_gain_var,
+        receiver_stop_event,
+        receiver_thread,
+        received_message_queue,
+        device_index_var,
+        *args, 
+        **kwargs
+    ):
+        super().__init__(master, *args, **kwargs)
         
-        print(f"Silence added to WAV file: {output_wav}")
-    except Exception as e:
-        print(f"Error adding silence to WAV: {e}")
-=======
-    with wave.open(input_wav, 'rb') as wav_in:
-        params = wav_in.getparams()
-        sample_rate = wav_in.getframerate()
-        num_channels = wav_in.getnchannels()
-        sampwidth = wav_in.getsampwidth()
+        # Initialize variables
+        self.gain_var = gain_var
+        self.if_gain_var = if_gain_var
+        self.master = master
+        self.frequency_var = frequency_var
+        self.transmitting_var = transmitting_var
+        self.message_queue = message_queue
+        self.num_flags_before = tk.IntVar(value=10)  # Default value
+        self.num_flags_after = tk.IntVar(value=4)    # Default value
+        self.stop_event = stop_event
+        self.received_message_queue = received_message_queue
+        self.device_index_var = device_index_var
+        self.receiver_stop_event = receiver_stop_event
+        self.receiver_thread = receiver_thread
 
-        audio_frames = wav_in.readframes(wav_in.getnframes())
+        # Pack the main frame
+        self.pack(fill=BOTH, expand=True, padx=20, pady=20)
 
-    num_silence_frames_before = int(silence_duration_before * sample_rate)
-    num_silence_frames_after = int(silence_duration_after * sample_rate)
+        # Initialize status variables
+        self.status_var = tk.StringVar(value="Ready")
+        self.receiver_status_var = tk.StringVar(value="Receiver Running")
 
-    silence_before = (b'\x00' * sampwidth * num_channels) * num_silence_frames_before
-    silence_after = (b'\x00' * sampwidth * num_channels) * num_silence_frames_after
+        # Create the scrollable canvas
+        self.canvas = tk.Canvas(self, borderwidth=0)
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.canvas)
 
-    new_frames = silence_before + audio_frames + silence_after
+        # Configure the canvas
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
 
-    with wave.open(output_wav, 'wb') as wav_out:
-        wav_out.setparams(params)
-        wav_out.writeframes(new_frames)
->>>>>>> parent of 5839f67 (Automatic detection of Hack RF)
+        # Pack the canvas and scrollbar
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
 
-# GNU Radio class
-if gr is not None:
-    class ResampleAndSend(gr.top_block):
-        def __init__(self, input_file, output_rate, device_index=0):
-            gr.top_block.__init__(self, "Resample and Send")
+        # Load icons
+        self.send_icon = None
+        self.transmitting_icon = None
+        self.idle_icon = None
+        self.load_icons()
 
-            self.file_source = blocks.wavfile_source(input_file, repeat=False)
-            # Adjusted decimation to match output_rate and reduce buffer requirements
-            decimation_factor = 2  # Example value; adjust as needed
-            self.resampler = filter.rational_resampler_fff(
-                interpolation=output_rate,
-                decimation=decimation_factor
-            )
-            self.amplitude_scaling = blocks.multiply_const_ff(0.05)
-            self.float_to_complex = blocks.float_to_complex()
-            self.sink = None
-            self.output_rate = output_rate
-            self.device_index = device_index
+        # Initialize GUI components within the scrollable frame
+        self.create_widgets()
 
+        # Start checking transmission status
+        self.check_transmission_status()
 
-            self.connect(self.file_source, self.resampler)
-            self.connect(self.resampler, self.amplitude_scaling)
-            self.connect(self.amplitude_scaling, self.float_to_complex)
+        # Start checking for received messages
+        self.check_received_messages()
 
-        def initialize_hackrf(self, gain, if_gain):
-            """Initialize HackRF sink."""
-            try:
-                print(f"Initializing HackRF device {self.device_index}...")
-                self.sink = osmosdr.sink(args=f"hackrf={self.device_index}")
-                self.sink.set_sample_rate(self.output_rate)
-                # Center frequency will be set externally after initialization
-                self.sink.set_center_freq(144.39e6, 0)  # Default; can be changed later
-                self.sink.set_gain(gain, 0)
-                self.sink.set_if_gain(if_gain, 0)
-                self.sink.set_bb_gain(20, 0)
-                self.sink.set_antenna("TX/RX", 0)
-                print("HackRF initialized successfully.")
-                self.connect(self.float_to_complex, self.sink)
-                return True
-            except RuntimeError as e:
-                print(f"Error initializing HackRF: {e}")
-                return False
+    def load_icons(self):
+        # Ensure the assets directory exists
+        assets_path = os.path.join(os.path.dirname(__file__), 'assets')
+        if not os.path.isdir(assets_path):
+            os.makedirs(assets_path)
+            # Notify the user within the GUI
+            self.status_var.set(f"'assets' directory created at {assets_path}. Please add required icon files.")
+            return
 
-        def set_center_freq(self, freq_hz):
-            """Set the center frequency of the HackRF."""
-            if self.sink:
-                self.sink.set_center_freq(freq_hz, 0)
-                print(f"HackRF center frequency set to {freq_hz / 1e6} MHz.")
+        try:
+            self.send_icon = tk.PhotoImage(file=os.path.join(assets_path, 'send_icon.png'))
+            self.transmitting_icon = tk.PhotoImage(file=os.path.join(assets_path, 'transmitting_icon.png'))
+            self.idle_icon = tk.PhotoImage(file=os.path.join(assets_path, 'idle_icon.png'))
+        except Exception as e:
+            self.status_var.set(f"Error loading icons: {e}")
+            self.send_icon = None
+            self.transmitting_icon = None
+            self.idle_icon = None
 
-        def stop_and_wait(self):
-            """Gracefully stop the flowgraph and release resources."""
-            try:
-                # Disconnect blocks if the sink is initialized
-                if self.sink:
-                    print("Disconnecting HackRF sink...")
-                    self.disconnect(self.float_to_complex, self.sink)
-                    self.sink = None  # Explicitly release the sink resource
+    def create_widgets(self):
+        # Header
+        header = ttk.Label(
+            self.scrollable_frame, 
+            text="APRS Transmission Control", 
+            font=("Helvetica", 18, "bold")
+        )
+        header.grid(row=0, column=0, columnspan=4, pady=(0, 20), sticky="w")
 
-                print("Stopping the flowgraph...")
-                self.stop()
-                print("Waiting for the flowgraph to terminate...")
-                self.wait()
-                print("Flowgraph stopped and resources released.")
-            except Exception as e:
-                print(f"Error during stop and wait: {e}")
+        # HackRF Device Selection Frame
+        device_frame = ttk.Labelframe(
+            self.scrollable_frame, 
+            text="HackRF Device Selection", 
+            padding=20
+        )
+        device_frame.grid(row=1, column=0, columnspan=4, sticky="ew", padx=0, pady=(0, 20))
+        device_frame.columnconfigure(1, weight=1)
 
-else:
-    # Provide a dummy class if gr is not available
-    class ResampleAndSend:
-        def __init__(self, input_file, output_rate, device_index=0):
-            print("Warning: GNU Radio is not available. ResampleAndSend functionality is disabled.")
+        ttk.Label(device_frame, text="Select HackRF Device:").grid(row=0, column=0, sticky="w")
+        self.device_combobox = ttk.Combobox(device_frame, state="readonly")
+        self.device_combobox.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
+        self.populate_device_combobox()
 
-        def initialize_hackrf(self, gain, if_gain):
-            print("Warning: Cannot initialize HackRF without GNU Radio.")
-            return False
+        # HackRF Settings Frame
+        hackrf_frame = ttk.Labelframe(
+            self.scrollable_frame, 
+            text="HackRF Settings", 
+            padding=20
+        )
+        hackrf_frame.grid(row=2, column=0, columnspan=2, sticky="ew", padx=(0,10), pady=(0, 20))
+        hackrf_frame.columnconfigure(1, weight=1)
 
-        def set_center_freq(self, freq_hz):
-            pass
+        ttk.Label(hackrf_frame, text="Gain:").grid(row=0, column=0, sticky="w")
+        self.gain_entry = ttk.Entry(hackrf_frame, width=20)
+        self.gain_entry.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
+        self.gain_entry.insert(0, str(self.gain_var.get()))
 
-        def stop_and_wait(self):
-            pass
+        ttk.Label(hackrf_frame, text="IF Gain:").grid(row=1, column=0, sticky="w")
+        self.if_gain_entry = ttk.Entry(hackrf_frame, width=20)
+        self.if_gain_entry.grid(row=1, column=1, pady=5, padx=10, sticky="ew")
+        self.if_gain_entry.insert(0, str(self.if_gain_var.get()))
 
-# Generate APRS WAV
-async def generate_aprs_wav(aprs_message, output_wav, flags_before=150, flags_after=4):
-    """Generate a WAV file from an APRS message."""
-    if AFSKModulator is None or AX25 is None:
-        print("Warning: AFSKModulator or AX25 is not available. Cannot generate APRS WAV.")
-        return
+        self.apply_hackrf_button = ttk.Button(
+            hackrf_frame, 
+            text="Apply", 
+            command=self.update_hackrf_settings
+            # If using ttkbootstrap, uncomment and adjust bootstyle
+            # bootstyle=PRIMARY
+        )
+        self.apply_hackrf_button.grid(row=2, column=0, columnspan=2, pady=(10,0))
 
-    print(f"Generating APRS WAV for message: {aprs_message}")
-    rate = 22050
-    try:
-        async with AFSKModulator(sampling_rate=rate, verbose=False) as afsk_mod:
-            ax25 = AX25(aprs=aprs_message.encode())
-            afsk, stop_bit = ax25.to_afsk()
-            await afsk_mod.send_flags(flags_before)
-            await afsk_mod.to_samples(afsk=afsk, stop_bit=stop_bit)
-            await afsk_mod.send_flags(flags_after)
-            arr, s = await afsk_mod.flush()
+        # Frequency Settings Frame
+        freq_frame = ttk.Labelframe(
+            self.scrollable_frame, 
+            text="Frequency Settings", 
+            padding=20
+        )
+        freq_frame.grid(row=2, column=2, columnspan=2, sticky="ew", padx=(10,0), pady=(0, 20))
+        freq_frame.columnconfigure(1, weight=1)
 
-            with wave.open(output_wav, 'wb') as wav_out:
-                wav_out.setnchannels(1)
-                wav_out.setsampwidth(2)
-                wav_out.setframerate(rate)
-                for i in range(s):
-                    samp = struct.pack('<h', arr[i])
-                    wav_out.writeframesraw(samp)
-        print(f"WAV file successfully generated: {output_wav}")
-    except Exception as e:
-        print(f"Error generating APRS WAV: {e}")
+        ttk.Label(freq_frame, text="Frequency (MHz):").grid(row=0, column=0, sticky="w")
+        self.frequency_entry = ttk.Entry(freq_frame, width=20)
+        self.frequency_entry.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
+        self.frequency_entry.insert(0, "144.39")
 
-# UDP Listener
-def udp_listener(host, port, message_queue, stop_event):
-    """Listen for APRS messages over UDP and add them to the message queue."""
-    print(f"Starting UDP listener on {host}:{port}")
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            sock.bind((host, port))
-            sock.settimeout(0.5)
-            while not stop_event.is_set():
-                try:
-                    data, addr = sock.recvfrom(1024)
-                    aprs_message = data.decode().strip()
-                    print(f"Received UDP message from {addr}: {aprs_message}")
-                    message_queue.put("VE2FPD>APRS:"+aprs_message)
-                except socket.timeout:
-                    continue
-                except Exception as e:
-                    print(f"Error in UDP listener: {e}")
-    except Exception as e:
-        print(f"UDP listener error: {e}")
+        self.freq_notification = ttk.Label(freq_frame, text="", foreground="red")
+        self.freq_notification.grid(row=1, column=0, columnspan=2, sticky="w")
 
-# Frequency Wrapper
-class Frequency:
-    """A thread-safe wrapper for the frequency variable."""
-    def __init__(self, initial_value):
-        self._value = initial_value
-        self._lock = threading.Lock()
+        self.apply_button = ttk.Button(
+            freq_frame, 
+            text="Apply", 
+            command=self.update_frequency
+            # If using ttkbootstrap, uncomment and adjust bootstyle
+            # bootstyle=PRIMARY
+        )
+        self.apply_button.grid(row=2, column=0, columnspan=2, pady=(10,0))
 
-    def get(self):
-        with self._lock:
-            return self._value
+        # Callsign Settings Frame
+        callsign_frame = ttk.Labelframe(
+            self.scrollable_frame, 
+            text="Callsign Settings", 
+            padding=20
+        )
+        callsign_frame.grid(row=3, column=0, columnspan=4, sticky="ew", padx=0, pady=(0, 20))
+        callsign_frame.columnconfigure(1, weight=1)
 
-    def set(self, value):
-        with self._lock:
-            self._value = value
+        ttk.Label(callsign_frame, text="Callsign:").grid(row=0, column=0, sticky="w")
+        self.callsign_entry = ttk.Entry(callsign_frame, width=25)
+        self.callsign_entry.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
+        self.callsign_entry.insert(0, "VE2FPD")  # Default callsign
 
-class ThreadSafeVariable:
-    """A thread-safe wrapper for any variable."""
-    def __init__(self, initial_value):
-        self._value = initial_value
-        self._lock = threading.Lock()
-    
-    def get(self):
-        with self._lock:
-            return self._value
-    
-    def set(self, value):
-        with self._lock:
-            self._value = value
+        ttk.Label(callsign_frame, text="Preamble length:").grid(row=1, column=0, sticky="w")
+        self.flags_before_entry = ttk.Entry(callsign_frame, width=10)
+        self.flags_before_entry.grid(row=1, column=1, pady=5, padx=10, sticky="ew")
+        self.flags_before_entry.insert(0, str(self.num_flags_before.get()))
 
-# Receiver Classes and Functions
-if gr is not None and osmosdr is not None:
-    class QueueSink(gr.sync_block):
-        """
-        A custom GNU Radio block that puts samples into an asyncio queue.
-        Includes signal detection to process samples only when audio is present.
-        """
-        def __init__(self, samples_q, threshold=500):
-            gr.sync_block.__init__(
-                self,
-                name='QueueSink',
-                in_sig=[np.int16],
-                out_sig=None
-            )
-            self.samples_q = samples_q
-            self.loop = asyncio.get_event_loop()
-            self.set_output_multiple(480)  # Process smaller chunks to reduce latency
-            self.threshold = threshold  # Threshold for detecting audio signal
+        ttk.Label(callsign_frame, text="Postamble length:").grid(row=2, column=0, sticky="w")
+        self.flags_after_entry = ttk.Entry(callsign_frame, width=10)
+        self.flags_after_entry.grid(row=2, column=1, pady=5, padx=10, sticky="ew")
+        self.flags_after_entry.insert(0, str(self.num_flags_after.get()))
 
-        def work(self, input_items, output_items):
-            in0 = input_items[0]
-            # Calculate the mean absolute value of the samples
-            energy = np.mean(np.abs(in0))
-            if energy > self.threshold:
-                # Copy the samples to avoid issues with memory management
-                samples = in0.copy()
-                idx = len(samples)
-                asyncio.run_coroutine_threadsafe(
-                    self.samples_q.put((samples, idx)),
-                    self.loop
+        self.callsign_notification = ttk.Label(callsign_frame, text="", foreground="red")
+        self.callsign_notification.grid(row=3, column=0, columnspan=2, sticky="w")
+
+        # Test Message Button
+        self.test_button = ttk.Button(
+            self.scrollable_frame, 
+            text="Send Test APRS Message", 
+            command=self.queue_test_message
+            # If using ttkbootstrap, uncomment and adjust bootstyle and image
+            # bootstyle=SUCCESS, 
+            # image=self.send_icon if self.send_icon else None,
+            # compound=LEFT
+        )
+        self.test_button.grid(row=4, column=0, columnspan=4, pady=(0, 20), ipadx=10, ipady=5, sticky="ew")
+
+        # Transmission Status Frame
+        status_frame = ttk.Frame(self.scrollable_frame)
+        status_frame.grid(row=5, column=0, columnspan=4, sticky="ew", pady=(0, 10))
+        status_frame.columnconfigure(1, weight=1)
+
+        ttk.Label(status_frame, text="Status:", font=("Helvetica", 12, "bold")).grid(row=0, column=0, sticky="w")
+        self.transmission_label = ttk.Label(
+            status_frame, 
+            text="Idle", 
+            font=("Helvetica", 12), 
+            background="#6c757d", 
+            foreground="white", 
+            padding=5
+        )
+        self.transmission_label.grid(row=0, column=1, sticky="w", padx=10)
+        self.transmission_icon_label = None  # Will be set after icons are loaded
+
+        # Progress Bar
+        self.progress = ttk.Progressbar(self.scrollable_frame, mode='indeterminate')
+        self.progress.grid(row=6, column=0, columnspan=4, sticky="ew", pady=(0, 10))
+        self.progress.stop()
+
+        # Received Messages Frame
+        messages_frame = ttk.Labelframe(
+            self.scrollable_frame, 
+            text="Received Messages", 
+            padding=20
+        )
+        messages_frame.grid(row=7, column=0, columnspan=4, sticky="nsew", pady=(0, 10))
+        messages_frame.columnconfigure(0, weight=1)
+        messages_frame.rowconfigure(0, weight=1)
+
+        self.messages_text = tk.Text(messages_frame, wrap='word', height=10)
+        self.messages_text.grid(row=0, column=0, sticky="nsew")
+
+        # Add a scrollbar to the messages text
+        scrollbar = ttk.Scrollbar(messages_frame, orient='vertical', command=self.messages_text.yview)
+        scrollbar.grid(row=0, column=1, sticky='ns')
+        self.messages_text['yscrollcommand'] = scrollbar.set
+
+        # Status Bar
+        status_bar = ttk.Label(
+            self.scrollable_frame, 
+            textvariable=self.status_var, 
+            relief=SUNKEN, 
+            anchor='w'
+        )
+        status_bar.grid(row=8, column=0, columnspan=4, sticky="ew")
+
+        # Receiver Status Bar
+        receiver_status_bar = ttk.Label(
+            self.scrollable_frame, 
+            textvariable=self.receiver_status_var, 
+            relief=SUNKEN, 
+            anchor='w'
+        )
+        receiver_status_bar.grid(row=9, column=0, columnspan=4, sticky="ew")
+
+        # Configure grid weights for resizing
+        self.scrollable_frame.grid_rowconfigure(7, weight=1)
+        self.scrollable_frame.grid_columnconfigure(3, weight=1)
+
+    def populate_device_combobox(self):
+        devices = list_hackrf_devices()
+        if not devices:
+            self.device_combobox['values'] = ["No HackRF devices found"]
+            self.device_combobox.current(0)
+            self.device_combobox.config(state="disabled")
+            self.status_var.set("No HackRF devices detected. Please connect a device.")
+        else:
+            device_list = [f"HackRF {dev['index']}" for dev in devices]
+            self.device_combobox['values'] = device_list
+            self.device_combobox.current(0)
+            self.device_combobox.bind("<<ComboboxSelected>>", self.on_device_selected)
+            # Set the initial device index
+            self.device_index_var.set(devices[0]['index'])
+            self.status_var.set(f"Detected {len(devices)} HackRF device(s).")
+
+    def on_device_selected(self, event):
+        selection = self.device_combobox.current()
+        devices = list_hackrf_devices()
+        if devices:
+            if selection < len(devices):
+                selected_device = devices[selection]
+                self.device_index_var.set(selected_device['index'])
+                self.status_var.set(f"Selected HackRF Device {selected_device['index']} - Serial: {selected_device['serial']}")
+                print(f"Selected HackRF Device {selected_device['index']} - Serial: {selected_device['serial']}")
+                self.receiver_stop_event.set()  # Signal to stop
+                self.receiver_thread.join()  # Wait for thread to finish
+                time.sleep(1)
+
+                # Restart the receiver with the new device index
+                self.receiver_stop_event.clear()  # Reset the stop event
+                self.receiver_thread = start_receiver_thread(
+                    self.receiver_stop_event,
+                    self.received_message_queue,
+                    self.device_index_var.get()  # Use updated device index
                 )
-            return len(in0)
+                self.receiver_status_var.set("Receiver Running")
+                self.status_var.set(f"Receiver restarted for device {selected_device['index']}.")
+                print(f"Receiver restarted for device {selected_device['index']}.")
+            else:
+                self.status_var.set("Selected device index out of range.")
+                print("Selected device index out of range.")
+        else:
+            self.device_index_var.set(0)
+            self.status_var.set("No HackRF devices detected.")
 
-    class AFSKReceiver(gr.top_block):
-        def __init__(self, samples_q, center_freq=143.890e6, offset_freq=500e3,
-                     sample_rate=960000, audio_rate=48000,
-                     rf_gain=0, if_gain=40, bb_gain=14,
-                     demod_gain=5.0, squelch_threshold=-40, device_index=0):
-            super(AFSKReceiver, self).__init__()
+    def update_hackrf_settings(self):
+        try:
+            gain = float(self.gain_entry.get())
+            if_gain = float(self.if_gain_entry.get())
+            # Optional: Validate gain values (e.g., within acceptable ranges)
+            self.gain_var.set(gain)
+            self.if_gain_var.set(if_gain)
+            self.status_var.set(f"HackRF settings updated: Gain={gain}, IF Gain={if_gain}")
+            print(f"HackRF settings updated: Gain={gain}, IF Gain={if_gain}")
+        except ValueError as ve:
+            self.status_var.set(f"Invalid gain values: {ve}")
+            print(f"Invalid gain values: {ve}")
 
-            ##################################################
-            # Variables
-            ##################################################
-            self.samp_rate = samp_rate = sample_rate
-            self.audio_rate = audio_rate
+    def update_frequency(self):
+        try:
+            frequency_mhz = float(self.frequency_entry.get())
+            if not (0 < frequency_mhz < 3000):
+                raise ValueError("Frequency out of valid range.")
+            self.frequency_var.set(frequency_mhz * 1e6)
+            self.freq_notification.config(text="Frequency updated successfully.", foreground="green")
+            self.status_var.set(f"Frequency set to {frequency_mhz} MHz.")
+            print(f"Frequency updated to {frequency_mhz} MHz")
+        except ValueError as ve:
+            self.freq_notification.config(text=f"Error: {ve}")
+            self.status_var.set("Failed to update frequency.")
+            print("Invalid frequency input.")
 
-            ##################################################
-            # Blocks
-            ##################################################
+    def queue_test_message(self):
+        callsign = self.callsign_entry.get().strip()
+        if not self.validate_callsign(callsign):
+            self.callsign_notification.config(text="Callsign must be 3-6 alphanumeric characters.", foreground="red")
+            self.status_var.set("Invalid callsign input.")
+            print("Invalid callsign input.")
+            return
 
-            self.osmosdr_source_0 = osmosdr.source(
-                args=f"numchan={1} hackrf={device_index}"
-            )
-            self.osmosdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
-            self.osmosdr_source_0.set_sample_rate(samp_rate)
-            self.osmosdr_source_0.set_center_freq(center_freq, 0)
-            self.osmosdr_source_0.set_freq_corr(0, 0)
-            self.osmosdr_source_0.set_dc_offset_mode(0, 0)
-            self.osmosdr_source_0.set_iq_balance_mode(0, 0)
-            self.osmosdr_source_0.set_gain_mode(False, 0)
-            self.osmosdr_source_0.set_gain(rf_gain, 0)
-            self.osmosdr_source_0.set_if_gain(if_gain, 0)
-            self.osmosdr_source_0.set_bb_gain(bb_gain, 0)
-            self.osmosdr_source_0.set_antenna("TX/RX", 0)
-            self.osmosdr_source_0.set_bandwidth(0, 0)
-            
-            # Adjusted number of taps to reduce buffer requirements
-            num_taps = 100  # Reduced from original to decrease buffer size
-            self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(
-                1,
-                firdes.low_pass(1.0, samp_rate, 10e3, 5e3, num_taps),
-                offset_freq,
-                samp_rate
-            )
-            self.fir_filter_xxx_0 = filter.fir_filter_fff(
-                int(samp_rate / audio_rate),
-                firdes.low_pass(1.0, samp_rate, 3.5e3, 500, num_taps)  # Reduced taps
-            )
-            self.fir_filter_xxx_0.declare_sample_delay(0)
-            self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(demod_gain)
-            self.blocks_float_to_short_0 = blocks.float_to_short(1, 32767)
-            self.audio_sink_1 = audio.sink(int(audio_rate), '', True)
-            self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(squelch_threshold, 1)
-            self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(1)
+        # Get number of flags before and after
+        try:
+            flags_before = int(self.flags_before_entry.get())
+            flags_after = int(self.flags_after_entry.get())
+            if flags_before < 0 or flags_after < 0:
+                raise ValueError("Flags must be non-negative integers.")
+        except ValueError as ve:
+            self.callsign_notification.config(text=f"Error: {ve}", foreground="red")
+            self.status_var.set("Invalid flags input.")
+            print("Invalid flags input.")
+            return
 
-            # Use the custom QueueSink block
-            self.queue_sink_0 = QueueSink(samples_q)
+        # Get selected device index
+        device_index = self.device_index_var.get()
 
-            ##################################################
-            # Connections
-            ##################################################
-            self.connect((self.osmosdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
-            self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.analog_simple_squelch_cc_0, 0))
-            self.connect((self.analog_simple_squelch_cc_0, 0), (self.analog_quadrature_demod_cf_0, 0))
-            self.connect((self.analog_quadrature_demod_cf_0, 0), (self.fir_filter_xxx_0, 0))
-            self.connect((self.fir_filter_xxx_0, 0), (self.blocks_multiply_const_vxx_0, 0))
-            self.connect((self.blocks_multiply_const_vxx_0, 0), (self.audio_sink_1, 0))
-            self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_float_to_short_0, 0))
-            self.connect((self.blocks_float_to_short_0, 0), (self.queue_sink_0, 0))
+        # Construct the APRS message with the provided callsign
+        aprs_message = f"{callsign}>APRS:TEST 123!"
+        self.message_queue.put((aprs_message, flags_before, flags_after, device_index))
 
-            # Adjusted set_max_noutput_items to align with block requirements
-            self.set_max_noutput_items(1024)  # Increased from 480 to 1024
+        self.callsign_notification.config(text="Test message queued.", foreground="green")
+        self.status_var.set(f"Test message queued with callsign: {aprs_message}")
+        print(f"Test message queued with callsign: {aprs_message} and flags_before: {flags_before}, flags_after: {flags_after}, device_index: {device_index}")
 
-            # Adjust buffer sizes based on block requirements
-            block_min_buffers = {
-                'hackrf_source_c0': 512,
-                'fix_cc0': 512,
-                'freq_xlating_fir_filter_ccc0': 512,
-                'fir_filter_fff0': 1024,
-                'multiply_const_ff0': 1024,
-                'float_to_short0': 2048,
-            }
+    def validate_callsign(self, callsign):
+        # Simple validation: length and alphanumeric
+        return 3 <= len(callsign) <= 6 and callsign.isalnum()
 
-            for blk in [self.osmosdr_source_0, self.freq_xlating_fir_filter_xxx_0,
-                       self.fir_filter_xxx_0, self.blocks_multiply_const_vxx_0,
-                       self.blocks_float_to_short_0]:
-                blk_name = blk.name()
-                min_buffer = block_min_buffers.get(blk_name, 480)
-                try:
-                    blk.set_max_output_buffer(max(480, min_buffer))
-                    print(f"Set max_output_buffer for {blk_name} to {max(480, min_buffer)}")
-                except AttributeError:
-                    # Some blocks might not have set_max_output_buffer method
-                    print(f"Block {blk_name} does not support set_max_output_buffer.")
+    def check_transmission_status(self):
+        if self.transmitting_var.is_set():
+            self.transmission_label.config(text="Transmitting", background="#28a745")
+            if self.transmitting_icon:
+                if not self.transmission_icon_label:
+                    self.transmission_icon_label = ttk.Label(
+                        self.scrollable_frame, 
+                        image=self.transmitting_icon
+                    )
+                    self.transmission_icon_label.grid(row=5, column=4, sticky="w", padx=(10,0))
+                else:
+                    self.transmission_icon_label.config(image=self.transmitting_icon)
+            self.progress.start(10)
+            self.status_var.set("Transmitting...")
+        else:
+            self.transmission_label.config(text="Idle", background="#6c757d")
+            if self.idle_icon:
+                if not self.transmission_icon_label:
+                    self.transmission_icon_label = ttk.Label(
+                        self.scrollable_frame, 
+                        image=self.idle_icon
+                    )
+                    self.transmission_icon_label.grid(row=5, column=4, sticky="w", padx=(10,0))
+                else:
+                    self.transmission_icon_label.config(image=self.idle_icon)
+            self.progress.stop()
+            self.status_var.set("Idle.")
+        self.after(500, self.check_transmission_status)
 
-            print(f"AFSK Receiver is configured and running.")
-
-        def stop_and_wait(self):
-            """Gracefully stop the flowgraph."""
-            try:
-                self.disconnect(self.analog_quadrature_demod_cf_0, self.fir_filter_xxx_0)
-                self.disconnect(self.fir_filter_xxx_0, self.blocks_multiply_const_vxx_0)
-                self.disconnect(self.blocks_multiply_const_vxx_0, self.audio_sink_1)
-                self.disconnect(self.blocks_multiply_const_vxx_0, self.blocks_float_to_short_0)
-                self.disconnect(self.blocks_float_to_short_0, self.queue_sink_0)
-                self.disconnect(self.osmosdr_source_0, self.freq_xlating_fir_filter_xxx_0)
-                self.disconnect(self.freq_xlating_fir_filter_xxx_0, self.analog_simple_squelch_cc_0)
-                self.disconnect(self.analog_simple_squelch_cc_0, self.analog_quadrature_demod_cf_0)
-                self.osmosdr_source_0
-            except Exception as e:
-                print(f"Error during disconnect: {e}")
-            self.stop()
-            self.wait()
-
-    async def consume_ax25(ax25_q, received_message_queue):
+    def check_received_messages(self):
         try:
             while True:
-                ax25 = await ax25_q.get()
-                ax25_q.task_done()
-                if ax25 is None:
-                    break
-                received_message_queue.put(str(ax25))
-                await asyncio.sleep(0)
-        except asyncio.CancelledError:
+                message = self.received_message_queue.get_nowait()
+                self.messages_text.insert('end', message + '\n')
+                self.messages_text.see('end')  # Scroll to the end
+        except queue.Empty:
             pass
-        except Exception as err:
-            print(f"Error in consume_ax25: {err}")
+        self.after(500, self.check_received_messages)
 
-    async def demod_core(samples_q, bits_q, ax25_q):
+def start_receiver_thread(receiver_stop_event, received_message_queue, device_index):
+    receiver_thread = threading.Thread(
+        target=start_receiver, 
+        args=(receiver_stop_event, received_message_queue, device_index),
+        daemon=True
+    )
+    receiver_thread.start()
+    return receiver_thread
+
+def stop_receiver(stop_event, receiver_thread):
+    stop_event.set()
+    receiver_thread.join()
+
+def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_var, if_gain_var, 
+              receiver_stop_event, receiver_thread, received_message_queue, gui_app):
+    while not stop_event.is_set():
         try:
-            if AFSKDemodulator is None or AX25FromAFSK is None:
-                print("Warning: AFSKDemodulator or AX25FromAFSK is not available.")
-                return
-            async with AFSKDemodulator(
-                sampling_rate=48000,
-                samples_in_q=samples_q,
-                bits_out_q=bits_q,
-                verbose=False,
-            ) as afsk_demod:
-                async with AX25FromAFSK(
-                    bits_in_q=bits_q,
-                    ax25_q=ax25_q,
-                    verbose=False
-                ) as bits2ax25:
-                    # Keep the coroutine alive indefinitely
-                    while True:
-                        await asyncio.sleep(1)
-        except asyncio.CancelledError:
-            pass
-        except Exception as err:
-            print(f"Error in demod_core: {err}")
+            message = message_queue.get_nowait()
+            print(f"Processing message: {message}")
 
-    def start_receiver(stop_event, received_message_queue, device_index=0):
-        """Start the AFSK Receiver in a separate thread."""
-        if gr is None or osmosdr is None:
-            print("GNU Radio or osmosdr is not available. Cannot start receiver.")
-            return None
-
-        import asyncio
-
-        def run_receiver():
-            # This function will run in a separate thread
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-            samples_q = asyncio.Queue()
-            bits_q = asyncio.Queue()
-            ax25_q = asyncio.Queue()
-
-            # Initialize the AFSK Receiver with the provided frequency and gains
-            try:
-                tb = AFSKReceiver(
-                    samples_q=samples_q,
-                    center_freq=143.89e6,
-                    offset_freq=500e3,  # Example offset; adjust as needed
-                    sample_rate=960000,
-                    audio_rate=48000,
-                    rf_gain=0,
-                    if_gain=40,
-                    bb_gain=14,
-                    demod_gain=5.0,
-                    squelch_threshold=-40,
-                    device_index=device_index
-                ) 
-            except:
-                raise Exception(f"erreur")
+            if isinstance(message, tuple) and len(message) == 4:
+                aprs_message, flags_before, flags_after, device_index = message
             else:
-                tb.start()
+                # For messages received via UDP listener without flags
+                aprs_message = message
+                flags_before = 10  # Default number of flags before
+                flags_after = 4    # Default number of flags after
+                device_index = 0   # Default device index
 
-            # Create asyncio tasks
-            tasks = []
-            tasks.append(loop.create_task(consume_ax25(ax25_q=ax25_q, received_message_queue=received_message_queue)))
-            tasks.append(loop.create_task(demod_core(samples_q, bits_q, ax25_q)))
+            print(f"Processing message: {aprs_message}, flags_before: {flags_before}, flags_after: {flags_after}, device_index: {device_index}")
+            
+            # Stop the receiver before transmission
+            print("Stopping receiver before transmission...")
+            receiver_stop_event.set()  # Signal the AFSK Receiver to stop
+            receiver_thread.join()      # Wait for the AFSK Receiver to stop
+            time.sleep(1)
+            print("Receiver stopped.")
+            gui_app.receiver_status_var.set("Receiver Stopped")
 
+            # Generate WAV file
+            raw_wav = "raw_output.wav"
+            processed_wav = "processed_output.wav"
+            silence_before = 0
+            silence_after = 0
             try:
-                while not stop_event.is_set():
-                    loop.run_until_complete(asyncio.sleep(1))
+                asyncio.run(generate_aprs_wav(aprs_message, raw_wav, flags_before, flags_after))
+                print(f"Generated WAV: {raw_wav}")
+                add_silence(raw_wav, processed_wav, silence_before, silence_after)
+                print(f"Processed WAV: {processed_wav}")
             except Exception as e:
-                print(f"Receiver encountered an exception: {e}")
-            finally:
-                for task in tasks:
-                    task.cancel()
-                loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
-                tb.stop_and_wait()
-                loop.stop()
-                loop.close()
-                print("Receiver thread has been stopped.") 
+                print(f"Error in generating WAV or processing: {e}")
+                continue
 
-        # Start the receiver in a separate thread
-        receiver_thread = threading.Thread(target=run_receiver, daemon=True)
-        receiver_thread.start()
-        print("Receiver thread started.")
-        return receiver_thread
+            gain = gain_var.get()
+            if_gain = if_gain_var.get()
 
-else:
-    print("GNU Radio or osmosdr is not available. Receiver functionality is disabled.")
+            # Reset and Initialize HackRF
+            reset_hackrf()
+            tb = ResampleAndSend(processed_wav, 2205000, device_index=device_index)
+            if tb.initialize_hackrf(gain, if_gain):
+                current_frequency = frequency_var.get()
+                tb.set_center_freq(current_frequency)
+                print(f"Frequency set to {current_frequency / 1e6} MHz. Starting transmission...")
+                transmitting_var.set()
+                tb.start()
+                try:
+                    time.sleep(2)  # Transmit for 2 seconds
+                finally:
+                    tb.stop_and_wait()
+                    transmitting_var.clear()
+                    print("Transmission completed.")
+            else:
+                print("HackRF initialization failed.")
 
-# Expose start_receiver function and other necessary components
-__all__ = ['ResampleAndSend', 'generate_aprs_wav', 'udp_listener', 'Frequency', 'ThreadSafeVariable', 'start_receiver']
+            # Restart the receiver after transmission
+            print("Restarting receiver after transmission...")
+            receiver_stop_event.clear()
+            receiver_thread = start_receiver_thread(
+                receiver_stop_event, 
+                received_message_queue, 
+                device_index=device_index
+            )
+            gui_app.receiver_status_var.set("Receiver Running")
+            print("Receiver restarted.")
+
+        except queue.Empty:
+            time.sleep(0.1)  # Prevent tight loop when queue is empty
+        except Exception as e:
+            print(f"Unexpected error in main_loop: {e}")
+
+def on_closing(app, stop_event, receiver_stop_event, receiver_thread, udp_thread):
+    stop_event.set()
+    receiver_stop_event.set()
+    stop_receiver(receiver_stop_event, receiver_thread)
+    udp_thread.join()
+    app.master.destroy()
+
+def handle_signal(signum, frame):
+    # Handle termination signals to ensure graceful shutdown
+    print(f"Received signal {signum}, shutting down gracefully.")
+    sys.exit(0)
+
+if __name__ == "__main__":
+    # Handle termination signals for graceful shutdown
+    signal.signal(signal.SIGINT, handle_signal)   # Handle Ctrl+C
+    signal.signal(signal.SIGTERM, handle_signal)  # Handle termination signals
+
+    try:
+        style = Style(theme='cosmo')  # Choose a modern theme like 'cosmo', 'flatly', 'journal', etc.
+
+        stop_event = threading.Event()
+        transmitting_var = threading.Event()
+        message_queue = queue.SimpleQueue()
+
+        frequency_var = Frequency(144.39e6)  # Default frequency in Hz
+        gain_var = ThreadSafeVariable(14)     # Default gain
+        if_gain_var = ThreadSafeVariable(47)  # Default IF gain
+
+        # Create stop event and received message queue for receiver
+        receiver_stop_event = threading.Event()
+        received_message_queue = queue.Queue()
+
+        # Device index variable
+        device_index_var = ThreadSafeVariable(0)  # Default device index
+
+        # Start the AFSK Receiver with default device index
+        receiver_thread = start_receiver_thread(
+            receiver_stop_event, 
+            received_message_queue, 
+            device_index=device_index_var.get()
+        )
+
+        # Start the UDP Listener
+        udp_thread = threading.Thread(
+            target=udp_listener, 
+            args=("127.0.0.1", 14580, message_queue, stop_event), 
+            daemon=True
+        )
+        udp_thread.start()
+
+        root = style.master
+        root.title("APRS Transmission Control")
+        root.geometry("600x800")  # Increased width for better layout
+        root.resizable(True, True)
+
+        app = Application(
+            root, 
+            frequency_var, 
+            transmitting_var, 
+            message_queue, 
+            stop_event, 
+            gain_var, 
+            if_gain_var,
+            receiver_stop_event,
+            receiver_thread,
+            received_message_queue,
+            device_index_var
+        )
+
+        # Start the main loop in a separate thread
+        gui_thread = threading.Thread(
+            target=main_loop, 
+            args=(
+                frequency_var, 
+                transmitting_var, 
+                message_queue, 
+                stop_event, 
+                gain_var, 
+                if_gain_var, 
+                receiver_stop_event, 
+                receiver_thread, 
+                received_message_queue,
+                app  # Pass the GUI application instance for status updates
+            ), 
+            daemon=True
+        )
+        gui_thread.start()
+
+        root.protocol("WM_DELETE_WINDOW", lambda: on_closing(app, stop_event, receiver_stop_event, receiver_thread, udp_thread))
+        app.mainloop()
+
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt received. Exiting gracefully.")
+        stop_event.set()
+        receiver_thread.stop_and_wait()
+        sys.exit(0)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        stop_event.set()
+        receiver_thread.stop_and_wait()
+        sys.exit(1)
+    finally:
+        print("Application has been closed.")

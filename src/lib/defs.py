@@ -1,0 +1,2 @@
+
+SAMPLES_SIZE = 22050

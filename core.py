@@ -126,6 +126,7 @@ if gr is not None:
             self.output_rate = output_rate
             self.device_index = device_index
 
+
             self.connect(self.file_source, self.resampler)
             self.connect(self.resampler, self.amplitude_scaling)
             self.connect(self.amplitude_scaling, self.float_to_complex)
@@ -189,7 +190,7 @@ else:
             pass
 
 # Generate APRS WAV
-async def generate_aprs_wav(aprs_message, output_wav, flags_before=10, flags_after=4):
+async def generate_aprs_wav(aprs_message, output_wav, flags_before=150, flags_after=4):
     """Generate a WAV file from an APRS message."""
     if AFSKModulator is None or AX25 is None:
         print("Warning: AFSKModulator or AX25 is not available. Cannot generate APRS WAV.")
@@ -230,7 +231,7 @@ def udp_listener(host, port, message_queue, stop_event):
                     data, addr = sock.recvfrom(1024)
                     aprs_message = data.decode().strip()
                     print(f"Received UDP message from {addr}: {aprs_message}")
-                    message_queue.put(aprs_message)
+                    message_queue.put("VE2FPD>APRS:"+aprs_message)
                 except socket.timeout:
                     continue
                 except Exception as e:
@@ -448,20 +449,24 @@ if gr is not None and osmosdr is not None:
             ax25_q = asyncio.Queue()
 
             # Initialize the AFSK Receiver with the provided frequency and gains
-            tb = AFSKReceiver(
-                samples_q=samples_q,
-                center_freq=143.89e6,
-                offset_freq=500e3,  # Example offset; adjust as needed
-                sample_rate=960000,
-                audio_rate=48000,
-                rf_gain=0,
-                if_gain=40,
-                bb_gain=14,
-                demod_gain=5.0,
-                squelch_threshold=-40,
-                device_index=device_index
-            )
-            tb.start()
+            try:
+                tb = AFSKReceiver(
+                    samples_q=samples_q,
+                    center_freq=143.89e6,
+                    offset_freq=500e3,  # Example offset; adjust as needed
+                    sample_rate=960000,
+                    audio_rate=48000,
+                    rf_gain=0,
+                    if_gain=40,
+                    bb_gain=14,
+                    demod_gain=5.0,
+                    squelch_threshold=-40,
+                    device_index=device_index
+                ) 
+            except:
+                raise Exception(f"erreur")
+            else:
+                tb.start()
 
             # Create asyncio tasks
             tasks = []

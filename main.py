@@ -50,7 +50,7 @@ class Application(ttk.Frame):
         self.frequency_var = frequency_var
         self.transmitting_var = transmitting_var
         self.message_queue = message_queue
-        self.num_flags_before = tk.IntVar(value=10)  # Default value
+        self.num_flags_before = tk.IntVar(value=100)  # Default value
         self.num_flags_after = tk.IntVar(value=4)    # Default value
         self.stop_event = stop_event
         self.received_message_queue = received_message_queue
@@ -466,7 +466,7 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
             else:
                 # For messages received via UDP listener without flags
                 aprs_message = message
-                flags_before = 10  # Default number of flags before
+                flags_before = 100  # Default number of flags before
                 flags_after = 4    # Default number of flags after
                 device_index = 0   # Default device index
 
@@ -483,8 +483,8 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
             # Generate WAV file
             raw_wav = "raw_output.wav"
             processed_wav = "processed_output.wav"
-            silence_before = 0
-            silence_after = 0
+            silence_before = 2
+            silence_after = 2
             try:
                 asyncio.run(generate_aprs_wav(aprs_message, raw_wav, flags_before, flags_after))
                 print(f"Generated WAV: {raw_wav}")
@@ -567,11 +567,15 @@ if __name__ == "__main__":
         device_index_var = ThreadSafeVariable(0)  # Default device index
 
         # Start the AFSK Receiver with default device index
-        receiver_thread = start_receiver_thread(
-            receiver_stop_event, 
-            received_message_queue, 
-            device_index=device_index_var.get()
-        )
+        try:
+            receiver_thread = start_receiver_thread(
+                receiver_stop_event, 
+                received_message_queue, 
+                device_index=device_index_var.get()
+            )
+        except:
+            self.device_index_var.set("1")
+            print("erreur")
 
         # Start the UDP Listener
         udp_thread = threading.Thread(

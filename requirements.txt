@@ -1,4 +1,2 @@
 numpy
-gnuradio
-osmosdr
 ttkbootstrap

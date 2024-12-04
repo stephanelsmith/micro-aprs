@@ -35,7 +35,7 @@ Follow these steps to set up the `hackrf-aprsc` project on your system.
 Begin by cloning the `hackrf-aprsc` repository from GitHub and navigating into the project directory:
 
 ```bash
-git clone https://github.com/fpoisson2/hackrf-aprsc.git
+git clone https://github.com/fpoisson2/hackrf-aprs.git
 cd hackrf-aprsc
 ```
 

@@ -39,10 +39,14 @@ Make sure you have the following installed on your system:
    cd hackrf-aprsc
    ```
 
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+   2. Install GNU Radio
+   3. Install osmosdr
+   4. python3 -m venv .venv --system-site-packages
+   5. source .venv/bin/activate
+   6. pip install ttkbootstrap
+   7. pip install numpy
+
+
 
 ---
 

@@ -137,12 +137,13 @@ if gr is not None:
                     1,
                     6.76))
 
-            self.connect((self.analog_noise_source_x_0, 0), (self.high_pass_filter_0, 0))
-            self.connect((self.blocks_add_xx_0, 0), self.resampler)
+            #self.connect((self.analog_noise_source_x_0, 0), (self.high_pass_filter_0, 0))
+            #self.connect((self.blocks_add_xx_0, 0), self.resampler)
             self.connect(self.resampler, self.amplitude_scaling)
             self.connect(self.amplitude_scaling, self.float_to_complex)
-            self.connect(self.file_source, (self.blocks_add_xx_0, 0))
-            self.connect((self.high_pass_filter_0, 0), (self.blocks_add_xx_0, 1))
+            #self.connect(self.file_source, (self.blocks_add_xx_0, 0))
+            self.connect(self.file_source, self.resampler)
+            #self.connect((self.high_pass_filter_0, 0), (self.blocks_add_xx_0, 1))
 
         def initialize_hackrf(self, gain, if_gain):
             """Initialize HackRF sink."""
@@ -151,7 +152,7 @@ if gr is not None:
                 self.sink = osmosdr.sink(args=f"hackrf={self.device_index}")
                 self.sink.set_sample_rate(self.output_rate)
                 # Center frequency will be set externally after initialization
-                self.sink.set_center_freq(144.39e6, 0)  # Default; can be changed later
+                self.sink.set_center_freq(28.12e6, 0)  # Default; can be changed later
                 self.sink.set_gain(gain, 0)
                 self.sink.set_if_gain(if_gain, 0)
                 self.sink.set_bb_gain(20, 0)
@@ -172,7 +173,7 @@ if gr is not None:
         def stop_and_wait(self):
             """Gracefully stop the flowgraph and release resources."""
             try:
-                # Disconnect blocks if the sink is initialized
+                # Disconnect blocks in the reverse order of connections
                 if self.sink:
                     print("Disconnecting HackRF sink...")
                     self.disconnect(self.float_to_complex, self.sink)
@@ -283,6 +284,9 @@ class ThreadSafeVariable:
 
 # Receiver Classes and Functions
 if gr is not None and osmosdr is not None:
+    import logging
+    import asyncio
+
     class QueueSink(gr.sync_block):
         """
         A custom GNU Radio block that puts samples into an asyncio queue.
@@ -296,7 +300,11 @@ if gr is not None and osmosdr is not None:
                 out_sig=None
             )
             self.samples_q = samples_q
-            self.loop = asyncio.get_event_loop()
+            try:
+                self.loop = asyncio.get_event_loop()
+            except RuntimeError:
+                self.loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(self.loop)
             self.set_output_multiple(480)  # Process smaller chunks to reduce latency
             self.threshold = threshold  # Threshold for detecting audio signal
 
@@ -315,80 +323,180 @@ if gr is not None and osmosdr is not None:
             return len(in0)
 
     class AFSKReceiver(gr.top_block):
-        def __init__(self, samples_q, center_freq=143.890e6, offset_freq=500e3,
-                     sample_rate=960000, audio_rate=48000,
-                     rf_gain=0, if_gain=40, bb_gain=14,
-                     demod_gain=5.0, squelch_threshold=-40,
-                     device_index=0):
+        def __init__(self, samples_q, device_index=0):
             super(AFSKReceiver, self).__init__()
-
             ##################################################
             # Variables
             ##################################################
-            self.samp_rate = samp_rate = sample_rate
-            self.audio_rate = audio_rate
+            self.freq = 28.12e6           # Frequency in Hz
+            self.vol = 8                  # Volume multiplier
+            self.sql = 52                 # Squelch threshold
+            self.samp_rate = 48e3 * 100   # Sample rate (4.8e6 Hz)
+            self.nbfm_bandwidth = 12e3    # Narrowband FM bandwidth
+            self.ifg = 32                 # IF Gain
+            self.center_freq = self.freq + 500e3  # Center frequency (28.62e6 Hz)
+            self.bbg = 32                 # BB Gain
 
             ##################################################
             # Blocks
             ##################################################
 
-            self.osmosdr_source_0 = osmosdr.source(
+            # SDR Source Block
+            self.osmosdr_source = osmosdr.source(
                 args=f"numchan={1} hackrf={device_index}"
             )
-            self.osmosdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
-            self.osmosdr_source_0.set_sample_rate(samp_rate)
-            self.osmosdr_source_0.set_center_freq(center_freq, 0)
-            self.osmosdr_source_0.set_freq_corr(0, 0)
-            self.osmosdr_source_0.set_dc_offset_mode(0, 0)
-            self.osmosdr_source_0.set_iq_balance_mode(0, 0)
-            self.osmosdr_source_0.set_gain_mode(False, 0)
-            self.osmosdr_source_0.set_gain(rf_gain, 0)
-            self.osmosdr_source_0.set_if_gain(if_gain, 0)
-            self.osmosdr_source_0.set_bb_gain(bb_gain, 0)
-            self.osmosdr_source_0.set_antenna("TX/RX", 0)
-            self.osmosdr_source_0.set_bandwidth(0, 0)
-            self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(
-                1,
-                firdes.low_pass(1.0, samp_rate, 5e3, 5e3, 6),
-                offset_freq,
-                samp_rate
-            )
-            self.fir_filter_xxx_0 = filter.fir_filter_fff(
-                int(samp_rate / audio_rate),
-                firdes.low_pass(1.0, samp_rate, 2.5e3, 500, 6)
-            )
-            self.fir_filter_xxx_0.declare_sample_delay(0)
-            self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(2)
-            self.blocks_float_to_short_0 = blocks.float_to_short(1, 32767)
-            self.audio_sink_1 = audio.sink(int(audio_rate), '', True)
-            self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(squelch_threshold, 1)
-            self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(demod_gain)
+            self.osmosdr_source.set_time_unknown_pps(osmosdr.time_spec_t())
+            self.osmosdr_source.set_sample_rate(self.samp_rate)
+            self.osmosdr_source.set_center_freq(self.center_freq, 0)
+            self.osmosdr_source.set_freq_corr(0, 0)
+            self.osmosdr_source.set_dc_offset_mode(0, 0)
+            self.osmosdr_source.set_iq_balance_mode(0, 0)
+            self.osmosdr_source.set_gain_mode(False, 0)
+            self.osmosdr_source.set_gain(0, 0)
+            self.osmosdr_source.set_if_gain(self.ifg, 0)
+            self.osmosdr_source.set_bb_gain(self.bbg, 0)
+            self.osmosdr_source.set_antenna('', 0)
+            self.osmosdr_source.set_bandwidth(0, 0)
 
-            # Use the custom QueueSink block
+            # Low Pass Filter
+            self.low_pass_filter = filter.fir_filter_ccf(
+                int(self.samp_rate / self.nbfm_bandwidth),
+                firdes.low_pass(
+                    1,
+                    self.samp_rate,
+                    self.nbfm_bandwidth,
+                    1e3,
+                    0,
+                    6.76
+                )
+            )
+
+            # Rational Resampler
+            self.rational_resampler = filter.rational_resampler_ccc(
+                interpolation=4,
+                decimation=1,
+                taps=[],
+                fractional_bw=0
+            )
+
+            # Narrowband FM Receiver
+            self.nbfm_rx = analog.nbfm_rx(
+                audio_rate=48000,
+                quad_rate=48000,
+                tau=75e-6,
+                max_dev=5e3,
+            )
+
+            # Power Squelch
+            self.pwr_squelch = analog.pwr_squelch_cc(self.sql, 75e-6, 10, True)
+
+            # Automatic Gain Control
+            self.agc = analog.agc3_cc(1e-3, 100e-6, 1.0, 1, 1, 65536)
+
+            # Signal Source for Multiplication
+            self.sig_source = analog.sig_source_c(
+                self.samp_rate,
+                analog.GR_COS_WAVE,
+                (self.center_freq - self.freq),
+                1,
+                0,
+                0
+            )
+
+            # Multiply Blocks
+            self.multiply = blocks.multiply_vcc(1)
+            self.multiply_const = blocks.multiply_const_ff(0.05)
+            self.multiply_vol = blocks.multiply_const_ff(self.vol)
+
+            # Moving Average for Squelch
+            self.moving_average = blocks.moving_average_cc(1000, 30, 1000, 1)
+
+            # Audio Sink
+            self.audio_sink = audio.sink(48000, '', True)
+
+            self.blocks_float_to_short_0 = blocks.float_to_short(1, 32767)
+
             self.queue_sink_0 = QueueSink(samples_q)
 
             ##################################################
             # Connections
             ##################################################
-            self.connect((self.osmosdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
-            self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.analog_simple_squelch_cc_0, 0))
-            self.connect((self.analog_simple_squelch_cc_0, 0), (self.analog_quadrature_demod_cf_0, 0))
-            self.connect((self.analog_quadrature_demod_cf_0, 0), (self.fir_filter_xxx_0, 0))
-            self.connect((self.fir_filter_xxx_0, 0), (self.blocks_multiply_const_vxx_0, 0))
-            self.connect((self.blocks_multiply_const_vxx_0, 0), (self.audio_sink_1, 0))
-            self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_float_to_short_0, 0))
+            self.connect((self.agc, 0), (self.low_pass_filter, 0))
+            self.connect((self.nbfm_rx, 0), (self.multiply_const, 0))
+            self.connect((self.pwr_squelch, 0), (self.agc, 0))
+            self.connect((self.sig_source, 0), (self.multiply, 1))
+            self.connect((self.moving_average, 0), (self.pwr_squelch, 0))
+            self.connect((self.multiply_const, 0), (self.multiply_vol, 0))
+            self.connect((self.multiply_vol, 0), (self.audio_sink, 0))
+            self.connect((self.multiply, 0), (self.moving_average, 0))
+            self.connect((self.low_pass_filter, 0), (self.rational_resampler, 0))
+            self.connect((self.osmosdr_source, 0), (self.multiply, 0))
+            self.connect((self.rational_resampler, 0), (self.nbfm_rx, 0))
             self.connect((self.blocks_float_to_short_0, 0), (self.queue_sink_0, 0))
+            self.connect((self.multiply_vol, 0), (self.blocks_float_to_short_0, 0))
 
-            # Reduce max_noutput_items to reduce latency
-            self.set_max_noutput_items(480)  # Corresponds to 10ms at 48kHz
+            # samp_rate = 4800000
+            # audio_rate = 48000
+            # rx_freq = 144.39e6-500e3
+            # offset_freq = 500e3
+            # if_gain = 32
+            # bb_gain = 32
+            # squelch_threshold=-40
+            # demod_gain = 5.0
+            # audio_gain = 2
 
-            # Reduce buffer sizes to minimize latency
-            for blk in [self.osmosdr_source_0, self.freq_xlating_fir_filter_xxx_0,
-                        self.fir_filter_xxx_0, self.blocks_multiply_const_vxx_0,
-                        self.blocks_float_to_short_0]:
-                blk.set_max_output_buffer(480)
+            # ##################################################
+            # # Blocks
+            # ##################################################
 
-            print(f"AFSK Receiver is configured and running on device {device_index}.")
+            # self.osmosdr_source_0 = osmosdr.source(
+            #     args=f"numchan={1} hackrf={device_index}"
+            # )
+            # self.osmosdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
+            # self.osmosdr_source_0.set_sample_rate(samp_rate)
+            # self.osmosdr_source_0.set_center_freq(rx_freq, 0)
+            # self.osmosdr_source_0.set_freq_corr(0, 0)
+            # self.osmosdr_source_0.set_dc_offset_mode(0, 0)
+            # self.osmosdr_source_0.set_iq_balance_mode(0, 0)
+            # self.osmosdr_source_0.set_gain_mode(False, 0)
+            # self.osmosdr_source_0.set_gain(0, 0)
+            # self.osmosdr_source_0.set_if_gain(if_gain, 0)
+            # self.osmosdr_source_0.set_bb_gain(bb_gain, 0)
+            # self.osmosdr_source_0.set_antenna("TX/RX", 0)
+            # self.osmosdr_source_0.set_bandwidth(0, 0)
+            # self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(
+            #     1,
+            #     firdes.low_pass(1.0, samp_rate, 5e3, 5e3, 6),
+            #     offset_freq,
+            #     samp_rate
+            # )
+            # self.fir_filter_xxx_0 = filter.fir_filter_fff(
+            #     int(samp_rate / audio_rate),
+            #     firdes.low_pass(1.0, samp_rate, 2.5e3, 500, 6)
+            # )
+            # self.fir_filter_xxx_0.declare_sample_delay(0)
+            # self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(audio_gain)
+            # self.blocks_float_to_short_0 = blocks.float_to_short(1, 32767)
+            # self.audio_sink_1 = audio.sink(int(audio_rate), '', True)
+            # self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(squelch_threshold, 1)
+            # self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(demod_gain)
+
+            # # Use the custom QueueSink block
+            # self.queue_sink_0 = QueueSink(samples_q)
+
+            # ##################################################
+            # # Connections
+            # ##################################################
+            # self.connect((self.osmosdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
+            # self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.analog_simple_squelch_cc_0, 0))
+            # self.connect((self.analog_simple_squelch_cc_0, 0), (self.analog_quadrature_demod_cf_0, 0))
+            # self.connect((self.analog_quadrature_demod_cf_0, 0), (self.fir_filter_xxx_0, 0))
+            # self.connect((self.fir_filter_xxx_0, 0), (self.blocks_multiply_const_vxx_0, 0))
+            # self.connect((self.blocks_multiply_const_vxx_0, 0), (self.audio_sink_1, 0))
+            # self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_float_to_short_0, 0))
+            # self.connect((self.blocks_float_to_short_0, 0), (self.queue_sink_0, 0))
+
+            # print(f"AFSK Receiver is configured and running on device {device_index}.")
 
         def stop_and_wait(self):
             """Gracefully stop the flowgraph."""
@@ -405,6 +513,7 @@ if gr is not None and osmosdr is not None:
                 print(f"Error during disconnect: {e}")
             self.stop()
             self.wait()
+
 
     async def consume_ax25(ax25_q, received_message_queue):
         try:
@@ -444,8 +553,8 @@ if gr is not None and osmosdr is not None:
         except Exception as err:
             print(f"Error in demod_core: {err}")
 
-    def start_receiver(current_frequency,stop_event, received_message_queue, device_index=0):
-        """Start t he AFSK Receiver in a separate thread."""
+    def start_receiver(stop_event, received_message_queue, device_index=0):
+        """Start the AFSK Receiver in a separate thread."""
         if gr is None or osmosdr is None:
             print("GNU Radio or osmosdr is not available. Cannot start receiver.")
             return None
@@ -461,22 +570,10 @@ if gr is not None and osmosdr is not None:
             bits_q = asyncio.Queue()
             ax25_q = asyncio.Queue()
 
-            print(current_frequency)
+            print(f"Starting receiver")
 
             # Initialize the AFSK Receiver with the provided frequency and gains
-            tb = AFSKReceiver(
-                samples_q=samples_q,
-                center_freq=current_frequency-500e3,
-                offset_freq=500e3,  # Example offset; adjust as needed
-                sample_rate=960000,
-                audio_rate=48000,
-                rf_gain=0,
-                if_gain=40,
-                bb_gain=14,
-                demod_gain=5.0,
-                squelch_threshold=-40,
-                device_index=device_index
-            )
+            tb = AFSKReceiver(samples_q=samples_q, device_index=device_index)
             tb.start()
 
             # Create asyncio tasks

@@ -179,7 +179,7 @@ class Application(ttk.Frame):
         ttk.Label(freq_frame, text="Frequency (MHz):").grid(row=0, column=0, sticky="w")
         self.frequency_entry = ttk.Entry(freq_frame, width=20)
         self.frequency_entry.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
-        self.frequency_entry.insert(0, "144.39")
+        self.frequency_entry.insert(0, "28.12")
 
         self.freq_notification = ttk.Label(freq_frame, text="", foreground="red")
         self.freq_notification.grid(row=1, column=0, columnspan=2, sticky="w")
@@ -327,7 +327,6 @@ class Application(ttk.Frame):
                 current_frequency = frequency_var.get()
                 self.receiver_stop_event.clear()  # Reset the stop event
                 self.receiver_thread = start_receiver_thread(
-                    current_frequency,
                     self.receiver_stop_event,
                     self.received_message_queue,
                     self.device_index_var.get()  # Use updated device index
@@ -443,10 +442,10 @@ class Application(ttk.Frame):
             pass
         self.after(500, self.check_received_messages)
 
-def start_receiver_thread(current_frequency, receiver_stop_event, received_message_queue, device_index):
+def start_receiver_thread(receiver_stop_event, received_message_queue, device_index):
     receiver_thread = threading.Thread(
         target=start_receiver, 
-        args=(current_frequency, receiver_stop_event, received_message_queue, device_index),
+        args=(receiver_stop_event, received_message_queue, device_index),
         daemon=True
     )
     receiver_thread.start()
@@ -468,7 +467,7 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
             else:
                 # For messages received via UDP listener without flags
                 aprs_message = message
-                flags_before = 10  # Default number of flags before
+                flags_before = 100  # Default number of flags before
                 flags_after = 4    # Default number of flags after
                 device_index = 0   # Default device index
 
@@ -523,7 +522,6 @@ def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_v
             print("Restarting receiver after transmission...")
             receiver_stop_event.clear()
             receiver_thread = start_receiver_thread(
-                current_frequency,
                 receiver_stop_event, 
                 received_message_queue, 
                 device_index=device_index
@@ -560,7 +558,7 @@ if __name__ == "__main__":
         transmitting_var = threading.Event()
         message_queue = queue.SimpleQueue()
 
-        frequency_var = Frequency(144.39e6)  # Default frequency in Hz
+        frequency_var = Frequency(28.12e6)  # Default frequency in Hz
         gain_var = ThreadSafeVariable(14)     # Default gain
         if_gain_var = ThreadSafeVariable(47)  # Default IF gain
 
@@ -573,7 +571,6 @@ if __name__ == "__main__":
 
         # Start the AFSK Receiver with default device index
         receiver_thread = start_receiver_thread(
-            144.39e6,
             receiver_stop_event, 
             received_message_queue, 
             device_index=device_index_var.get()

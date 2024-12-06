@@ -9,8 +9,7 @@ This project is a HackRF-based APRS (Automatic Packet Reporting System) implemen
 
 ## Features
 
-- **APRS Reception**: Use `aprs_rx.py` to receive and decode APRS messages from live signals.
-- **APRS Transmission**: Use `aprs_tx.py` to send APRS messages with a graphical interface.
+- **APRS Reception and Transmission**: Use `main.py` to transmit, receive and decode APRS messages from live signals.
 - **HackRF Integration**: Full support for HackRF to handle both reception and transmission.
 - **Python-based Design**: Easy to modify and extend for your specific needs.
 

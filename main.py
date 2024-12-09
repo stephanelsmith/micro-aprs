@@ -629,11 +629,13 @@ if __name__ == "__main__":
         print("KeyboardInterrupt received. Exiting gracefully.")
         stop_event.set()
         receiver_thread.stop_and_wait()
+        time.sleep(1)
         sys.exit(0)
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         stop_event.set()
         receiver_thread.stop_and_wait()
+        time.sleep(1)
         sys.exit(1)
     finally:
         print("Application has been closed.")

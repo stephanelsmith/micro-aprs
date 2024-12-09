@@ -9,6 +9,7 @@ import struct
 import subprocess
 import numpy as np
 import re
+import sys
 
 # Try to import external dependencies, handle ImportError gracefully
 try:
@@ -435,85 +436,26 @@ if gr is not None and osmosdr is not None:
             self.connect((self.blocks_float_to_short_0, 0), (self.queue_sink_0, 0))
             self.connect((self.multiply_vol, 0), (self.blocks_float_to_short_0, 0))
 
-            # samp_rate = 4800000
-            # audio_rate = 48000
-            # rx_freq = 144.39e6-500e3
-            # offset_freq = 500e3
-            # if_gain = 32
-            # bb_gain = 32
-            # squelch_threshold=-40
-            # demod_gain = 5.0
-            # audio_gain = 2
-
-            # ##################################################
-            # # Blocks
-            # ##################################################
-
-            # self.osmosdr_source_0 = osmosdr.source(
-            #     args=f"numchan={1} hackrf={device_index}"
-            # )
-            # self.osmosdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
-            # self.osmosdr_source_0.set_sample_rate(samp_rate)
-            # self.osmosdr_source_0.set_center_freq(rx_freq, 0)
-            # self.osmosdr_source_0.set_freq_corr(0, 0)
-            # self.osmosdr_source_0.set_dc_offset_mode(0, 0)
-            # self.osmosdr_source_0.set_iq_balance_mode(0, 0)
-            # self.osmosdr_source_0.set_gain_mode(False, 0)
-            # self.osmosdr_source_0.set_gain(0, 0)
-            # self.osmosdr_source_0.set_if_gain(if_gain, 0)
-            # self.osmosdr_source_0.set_bb_gain(bb_gain, 0)
-            # self.osmosdr_source_0.set_antenna("TX/RX", 0)
-            # self.osmosdr_source_0.set_bandwidth(0, 0)
-            # self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(
-            #     1,
-            #     firdes.low_pass(1.0, samp_rate, 5e3, 5e3, 6),
-            #     offset_freq,
-            #     samp_rate
-            # )
-            # self.fir_filter_xxx_0 = filter.fir_filter_fff(
-            #     int(samp_rate / audio_rate),
-            #     firdes.low_pass(1.0, samp_rate, 2.5e3, 500, 6)
-            # )
-            # self.fir_filter_xxx_0.declare_sample_delay(0)
-            # self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(audio_gain)
-            # self.blocks_float_to_short_0 = blocks.float_to_short(1, 32767)
-            # self.audio_sink_1 = audio.sink(int(audio_rate), '', True)
-            # self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(squelch_threshold, 1)
-            # self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(demod_gain)
-
-            # # Use the custom QueueSink block
-            # self.queue_sink_0 = QueueSink(samples_q)
-
-            # ##################################################
-            # # Connections
-            # ##################################################
-            # self.connect((self.osmosdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
-            # self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.analog_simple_squelch_cc_0, 0))
-            # self.connect((self.analog_simple_squelch_cc_0, 0), (self.analog_quadrature_demod_cf_0, 0))
-            # self.connect((self.analog_quadrature_demod_cf_0, 0), (self.fir_filter_xxx_0, 0))
-            # self.connect((self.fir_filter_xxx_0, 0), (self.blocks_multiply_const_vxx_0, 0))
-            # self.connect((self.blocks_multiply_const_vxx_0, 0), (self.audio_sink_1, 0))
-            # self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_float_to_short_0, 0))
-            # self.connect((self.blocks_float_to_short_0, 0), (self.queue_sink_0, 0))
-
-            # print(f"AFSK Receiver is configured and running on device {device_index}.")
-
         def stop_and_wait(self):
             """Gracefully stop the flowgraph."""
             try:
-                self.disconnect(self.analog_quadrature_demod_cf_0, self.fir_filter_xxx_0)
-                self.disconnect(self.fir_filter_xxx_0, self.blocks_multiply_const_vxx_0)
-                self.disconnect(self.blocks_multiply_const_vxx_0, self.audio_sink_1)
-                self.disconnect(self.blocks_multiply_const_vxx_0, self.blocks_float_to_short_0)
+                self.disconnect(self.agc, self.low_pass_filter)
+                self.disconnect(self.low_pass_filter, self.rational_resampler)
+                self.disconnect(self.rational_resampler, self.nbfm_rx)
+                self.disconnect(self.nbfm_rx, self.multiply_const)
+                self.disconnect(self.multiply_const, self.multiply_vol)
+                self.disconnect(self.multiply_vol, self.audio_sink)
+                self.disconnect(self.multiply_vol, self.blocks_float_to_short_0)
                 self.disconnect(self.blocks_float_to_short_0, self.queue_sink_0)
-                self.disconnect(self.osmosdr_source_0, self.freq_xlating_fir_filter_xxx_0)
-                self.disconnect(self.freq_xlating_fir_filter_xxx_0, self.analog_simple_squelch_cc_0)
-                self.disconnect(self.analog_simple_squelch_cc_0, self.analog_quadrature_demod_cf_0)
+                self.disconnect(self.pwr_squelch, self.agc)
+                self.disconnect(self.sig_source, self.multiply)
+                self.disconnect(self.multiply, self.moving_average)
+                self.disconnect(self.moving_average, self.pwr_squelch)
+                self.disconnect(self.osmosdr_source, self.multiply)
             except Exception as e:
                 print(f"Error during disconnect: {e}")
             self.stop()
             self.wait()
-
 
     async def consume_ax25(ax25_q, received_message_queue):
         try:

@@ -2,3 +2,4 @@
 *.pyc
 memoize.json
 *.wav
+/.venv

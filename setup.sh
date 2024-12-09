@@ -10,19 +10,18 @@ echo "Installing GNU Radio..."
 sudo apt-get install -y gnuradio
 
 echo "Verifying GNU Radio installation..."
-gnuradio-companion --version
+gnuradio-config-info --version
 
 # 3. Install Osmocom's osmosdr
 echo "Installing Osmocom's osmosdr..."
 sudo apt-get install -y libosmosdr-dev gr-osmosdr
 
 echo "Verifying osmosdr installation..."
-if gnuradio-companion --help | grep -q osmosdr; then
-    echo "osmosdr is available in GNU Radio Companion."
+if gnuradio-companion 2>&1 | grep -q "GNU Radio Companion"; then
+    echo "Osmosdr is available in GNU Radio Companion."
 else
-    echo "osmosdr blocks not found in GRC. Please check the installation."
+    echo "Osmosdr blocks not found in GRC. Please check the installation."
     exit 1
-fi
 
 # 4. Set Up a Python Virtual Environment
 echo "Creating a Python virtual environment..."

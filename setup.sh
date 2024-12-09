@@ -2,10 +2,6 @@
 
 set -e  # Exit immediately if a command exits with a non-zero status
 
-echo "Starting hackrf-aprsc setup..."
-
-cd hackrf-aprs || { echo "Failed to enter hackrf-aprsc directory"; exit 1; }
-
 # 2. Install GNU Radio
 echo "Updating package lists..."
 sudo apt-get update

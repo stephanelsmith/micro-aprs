@@ -16,14 +16,6 @@ gnuradio-config-info --version
 echo "Installing Osmocom's osmosdr..."
 sudo apt-get install -y libosmosdr-dev gr-osmosdr
 
-echo "Verifying osmosdr installation..."
-if gnuradio-companion 2>&1 | grep -q "GNU Radio Companion"; then
-    echo "Osmosdr is available in GNU Radio Companion."
-else
-    echo "Osmosdr blocks not found in GRC. Please check the installation."
-    exit 1
-fi
-
 # 4. Set Up a Python Virtual Environment
 echo "Creating a Python virtual environment..."
 python3 -m venv .venv --system-site-packages

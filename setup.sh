@@ -22,6 +22,7 @@ if gnuradio-companion 2>&1 | grep -q "GNU Radio Companion"; then
 else
     echo "Osmosdr blocks not found in GRC. Please check the installation."
     exit 1
+fi
 
 # 4. Set Up a Python Virtual Environment
 echo "Creating a Python virtual environment..."

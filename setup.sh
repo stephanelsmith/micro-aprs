@@ -4,9 +4,6 @@ set -e  # Exit immediately if a command exits with a non-zero status
 
 echo "Starting hackrf-aprsc setup..."
 
-# 1. Clone the Repository
-echo "Cloning the hackrf-aprsc repository..."
-git clone https://github.com/fpoisson2/hackrf-aprs.git
 cd hackrf-aprs || { echo "Failed to enter hackrf-aprsc directory"; exit 1; }
 
 # 2. Install GNU Radio

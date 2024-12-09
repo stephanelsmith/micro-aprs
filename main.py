@@ -443,17 +443,24 @@ class Application(ttk.Frame):
         self.after(500, self.check_received_messages)
 
 def start_receiver_thread(receiver_stop_event, received_message_queue, device_index):
+    devices = list_hackrf_devices()
+    if not devices:
+        print("No HackRF devices detected. Cannot start receiver.")
+        return None  # Do not start the thread if no devices are found
+
+    print(f"Detected {len(devices)} HackRF devices. Starting receiver with device index {device_index}...")
     receiver_thread = threading.Thread(
-        target=start_receiver, 
+        target=start_receiver,
         args=(receiver_stop_event, received_message_queue, device_index),
         daemon=True
     )
     receiver_thread.start()
     return receiver_thread
 
+
 def stop_receiver(stop_event, receiver_thread):
     stop_event.set()
-    receiver_thread.join()
+    #receiver_thread.join()
 
 def main_loop(frequency_var, transmitting_var, message_queue, stop_event, gain_var, if_gain_var, 
               receiver_stop_event, receiver_thread, received_message_queue, gui_app):
@@ -538,6 +545,7 @@ def on_closing(app, stop_event, receiver_stop_event, receiver_thread, udp_thread
     stop_event.set()
     receiver_stop_event.set()
     stop_receiver(receiver_stop_event, receiver_thread)
+    time.sleep(1)
     udp_thread.join()
     app.master.destroy()
 

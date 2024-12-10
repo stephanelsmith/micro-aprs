@@ -109,35 +109,35 @@ class Application(ttk.Frame):
             self.idle_icon = None
 
     def create_widgets(self):
+        # Header
         header = ttk.Label(
             self.scrollable_frame,
             text="Contrôle de Transmission APRS",
             font=("Helvetica", 18, "bold")
         )
-        header.grid(row=0, column=0, columnspan=3, pady=(0, 20), sticky="w")
+        header.grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
 
-        device_frame = ttk.Labelframe(self.scrollable_frame, text="Sélection de l'appareil HackRF", padding=20)
-        device_frame.grid(row=1, column=0, columnspan=3, sticky="ew", padx=0, pady=(0, 20))
+        # Left Container: Device Selection, HackRF Settings (including Frequency), Callsign, UDP Config
+        left_container = ttk.Frame(self.scrollable_frame)
+        left_container.grid(row=1, column=0, sticky="nsew", padx=(0, 10), pady=(0, 20))
+        left_container.columnconfigure(0, weight=1)
+
+        # Device Selection Frame
+        device_frame = ttk.Labelframe(left_container, text="Sélection de l'appareil HackRF", padding=20)
+        device_frame.grid(row=0, column=0, sticky="ew", pady=(0, 20))
         device_frame.columnconfigure(1, weight=1)
 
-        ttk.Label(device_frame, text="Sélectionnez l'appareil HackRF :").grid(row=0, column=0, sticky="w")
+        ttk.Label(device_frame, text="HackRF :").grid(row=0, column=0, sticky="w")
         self.device_combobox = ttk.Combobox(device_frame, state="readonly")
         self.device_combobox.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
         self.populate_device_combobox()
 
-        left_container = ttk.Frame(self.scrollable_frame)
-        left_container.grid(row=2, column=0, sticky="nsew", padx=(0,10), pady=(0, 20))
-        left_container.columnconfigure(0, weight=1)
-
-        right_container = ttk.Frame(self.scrollable_frame)
-        right_container.grid(row=2, column=1, sticky="nsew", padx=(10,0), pady=(0, 20))
-        right_container.columnconfigure(0, weight=1)
-
-        # Paramètres HackRF
-        hackrf_frame = ttk.Labelframe(left_container, text="Paramètres HackRF", padding=20)
-        hackrf_frame.pack(fill="x", pady=(0, 20))
+        # HackRF Settings Frame (including Frequency)
+        hackrf_frame = ttk.Labelframe(left_container, text="Paramètres du HackRF", padding=20)
+        hackrf_frame.grid(row=1, column=0, sticky="ew", pady=(0, 20))
         hackrf_frame.columnconfigure(1, weight=1)
 
+        # Gain Settings
         ttk.Label(hackrf_frame, text="Gain :").grid(row=0, column=0, sticky="w")
         self.gain_entry = ttk.Entry(hackrf_frame, width=20)
         self.gain_entry.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
@@ -150,45 +150,41 @@ class Application(ttk.Frame):
         self.if_gain_entry.delete(0, tk.END)
         self.if_gain_entry.insert(0, str(self.if_gain_var.get()))
 
-        # Paramètres de Fréquence
-        freq_frame = ttk.Labelframe(left_container, text="Paramètres de fréquence", padding=20)
-        freq_frame.pack(fill="x", pady=(0, 20))
-        freq_frame.columnconfigure(1, weight=1)
-
-        ttk.Label(freq_frame, text="Fréquence (MHz) :").grid(row=0, column=0, sticky="w")
-        self.frequency_entry = ttk.Entry(freq_frame, width=20)
-        self.frequency_entry.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
+        # Frequency Settings (Integrated into HackRF Settings)
+        ttk.Label(hackrf_frame, text="Fréquence (MHz) :").grid(row=2, column=0, sticky="w")
+        self.frequency_entry = ttk.Entry(hackrf_frame, width=20)
+        self.frequency_entry.grid(row=2, column=1, pady=5, padx=10, sticky="ew")
         freq_mhz = self.frequency_var.get() / 1e6
         self.frequency_entry.delete(0, tk.END)
         self.frequency_entry.insert(0, f"{freq_mhz:.2f}")
 
-        self.freq_notification = ttk.Label(freq_frame, text="", foreground="red")
-        self.freq_notification.grid(row=1, column=0, columnspan=2, sticky="w")
+        self.freq_notification = ttk.Label(hackrf_frame, text="", foreground="red")
+        self.freq_notification.grid(row=3, column=0, columnspan=2, sticky="w")
 
-        # Callsign Parameters
-        callsign_frame = ttk.Labelframe(left_container, text="Paramètres Callsign", padding=20)
-        callsign_frame.pack(fill="x", pady=(0, 20))
+        # Callsign Parameters Frame
+        callsign_frame = ttk.Labelframe(left_container, text="Paramètres de l'indicatif d'appel", padding=20)
+        callsign_frame.grid(row=2, column=0, sticky="ew", pady=(0, 20))
         callsign_frame.columnconfigure(1, weight=1)
 
-        ttk.Label(callsign_frame, text="Callsign Source :").grid(row=0, column=0, sticky="w")
+        ttk.Label(callsign_frame, text="Indicatif d'appel de source :").grid(row=0, column=0, sticky="w")
         self.callsign_entry = ttk.Entry(callsign_frame, width=25)
         self.callsign_entry.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
         callsign = getattr(self, 'saved_callsign', "VE2FPD")
         self.callsign_entry.insert(0, callsign)
 
-        ttk.Label(callsign_frame, text="Callsign Destination :").grid(row=1, column=0, sticky="w")
+        ttk.Label(callsign_frame, text="Indicatif d'appel de destination :").grid(row=1, column=0, sticky="w")
         self.dest_callsign_entry = ttk.Entry(callsign_frame, width=25)
         self.dest_callsign_entry.grid(row=1, column=1, pady=5, padx=10, sticky="ew")
         dest_callsign = getattr(self, 'saved_dest_callsign', "VE2FPD-2")
         self.dest_callsign_entry.insert(0, dest_callsign)
 
-        ttk.Label(callsign_frame, text="Longueur de préambule :").grid(row=2, column=0, sticky="w")
+        ttk.Label(callsign_frame, text="Longueur du préambule :").grid(row=2, column=0, sticky="w")
         self.flags_before_entry = ttk.Entry(callsign_frame, width=10)
         self.flags_before_entry.grid(row=2, column=1, pady=5, padx=10, sticky="ew")
         self.flags_before_entry.delete(0, tk.END)
         self.flags_before_entry.insert(0, str(self.num_flags_before.get()))
 
-        ttk.Label(callsign_frame, text="Longueur de postambule :").grid(row=3, column=0, sticky="w")
+        ttk.Label(callsign_frame, text="Longueur du postambule :").grid(row=3, column=0, sticky="w")
         self.flags_after_entry = ttk.Entry(callsign_frame, width=10)
         self.flags_after_entry.grid(row=3, column=1, pady=5, padx=10, sticky="ew")
         self.flags_after_entry.delete(0, tk.END)
@@ -197,59 +193,72 @@ class Application(ttk.Frame):
         self.callsign_notification = ttk.Label(callsign_frame, text="", foreground="red")
         self.callsign_notification.grid(row=4, column=0, columnspan=2, sticky="w")
 
-        # Option "Carrier Only"
-        carrier_frame = ttk.Labelframe(left_container, text="Mode Transmission", padding=20)
-        carrier_frame.pack(fill="x", pady=(0, 20))
-        carrier_frame.columnconfigure(1, weight=1)
-
-        self.carrier_only_var = tk.BooleanVar(value=False)
-        self.carrier_only_checkbox = ttk.Checkbutton(
-            carrier_frame,
-            text="Carrier Only (Continu)",
-            variable=self.carrier_only_var,
-            command=self.toggle_carrier_only
-        )
-        self.carrier_only_checkbox.grid(row=0, column=0, columnspan=2, sticky="w")
-
-        # Transmission UDP
-        udp_frame = ttk.Labelframe(left_container, text="Transmission UDP", padding=20)
-        udp_frame.pack(fill="x", pady=(0, 20))
+        # Transmission UDP Configuration Frame
+        udp_frame = ttk.Labelframe(left_container, text="Paramètres UDP", padding=20)
+        udp_frame.grid(row=3, column=0, sticky="ew", pady=(0, 20))
         udp_frame.columnconfigure(1, weight=1)
 
-        ttk.Label(udp_frame, text="Envoyer IP :").grid(row=0, column=0, sticky="w")
+        ttk.Label(udp_frame, text="IP de destination:").grid(row=0, column=0, sticky="w")
         self.send_ip_entry = ttk.Entry(udp_frame, width=25)
         self.send_ip_entry.grid(row=0, column=1, pady=5, padx=10, sticky="ew")
         self.send_ip_entry.delete(0, tk.END)
         self.send_ip_entry.insert(0, self.send_ip)
 
-        ttk.Label(udp_frame, text="Envoyer Port :").grid(row=1, column=0, sticky="w")
+        ttk.Label(udp_frame, text="Port UDP de destination:").grid(row=1, column=0, sticky="w")
         self.send_port_entry = ttk.Entry(udp_frame, width=25)
         self.send_port_entry.grid(row=1, column=1, pady=5, padx=10, sticky="ew")
         self.send_port_entry.delete(0, tk.END)
         self.send_port_entry.insert(0, str(self.send_port))
 
+        # Apply Settings Button
         self.apply_all_button = ttk.Button(left_container, text="Appliquer tous les paramètres", command=self.apply_all_settings)
-        self.apply_all_button.pack(fill="x", pady=(10,0))
+        self.apply_all_button.grid(row=4, column=0, sticky="ew", pady=(10, 0))
 
-        # Cadre pour le message test et le bouton
-        test_frame = ttk.Frame(right_container)
-        test_frame.pack(fill="x", pady=(0, 20))
+        # Right Container: Carrier Only, Send Button, Message Test, Messages Received, Status
+        right_container = ttk.Frame(self.scrollable_frame)
+        right_container.grid(row=1, column=1, sticky="nsew", padx=(10, 0), pady=(0, 20))
+        right_container.columnconfigure(0, weight=1)
 
-        ttk.Label(test_frame, text="Message test APRS :").pack(anchor="w")
+        # Carrier Only Frame
+        carrier_frame = ttk.Labelframe(right_container, text="Mode de transmission", padding=20)
+        carrier_frame.grid(row=0, column=0, sticky="ew", pady=(0, 20))
+        carrier_frame.columnconfigure(0, weight=1)
+
+        self.carrier_only_var = tk.BooleanVar(value=False)
+        self.carrier_only_checkbox = ttk.Checkbutton(
+            carrier_frame,
+            text="Porteuse seulement",
+            variable=self.carrier_only_var,
+            command=self.toggle_carrier_only
+        )
+        self.carrier_only_checkbox.grid(row=0, column=0, sticky="w")
+
+        # Send Button
+        send_frame = ttk.Frame(right_container)
+        send_frame.grid(row=1, column=0, sticky="ew", pady=(10, 20))
+        send_frame.columnconfigure(0, weight=1)
+
+        # Message Test APRS Frame
+        test_frame = ttk.Labelframe(right_container, text="Message de test", padding=20)
+        test_frame.grid(row=2, column=0, sticky="ew", pady=(0, 20))
+        test_frame.columnconfigure(0, weight=1)
+
+        ttk.Label(test_frame, text="Message:").grid(row=0, column=0, sticky="w")
 
         self.test_message_entry = ttk.Entry(test_frame, width=40)
-        self.test_message_entry.pack(fill="x", padx=5, pady=(0, 10))
+        self.test_message_entry.grid(row=1, column=0, padx=5, pady=(0, 10), sticky="ew")
         self.test_message_entry.insert(0, "TEST 123!")  # Valeur par défaut
 
         self.test_button = ttk.Button(
             test_frame,
-            text="Envoyer un message APRS de test",
+            text="Envoyer le message de test",
             command=self.queue_test_message
         )
-        self.test_button.pack(fill="x", ipadx=10, ipady=5)
+        self.test_button.grid(row=2, column=0, sticky="ew", ipadx=10, ipady=5)
 
+        # Messages Received Frame
         messages_frame = ttk.Labelframe(right_container, text="Messages Reçus", padding=20)
-        messages_frame.pack(fill="both", expand=True, pady=(0, 20))
+        messages_frame.grid(row=3, column=0, sticky="nsew", pady=(0, 20))
         messages_frame.columnconfigure(0, weight=1)
         messages_frame.rowconfigure(0, weight=1)
 
@@ -260,9 +269,11 @@ class Application(ttk.Frame):
         msg_scrollbar.grid(row=0, column=1, sticky='ns')
         self.messages_text['yscrollcommand'] = msg_scrollbar.set
 
+        # Status Frames
         status_frame = ttk.Frame(right_container)
-        status_frame.pack(fill="x", pady=(0,10))
+        status_frame.grid(row=4, column=0, sticky="ew", pady=(0, 10))
         status_frame.columnconfigure(1, weight=1)
+        status_frame.columnconfigure(2, weight=0)
 
         ttk.Label(status_frame, text="Statut :", font=("Helvetica", 12, "bold")).grid(row=0, column=0, sticky="w")
         self.transmission_label = ttk.Label(
@@ -274,10 +285,9 @@ class Application(ttk.Frame):
             padding=5
         )
         self.transmission_label.grid(row=0, column=1, sticky="w", padx=10)
-        self.transmission_icon_label = None
 
         self.progress = ttk.Progressbar(status_frame, mode='indeterminate')
-        self.progress.grid(row=0, column=2, sticky="ew", padx=(10,0))
+        self.progress.grid(row=0, column=2, sticky="ew", padx=(10, 0))
         self.progress.stop()
 
         status_bar = ttk.Label(
@@ -286,7 +296,7 @@ class Application(ttk.Frame):
             relief=tk.SUNKEN,
             anchor='w'
         )
-        status_bar.pack(fill="x", pady=(0,5))
+        status_bar.grid(row=5, column=0, sticky="ew", pady=(0,5))
 
         receiver_status_bar = ttk.Label(
             right_container,
@@ -294,11 +304,16 @@ class Application(ttk.Frame):
             relief=tk.SUNKEN,
             anchor='w'
         )
-        receiver_status_bar.pack(fill="x")
+        receiver_status_bar.grid(row=6, column=0, sticky="ew")
 
+        # Configure grid weights for the main scrollable frame
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
         self.scrollable_frame.grid_columnconfigure(1, weight=1)
-        self.scrollable_frame.grid_columnconfigure(2, weight=1)
+
+        # Configure grid weights for right_container to allow messages_frame to expand
+        right_container.grid_rowconfigure(3, weight=1)  # messages_frame row
+        right_container.grid_columnconfigure(0, weight=1)
+
 
     def populate_device_combobox(self):
         from core import list_hackrf_devices

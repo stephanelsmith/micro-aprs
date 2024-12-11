@@ -1,0 +1,121 @@
+2024-12-11 15:58:41,704 [DEBUG] Using proactor: IocpProactor
+2024-12-11 15:58:46,886 [DEBUG] Using proactor: IocpProactor
+2024-12-11 15:58:46,888 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from run_without_gui.py"
+2024-12-11 15:58:46,919 [ERROR] Error generating APRS WAV: signed short integer is greater than maximum
+2024-12-11 15:58:48,999 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:01:05,868 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:01:10,135 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:01:10,135 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from run_without_gui.py"
+2024-12-11 16:01:10,162 [ERROR] Error generating APRS WAV: signed short integer is greater than maximum
+2024-12-11 16:01:12,238 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:02:00,488 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:02:04,468 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:02:04,468 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from run_without_gui.py"
+2024-12-11 16:02:04,487 [ERROR] Error generating APRS WAV: signed short integer is greater than maximum
+2024-12-11 16:02:06,573 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:03:51,959 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:03:55,729 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:03:55,729 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from run_without_gui.py"
+2024-12-11 16:03:55,754 [ERROR] Error generating APRS WAV: signed short integer is greater than maximum
+2024-12-11 16:03:57,836 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:04:18,167 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:04:21,421 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:04:21,423 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from run_without_gui.py"
+2024-12-11 16:04:21,447 [ERROR] Error generating APRS WAV: signed short integer is greater than maximum
+2024-12-11 16:04:23,542 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:04:36,762 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:04:40,212 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:04:40,212 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from run_without_gui.py"
+2024-12-11 16:04:40,241 [ERROR] Error generating APRS WAV: signed short integer is greater than maximum
+2024-12-11 16:05:02,597 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:05:06,351 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:05:06,352 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from run_without_gui.py"
+2024-12-11 16:05:06,372 [DEBUG] Audio data type before processing: float32
+2024-12-11 16:05:06,372 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 16:05:06,372 [DEBUG] Audio normalization not required.
+2024-12-11 16:05:06,372 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 16:05:06,372 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 16:05:08,451 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:05:30,871 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:05:34,739 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:05:34,739 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from run_without_gui.py"
+2024-12-11 16:05:34,752 [DEBUG] Audio data type before processing: float32
+2024-12-11 16:05:34,752 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 16:05:34,752 [DEBUG] Audio normalization not required.
+2024-12-11 16:05:34,752 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 16:05:34,762 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 16:05:36,856 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:06:04,232 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:06:08,401 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:06:08,401 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from run_without_gui.py"
+2024-12-11 16:06:08,414 [DEBUG] Audio data type before processing: float32
+2024-12-11 16:06:08,424 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 16:06:08,424 [DEBUG] Audio normalization not required.
+2024-12-11 16:06:08,424 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 16:06:08,424 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 16:06:10,516 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:06:30,527 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:06:30,527 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"terst11"
+2024-12-11 16:06:30,537 [DEBUG] Audio data type before processing: float32
+2024-12-11 16:06:30,537 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 16:06:30,537 [DEBUG] Audio normalization not required.
+2024-12-11 16:06:30,537 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 16:06:30,537 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 16:06:32,630 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:07:13,405 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:07:18,285 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:07:18,287 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from run_without_gui.py"
+2024-12-11 16:07:18,297 [DEBUG] Audio data type before processing: float32
+2024-12-11 16:07:18,297 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 16:07:18,307 [DEBUG] Audio normalization not required.
+2024-12-11 16:07:18,307 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 16:07:18,307 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 16:07:23,403 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:07:32,214 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:07:41,074 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:07:41,074 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from runpy"
+2024-12-11 16:07:41,094 [DEBUG] Audio data type before processing: float32
+2024-12-11 16:07:41,094 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 16:07:41,094 [DEBUG] Audio normalization not required.
+2024-12-11 16:07:41,094 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 16:07:41,094 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 16:07:46,179 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:07:52,321 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:07:52,321 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from runpysadsadfaslkgnsfdngslfasklfnasd"
+2024-12-11 16:07:52,336 [DEBUG] Audio data type before processing: float32
+2024-12-11 16:07:52,336 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 16:07:52,336 [DEBUG] Audio normalization not required.
+2024-12-11 16:07:52,336 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 16:07:52,336 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 16:07:57,418 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:08:05,779 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:08:05,780 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from runpysadsadfaslkgnsfdngslfaskAKDMSDLKMAEKLWQMFKLWEMFLKQWMFKWMEFLASMDFKSDVlfnasd"
+2024-12-11 16:08:05,801 [ERROR] Error generating APRS WAV: signed short integer is greater than maximum
+2024-12-11 16:08:10,883 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:09:20,168 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:09:23,503 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:09:23,503 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from runpysadsadfaslkgnsfdngslfaskAKDMSDLKMAEKLWQMFKLWEMFLKQWMFKWMEFLASMDFKSDVlfnasd"
+2024-12-11 16:09:23,521 [ERROR] Error generating APRS WAV: signed short integer is greater than maximum
+2024-12-11 16:09:28,609 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:09:42,645 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:09:42,645 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from runpysadsadfaslkgnsfdngslfasSDVlfnasd"
+2024-12-11 16:09:42,662 [ERROR] Error generating APRS WAV: signed short integer is greater than maximum
+2024-12-11 16:09:47,745 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:09:57,924 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:09:57,924 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from runpysadsadfaslkgnsfdngslfasklfnasd"
+2024-12-11 16:09:57,940 [DEBUG] Audio data type before processing: float32
+2024-12-11 16:09:57,940 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 16:09:57,940 [DEBUG] Audio normalization not required.
+2024-12-11 16:09:57,940 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 16:09:57,940 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 16:10:03,030 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:10:08,462 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:10:08,462 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"Hello from runpysadsadfaslksklfnasd"
+2024-12-11 16:10:08,482 [DEBUG] Audio data type before processing: float32
+2024-12-11 16:10:08,482 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 16:10:08,482 [DEBUG] Audio normalization not required.
+2024-12-11 16:10:08,482 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 16:10:08,482 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 16:10:13,558 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:11:27,377 [DEBUG] Using proactor: IocpProactor
+2024-12-11 16:11:38,433 [DEBUG] Using proactor: IocpProactor

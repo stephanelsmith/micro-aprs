@@ -20,9 +20,7 @@ from core import (
     list_hackrf_devices,
     start_receiver,
     Frequency,
-    ThreadSafeVariable,
-    udp_listener,
-    udp_transmitter
+    ThreadSafeVariable
 )
 
 # Configuration file path
@@ -33,11 +31,12 @@ def load_config(config_file):
     if os.path.exists(config_file):
         with open(config_file, "r") as f:
             config = json.load(f)
+            print(config)
         return config
     else:
         # Default configuration
         return {
-            "frequency_hz": 28.12e6,
+            "frequency_hz": 50.01e6,
             "gain": 14,
             "if_gain": 47,
             "callsign_source": "VE2FPD",
@@ -109,7 +108,7 @@ def process_message(message, config, queues, vars):
         silence_after = 0
 
         source_callsign = config.get("callsign_source", "VE2FPD")
-        destination_callsign = config.get("callsign_dest", "VE2FPD-2")
+        destination_callsign = config.get("callsign_dest", "VE2FPD")
 
         aprs_line = f"{source_callsign}>{destination_callsign}:{aprs_message}"
 
@@ -118,6 +117,7 @@ def process_message(message, config, queues, vars):
 
         gain = vars['gain_var'].get()
         if_gain = vars['if_gain_var'].get()
+        print("allo")
 
         # Transmit
         reset_hackrf()
@@ -128,7 +128,7 @@ def process_message(message, config, queues, vars):
             vars['transmitting_var'].set()
             tb.start()
             print("Transmission started.")
-            time.sleep(2)
+            time.sleep(5)
             tb.stop_and_wait()
             vars['transmitting_var'].clear()
             print("Transmission stopped.")
@@ -147,6 +147,7 @@ def process_message(message, config, queues, vars):
 
         # Handle received messages
         while not queues['received_message_queue'].empty():
+
             received_message = queues['received_message_queue'].get()
             udp_transmitter(config['send_ip'], config['send_port'], received_message)
             print(f"Received message transmitted to {config['send_ip']}:{config['send_port']}: {received_message}")
@@ -197,7 +198,7 @@ def handle_signal(signum, frame, queues, udp_thread, config_file):
         "gain": queues['vars']['gain_var'].get(),
         "if_gain": queues['vars']['if_gain_var'].get(),
         "callsign_source": config.get("callsign_source", "VE2FPD"),
-        "callsign_dest": config.get("callsign_dest", "VE2FPD-2"),
+        "callsign_dest": config.get("callsign_dest", "VE2FPD"),
         "flags_before": config.get("flags_before", 10),
         "flags_after": config.get("flags_after", 4),
         "send_ip": config.get("send_ip", "127.0.0.1"),

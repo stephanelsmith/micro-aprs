@@ -35,7 +35,7 @@ Begin by cloning the `hackrf-aprsc` repository from GitHub and navigating into t
 
 ```bash
 git clone https://github.com/fpoisson2/hackrf-aprs.git
-cd hackrf-aprsc
+cd hackrf-aprs
 ```
 
 ### 2. Install GNU Radio
@@ -62,13 +62,13 @@ cd hackrf-aprsc
 
 3. **Verify Installation:**
 
-   After installation, verify it by checking the version:
+   After installation, verify that gnuradio is installed by running:
 
    ```bash
-   gnuradio-companion --version
+   gnuradio-companion
    ```
 
-   This should display the installed GNU Radio version.
+   This should open GNU Radio Companion app.
 
 ### 3. Install Osmocom's osmosdr
 

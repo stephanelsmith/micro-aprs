@@ -50,12 +50,12 @@ cd hackrf-aprs
    sudo apt-get update
    ```
 
-2. **Install GNU Radio:**
+2. **Install GNU Radio and Hack RF tools:**
 
-   Install GNU Radio using the package manager:
+   Install GNU Radio and Hack RF tools using the package manager:
 
    ```bash
-   sudo apt-get install gnuradio
+   sudo apt-get install gnuradio hackrf
    ```
 
    *This command installs the latest stable version available in the Ubuntu repositories.*

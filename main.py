@@ -130,7 +130,7 @@ if __name__ == "__main__":
         stop_event = threading.Event()
         transmitting_var = threading.Event()
         message_queue = queue.SimpleQueue()
-        frequency_var = Frequency(28.12e6)
+        frequency_var = Frequency(50.01e6)
         gain_var = ThreadSafeVariable(14)
         if_gain_var = ThreadSafeVariable(47)
         receiver_stop_event = threading.Event()

@@ -58,7 +58,7 @@ class QueueSink(gr.sync_block):
         return len(in0)
 
 class AFSKReceiver(gr.top_block):
-    def __init__(self, samples_q, device_index=0, frequency=28.12e6):
+    def __init__(self, samples_q, device_index=0, frequency=50.01e6):
         super(AFSKReceiver, self).__init__()
         ##################################################
         # Variables
@@ -222,7 +222,7 @@ async def demod_core(samples_q, bits_q, ax25_q):
     except Exception as err:
         print(f"Error in demod_core: {err}")
 
-def start_receiver(stop_event, received_message_queue, device_index=0, frequency = 28.12e6):
+def start_receiver(stop_event, received_message_queue, device_index=0, frequency = 50.01e6):
     def run_receiver():
         # Create a new event loop for the receiver thread
         loop = asyncio.new_event_loop()

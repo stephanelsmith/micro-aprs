@@ -3,7 +3,7 @@ from gnuradio.filter import firdes
 import osmosdr
 
 class ResampleAndSend(gr.top_block):
-    def __init__(self, input_file, output_rate, device_index=0, carrier_only=False, carrier_freq=28.12e6):
+    def __init__(self, input_file, output_rate, device_index=0, carrier_only=False, carrier_freq=50.01e6):
         gr.top_block.__init__(self, "Resample and Send")
 
         self.output_rate = output_rate
@@ -44,7 +44,7 @@ class ResampleAndSend(gr.top_block):
             print(f"Initializing HackRF device {self.device_index}...")
             self.sink = osmosdr.sink(args=f"hackrf={self.device_index}")
             self.sink.set_sample_rate(self.output_rate)
-            self.sink.set_center_freq(28.12e6, 0)  # Adjust frequency as needed
+            self.sink.set_center_freq(50.01e6, 0)  # Adjust frequency as needed
             self.sink.set_gain(gain, 0)
             self.sink.set_if_gain(if_gain, 0)
             self.sink.set_bb_gain(20, 0)

@@ -58,7 +58,7 @@ class QueueSink(gr.sync_block):
         return len(in0)
 
 class AFSKReceiver(gr.top_block):
-    def __init__(self, samples_q, device_index=0, frequency=50.01e6):
+    def __init__(self, samples_q, device_index=0, frequency=28.12e6):
         super(AFSKReceiver, self).__init__()
         ##################################################
         # Variables

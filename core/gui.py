@@ -611,7 +611,7 @@ class Application(ttk.Frame):
             self.gain_var.set(config.get("gain", 14))
             self.if_gain_var.set(config.get("if_gain", 47))
             self.saved_callsign = config.get("callsign_source", "VE2FPD")
-            self.saved_dest_callsign = config.get("callsign_dest", "VE2FPD")
+            self.saved_dest_callsign = config.get("callsign_dest", "VE2FPD-2")
             self.num_flags_before.set(config.get("flags_before", 10))
             self.num_flags_after.set(config.get("flags_after", 4))
             self.send_ip = config.get("send_ip", "127.0.0.1")

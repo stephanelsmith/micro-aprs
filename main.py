@@ -139,8 +139,6 @@ if __name__ == "__main__":
 
         # Start receiver
         receiver_thread = start_receiver_thread(receiver_stop_event, received_message_queue, device_index_var.get(), frequency_var.get())
-        receiver_stop_event.set() #stop for now before setting up gui and getting config data
-        time.sleep(1)
 
         # Start UDP listener
         udp_thread = threading.Thread(
@@ -176,9 +174,6 @@ if __name__ == "__main__":
             daemon=True
         )
         gui_thread.start()
-
-        receiver_stop_event.clear() #let's start back the receiver
-        receiver_thread = start_receiver_thread(receiver_stop_event, received_message_queue, device_index_var.get(), frequency_var.get())
 
         root.protocol("WM_DELETE_WINDOW", lambda: on_closing(app, stop_event, receiver_stop_event, receiver_thread, udp_thread))
         app.mainloop()

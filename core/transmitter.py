@@ -3,7 +3,7 @@ from gnuradio.filter import firdes
 import osmosdr
 
 class ResampleAndSend(gr.top_block):
-    def __init__(self, input_file, output_rate, device_index=0, carrier_only=False, carrier_freq=50.01e6):
+    def __init__(self, input_file, output_rate, device_index=0, carrier_only=False, carrier_freq=28.12e6):
         gr.top_block.__init__(self, "Resample and Send")
 
         self.output_rate = output_rate

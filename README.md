@@ -132,34 +132,9 @@ With the virtual environment activated, install the necessary Python packages us
 1. Connect your HackRF device to your system.
 2. Run the APRS receiver script:
    ```bash
-   python aprs_rx.py -i hackrf -o aprs -
+   python main.py
    ```
 3. This will start listening for APRS messages on the default frequency (144.39 MHz in North America). Messages will be displayed on the console.
-
-### APRS Transmission
-
-1. Launch the GUI for APRS transmission:
-   ```bash
-   python aprs_tx.py
-   ```
-2. Set the frequency, callsign, and other parameters in the GUI.
-3. Queue and transmit APRS messages directly from the GUI.
-
----
-
-## Key Components
-
-### `aprs_rx.py`
-
-Handles the reception and demodulation of APRS signals. It uses GNU Radio to process the input from the HackRF and decodes the packets.
-
-### `aprs_tx.py`
-
-Provides a GUI for sending APRS messages. It supports configuring the HackRF and transmitting custom APRS messages.
-
-### `core.py`
-
-Contains utility functions for HackRF management, generating APRS-compatible WAV files, and supporting communication protocols like UDP.
 
 ---
 

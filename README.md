@@ -1,9 +1,9 @@
 
-# HackRF APRS Decoder
+# HackRF APRS Transceiver
 
 This project is a HackRF-based APRS (Automatic Packet Reporting System) implementation to handle the reception and transmission of APRS signals. It utilizes the HackRF device as an SDR (Software Defined Radio) for receiving and transmitting packets. This project is based on the excellent work from [micro-aprs](https://github.com/stephanelsmith/micro-aprs).
 
-![image](https://github.com/user-attachments/assets/e1caabe6-4f9e-43e2-8c9f-90dff6370495)
+![image](https://github.com/user-attachments/assets/eae39269-036e-4702-8e30-46b81c9629b7)
 
 ---
 
@@ -35,7 +35,7 @@ Begin by cloning the `hackrf-aprsc` repository from GitHub and navigating into t
 
 ```bash
 git clone https://github.com/fpoisson2/hackrf-aprs.git
-cd hackrf-aprsc
+cd hackrf-aprs
 ```
 
 ### 2. Install GNU Radio
@@ -50,25 +50,25 @@ cd hackrf-aprsc
    sudo apt-get update
    ```
 
-2. **Install GNU Radio:**
+2. **Install GNU Radio and Hack RF tools:**
 
-   Install GNU Radio using the package manager:
+   Install GNU Radio and Hack RF tools using the package manager:
 
    ```bash
-   sudo apt-get install gnuradio
+   sudo apt-get install gnuradio hackrf
    ```
 
    *This command installs the latest stable version available in the Ubuntu repositories.*
 
 3. **Verify Installation:**
 
-   After installation, verify it by checking the version:
+   After installation, verify that gnuradio is installed by running:
 
    ```bash
-   gnuradio-companion --version
+   gnuradio-companion
    ```
 
-   This should display the installed GNU Radio version.
+   This should open GNU Radio Companion app.
 
 ### 3. Install Osmocom's osmosdr
 
@@ -132,34 +132,9 @@ With the virtual environment activated, install the necessary Python packages us
 1. Connect your HackRF device to your system.
 2. Run the APRS receiver script:
    ```bash
-   python aprs_rx.py -i hackrf -o aprs -
+   python main.py
    ```
 3. This will start listening for APRS messages on the default frequency (144.39 MHz in North America). Messages will be displayed on the console.
-
-### APRS Transmission
-
-1. Launch the GUI for APRS transmission:
-   ```bash
-   python aprs_tx.py
-   ```
-2. Set the frequency, callsign, and other parameters in the GUI.
-3. Queue and transmit APRS messages directly from the GUI.
-
----
-
-## Key Components
-
-### `aprs_rx.py`
-
-Handles the reception and demodulation of APRS signals. It uses GNU Radio to process the input from the HackRF and decodes the packets.
-
-### `aprs_tx.py`
-
-Provides a GUI for sending APRS messages. It supports configuring the HackRF and transmitting custom APRS messages.
-
-### `core.py`
-
-Contains utility functions for HackRF management, generating APRS-compatible WAV files, and supporting communication protocols like UDP.
 
 ---
 

@@ -1,7 +1,7 @@
 {
-    "frequency_hz": 50010000.0,
-    "gain": 14.0,
-    "if_gain": 47.0,
+    "frequency_hz": 144390000,
+    "gain": 14,
+    "if_gain": 47,
     "callsign_source": "VE2FPD",
     "callsign_dest": "APRS",
     "flags_before": 50,

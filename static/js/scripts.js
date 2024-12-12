@@ -1,10 +1,17 @@
 // static/js/scripts.js
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Establish a Socket.IO connection
     const socket = io();
 
     // Elements
+    const systemStatus = document.getElementById('system-status');
     const transmissionStatus = document.getElementById('transmission-status');
     const receptionStatus = document.getElementById('reception-status');
+    const udpListenerStatus = document.getElementById('udp-listener-status');
+    const carrierStatus = document.getElementById('carrier-status');
+    const wavGenerationStatus = document.getElementById('wav-generation-status');
+    const systemError = document.getElementById('system-error');
     const restartReceptionBtn = document.getElementById('restart-reception');
     const configForm = document.getElementById('config-form');
     const saveConfigBtn = document.getElementById('save-config');
@@ -14,7 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('/api/config')
         .then(response => response.json())
         .then(config => {
-            populateConfigForm(config);
+            if (config.status === 'success') {
+                populateConfigForm(config.config);
+            } else {
+                console.error('Failed to fetch configuration:', config.message);
+            }
         })
         .catch(error => console.error('Error fetching config:', error));
 
@@ -140,25 +151,63 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('udp_listener_status', data => {
-        // Implement similar to transmission and reception statuses if needed
-        console.log('UDP Listener Status:', data.status);
+        if (data.status === 'active') {
+            udpListenerStatus.textContent = 'UDP Listener: Active';
+            udpListenerStatus.style.color = 'orange';
+        } else if (data.status === 'stopped') {
+            udpListenerStatus.textContent = 'UDP Listener: Stopped';
+            udpListenerStatus.style.color = 'gray';
+        } else {
+            udpListenerStatus.textContent = 'UDP Listener: Idle';
+            udpListenerStatus.style.color = 'green';
+        }
     });
 
     socket.on('carrier_status', data => {
-        // Implement similar to transmission and reception statuses if needed
-        console.log('Carrier Status:', data.status);
+        if (data.status === 'active') {
+            carrierStatus.textContent = 'Carrier Transmission: Active';
+            carrierStatus.style.color = 'purple';
+        } else if (data.status === 'stopped') {
+            carrierStatus.textContent = 'Carrier Transmission: Stopped';
+            carrierStatus.style.color = 'gray';
+        } else {
+            carrierStatus.textContent = 'Carrier Transmission: Idle';
+            carrierStatus.style.color = 'green';
+        }
     });
 
-    socket.on('system_status', data => {
-        console.log('System Status:', data.status);
-    });
-
-    socket.on('backend_restarted', data => {
-        alert(data.message);
+    socket.on('wav_generation', data => {
+        if (data.status === 'completed') {
+            wavGenerationStatus.textContent = 'WAV Generation: Completed';
+            wavGenerationStatus.style.color = 'green';
+            console.log('WAV generation completed successfully.');
+        } else if (data.status === 'started') {
+            wavGenerationStatus.textContent = 'WAV Generation: In Progress';
+            wavGenerationStatus.style.color = 'blue';
+            console.log('WAV generation started.');
+        }
     });
 
     socket.on('system_error', data => {
-        alert('System Error: ' + data.message);
+        systemError.textContent = 'System Error: ' + data.message;
+        systemError.style.display = 'block';
+        systemError.style.color = 'red';
+        console.error('System Error:', data.message);
+    });
+
+    socket.on('system_status', data => {
+        systemStatus.textContent = 'System Status: ' + data.status;
+        if (data.status === 'running') {
+            systemStatus.style.color = 'green';
+        } else {
+            systemStatus.style.color = 'gray';
+        }
+        console.log('System Status:', data.status);
+    });
+
+    // Handle backend restarted event
+    socket.on('backend_restarted', data => {
+        alert(data.message);
     });
 
     // Handle restart reception button

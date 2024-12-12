@@ -36,15 +36,17 @@ class Receiver:
         The thread function that handles receiving data. This simulates receiving.
         """
         start_receiver(stop_event, message_queue, device_index, frequency)
+
         self.is_receiving = True  # Update to active receiving state once receiving starts
         self.backend.socketio.emit('reception_status', {'status': 'active'})
         try:
             while not stop_event.is_set():
                 if not message_queue.empty():
-                    message = message_queue.get_nowait()  # Simulate processing received messages
+                    message = message_queue.get()  # Simulate processing received messages
                     # Process the message here (e.g., log or handle the received data)
                     logger.info(f"Receiver received message: {message}")
                     self.backend.socketio.emit('aprs_message', {'message': message})
+                    logger.info("SocketIO Event Emitted: aprs_message - %s", message)
                 else:
                     # If there's no message, we continue the loop (still receiving, waiting for messages)
                     pass

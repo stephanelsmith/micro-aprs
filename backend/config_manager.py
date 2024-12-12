@@ -48,7 +48,26 @@ class ConfigurationManager:
         logger.info("Configuration saved to %s.", self.config_file)
 
     def get(self, key: str, default: Any = None) -> Any:
+        """
+        Get a configuration value by key.
+        """
         return self.config.get(key, default)
 
     def set(self, key: str, value: Any) -> None:
+        """
+        Set a single configuration value.
+        """
         self.config[key] = value
+        logger.info("Configuration parameter '%s' set to '%s'.", key, value)
+
+    def update_config(self, new_config: Dict[str, Any]) -> None:
+        """
+        Update multiple configuration parameters.
+        """
+        for key, value in new_config.items():
+            if key in self.config:
+                self.config[key] = value
+                logger.info("Configuration parameter '%s' updated to '%s'.", key, value)
+            else:
+                logger.warning("Attempted to update unknown configuration parameter '%s'.", key)
+        logger.info("Configuration update completed.")

@@ -10,10 +10,11 @@ from core import ResampleAndSend, reset_hackrf
 logger = logging.getLogger(__name__)
 
 class CarrierTransmission:
-    def __init__(self, config: Dict[str, Any], vars: Dict[str, Any], stop_event: threading.Event):
+    def __init__(self, config: Dict[str, Any], vars: Dict[str, Any], stop_event: threading.Event, backend: Any):
         self.config = config
         self.vars = vars
         self.stop_event = stop_event
+        self.backend = backend  # Store the backend reference
         self.thread = threading.Thread(target=self.start_carrier_transmission, daemon=True)
 
     def start(self):
@@ -39,6 +40,7 @@ class CarrierTransmission:
                 carrier_top_block.start()
                 self.vars['transmitting_var'].set()
                 logger.info("Carrier-only transmission started.")
+                self.backend.socketio.emit('carrier_status', {'status': 'active'})
 
                 # Wait until stop_event is set
                 while not self.stop_event.is_set():
@@ -48,12 +50,16 @@ class CarrierTransmission:
                 carrier_top_block.stop_and_wait()
                 self.vars['transmitting_var'].clear()
                 logger.info("Carrier-only transmission stopped.")
+                self.backend.socketio.emit('carrier_status', {'status': 'stopped'})
             else:
                 logger.error("Failed to initialize HackRF for carrier-only mode.")
+                self.backend.socketio.emit('system_error', {'message': "Failed to initialize HackRF for carrier-only mode."})
         except Exception as e:
             logger.exception("Error starting carrier-only mode: %s", e)
+            self.backend.socketio.emit('system_error', {'message': f"Carrier Transmission error: {e}"})
 
     def stop(self):
+        logger.info("Stopping Carrier Transmission...")
         self.stop_event.set()
         if self.thread.is_alive():
             self.thread.join()

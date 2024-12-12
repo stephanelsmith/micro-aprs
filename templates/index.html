@@ -5,32 +5,43 @@
     <meta charset="UTF-8">
     <title>Radio Transmission Application</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js" integrity="sha512-bW7PhgOGHKFTSn/G7QAA3fDAu4+e+3sOFmB4r7m5g6YlD7qIBzYjXjAL0KUjC3jEIXY57R1tujxRmn9lHQuIiw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Include Socket.IO library without integrity and crossorigin attributes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Radio Transmission Application</h1>
         
+        <!-- System Status Section -->
         <div class="status">
+            <h2>System Status</h2>
+            <p id="system-status">System Status: Unknown</p>
             <p id="transmission-status">Transmission: Idle</p>
             <p id="reception-status">Reception: Idle</p>
+            <p id="udp-listener-status">UDP Listener: Idle</p>
+            <p id="carrier-status">Carrier Transmission: Idle</p>
+            <p id="wav-generation-status">WAV Generation: Not Started</p>
+            <p id="system-error" class="error-message" style="display: none;">System Error: </p>
             <button id="restart-reception">Restart Reception</button>
         </div>
         
+        <!-- Configuration Management Section -->
         <div class="config">
-            <h2>Current Configuration</h2>
+            <h2>Configuration Management</h2>
             <form id="config-form">
-                <!-- Configuration fields will be populated here -->
+                <!-- Configuration fields will be dynamically populated by scripts.js -->
             </form>
             <button id="save-config">Save Configuration</button>
         </div>
         
+        <!-- Received Messages Section -->
         <div class="messages">
             <h2>Received APRS Messages</h2>
-            <textarea id="received-messages" readonly></textarea>
+            <textarea id="received-messages" readonly placeholder="Received messages will appear here..."></textarea>
         </div>
     </div>
     
+    <!-- Include the main JavaScript file after Socket.IO -->
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </body>
 </html>

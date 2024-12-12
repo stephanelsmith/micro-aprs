@@ -4142,3 +4142,1559 @@ AttributeError: 'Event' object has no attribute 'stop'
 2024-12-12 13:39:24,217 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
 2024-12-12 13:39:24,217 [DEBUG] Using proactor: IocpProactor
 2024-12-12 13:39:24,257 [INFO] Receiver thread restarted.
+2024-12-12 13:47:19,270 [INFO] Configuration loaded from config.json.
+2024-12-12 13:47:19,270 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:47:19,280 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:47:19,280 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:47:19,331 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 13:47:19,351 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 13:47:19,371 [INFO] Backend thread started.
+2024-12-12 13:48:05,394 [INFO] Configuration loaded from config.json.
+2024-12-12 13:48:05,394 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:48:05,394 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:48:05,394 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:48:05,511 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 13:48:05,518 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 13:48:05,838 [INFO] Backend thread started.
+2024-12-12 13:49:35,029 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 13:49:35,062 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 13:49:35,123 [DEBUG] Audio data type before processing: float32
+2024-12-12 13:49:35,165 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 13:49:35,204 [DEBUG] Audio normalization not required.
+2024-12-12 13:49:35,205 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 13:49:35,332 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 13:49:35,339 [INFO] Stopping receiver thread...
+2024-12-12 13:49:35,356 [INFO] Receiver stopped.
+2024-12-12 13:49:35,356 [INFO] WAV files generated successfully.
+2024-12-12 13:49:35,921 [INFO] Receiver thread was not running.
+2024-12-12 13:49:35,921 [INFO] Receiver stopped before transmission.
+2024-12-12 13:49:35,972 [INFO] Transmission started.
+2024-12-12 13:49:37,337 [INFO] Transmission done
+2024-12-12 13:49:37,340 [INFO] Transmission stopped.
+2024-12-12 13:49:37,341 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:49:37,341 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:49:37,342 [INFO] Receiver thread restarted.
+2024-12-12 13:53:33,246 [INFO] Configuration loaded from config.json.
+2024-12-12 13:53:33,246 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:53:33,246 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:53:33,246 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:53:33,286 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 13:53:33,306 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 13:53:33,396 [INFO] Backend thread started.
+2024-12-12 13:56:37,330 [INFO] Configuration loaded from config.json.
+2024-12-12 13:56:37,330 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:56:37,330 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:56:37,340 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:56:37,401 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 13:56:37,411 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 13:56:37,712 [INFO] Backend thread started.
+2024-12-12 13:57:44,158 [INFO] Configuration loaded from config.json.
+2024-12-12 13:57:44,158 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:57:44,158 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:57:44,158 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:57:44,178 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 13:57:44,198 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 13:57:44,228 [INFO] Backend thread started.
+2024-12-12 13:57:53,386 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 13:57:53,396 [INFO] Shutting down...
+2024-12-12 13:57:53,406 [INFO] Stopping receiver thread...
+2024-12-12 13:57:53,416 [INFO] Receiver stopped.
+2024-12-12 13:57:53,476 [INFO] Receiver thread was not running.
+2024-12-12 13:57:53,476 [INFO] Configuration saved to config.json.
+2024-12-12 13:57:53,476 [INFO] Shutdown complete.
+2024-12-12 13:58:04,403 [INFO] Configuration loaded from config.json.
+2024-12-12 13:58:04,403 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:58:04,405 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:58:04,405 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:58:04,433 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 13:58:04,464 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 13:58:04,606 [INFO] Backend thread started.
+2024-12-12 13:58:27,463 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 13:58:27,489 [INFO] Shutting down...
+2024-12-12 13:58:27,500 [INFO] Stopping receiver thread...
+2024-12-12 13:58:27,515 [INFO] Receiver stopped.
+2024-12-12 13:58:28,034 [INFO] UDP Listener stopped on 127.0.0.1:14582.
+2024-12-12 13:58:28,061 [INFO] Receiver thread was not running.
+2024-12-12 13:58:28,062 [INFO] Configuration saved to config.json.
+2024-12-12 13:58:28,062 [INFO] Shutdown complete.
+2024-12-12 13:58:35,938 [INFO] Configuration loaded from config.json.
+2024-12-12 13:58:35,938 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:58:35,938 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:58:35,938 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:58:35,958 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 13:58:35,958 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 13:58:36,321 [INFO] Backend thread started.
+2024-12-12 13:58:42,939 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 13:58:42,970 [INFO] Shutting down...
+2024-12-12 13:58:43,000 [INFO] Stopping receiver thread...
+2024-12-12 13:58:43,023 [INFO] Receiver stopped.
+2024-12-12 13:58:43,068 [INFO] Receiver thread was not running.
+2024-12-12 13:58:43,069 [INFO] Configuration saved to config.json.
+2024-12-12 13:58:43,069 [INFO] Shutdown complete.
+2024-12-12 13:58:47,668 [INFO] Configuration loaded from config.json.
+2024-12-12 13:58:47,669 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:58:47,670 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:58:47,670 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:58:47,725 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 13:58:47,740 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 13:58:47,842 [INFO] Backend thread started.
+2024-12-12 13:58:52,074 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 13:58:52,094 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 13:58:52,104 [DEBUG] Audio data type before processing: float32
+2024-12-12 13:58:52,144 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 13:58:52,175 [DEBUG] Audio normalization not required.
+2024-12-12 13:58:52,195 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 13:58:52,285 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 13:58:52,345 [INFO] Stopping receiver thread...
+2024-12-12 13:58:52,375 [INFO] WAV files generated successfully.
+2024-12-12 13:58:52,375 [INFO] Receiver stopped.
+2024-12-12 13:58:52,435 [INFO] Receiver thread was not running.
+2024-12-12 13:58:52,435 [INFO] Receiver stopped before transmission.
+2024-12-12 13:58:52,445 [INFO] Transmission started.
+2024-12-12 13:58:53,813 [INFO] Transmission done
+2024-12-12 13:58:53,822 [INFO] Transmission stopped.
+2024-12-12 13:58:53,822 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:58:53,822 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:58:53,832 [INFO] Receiver thread restarted.
+2024-12-12 13:58:58,576 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 13:58:58,606 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 13:58:58,646 [DEBUG] Audio data type before processing: float32
+2024-12-12 13:58:58,666 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 13:58:58,696 [DEBUG] Audio normalization not required.
+2024-12-12 13:58:58,757 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 13:58:58,786 [INFO] Stopping receiver thread...
+2024-12-12 13:58:58,816 [INFO] Receiver stopped.
+2024-12-12 13:58:58,816 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 13:58:58,816 [INFO] WAV files generated successfully.
+2024-12-12 13:58:58,866 [INFO] Receiver thread was not running.
+2024-12-12 13:58:58,866 [INFO] Receiver stopped before transmission.
+2024-12-12 13:58:58,886 [INFO] Transmission started.
+2024-12-12 13:59:00,251 [INFO] Transmission done
+2024-12-12 13:59:00,261 [INFO] Transmission stopped.
+2024-12-12 13:59:00,261 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:59:00,261 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:59:00,271 [INFO] Receiver thread restarted.
+2024-12-12 14:03:02,345 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 14:03:02,355 [INFO] Shutting down...
+2024-12-12 14:03:02,365 [INFO] Stopping receiver thread...
+2024-12-12 14:03:02,385 [INFO] Receiver stopped.
+2024-12-12 14:03:02,891 [INFO] UDP Listener stopped on 127.0.0.1:14582.
+2024-12-12 14:03:02,921 [INFO] Receiver thread was not running.
+2024-12-12 14:03:02,921 [INFO] Configuration saved to config.json.
+2024-12-12 14:03:02,921 [INFO] Shutdown complete.
+2024-12-12 14:03:06,601 [INFO] Configuration loaded from config.json.
+2024-12-12 14:03:06,601 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:03:06,601 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:03:06,601 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:03:06,611 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:03:06,611 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:03:06,733 [INFO] Backend thread started.
+2024-12-12 14:03:16,356 [INFO] Restarting receiver...
+2024-12-12 14:03:16,370 [INFO] Stopping receiver thread...
+2024-12-12 14:03:16,387 [INFO] Receiver stopped.
+2024-12-12 14:03:16,457 [INFO] Receiver thread was not running.
+2024-12-12 14:03:16,457 [INFO] Receiver stopped.
+2024-12-12 14:03:16,457 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:03:16,457 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:03:16,467 [INFO] Receiver restarted.
+2024-12-12 14:03:16,507 [INFO] Reception restarted successfully.
+2024-12-12 14:03:22,632 [ERROR] Failed to update configuration: 'ConfigurationManager' object has no attribute 'update_config'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 52, in update_config
+    backend.config_manager.update_config(new_config)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ConfigurationManager' object has no attribute 'update_config'
+2024-12-12 14:03:36,693 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 14:03:36,713 [INFO] Shutting down...
+2024-12-12 14:03:36,730 [INFO] Stopping receiver thread...
+2024-12-12 14:03:36,736 [INFO] Receiver stopped.
+2024-12-12 14:03:37,262 [INFO] UDP Listener stopped on 127.0.0.1:14582.
+2024-12-12 14:03:37,289 [INFO] Receiver thread was not running.
+2024-12-12 14:03:37,291 [INFO] Configuration saved to config.json.
+2024-12-12 14:03:37,291 [INFO] Shutdown complete.
+2024-12-12 14:03:40,631 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 14:03:40,632 [INFO] Shutting down...
+2024-12-12 14:03:40,634 [INFO] Configuration saved to config.json.
+2024-12-12 14:03:40,635 [INFO] Shutdown complete.
+2024-12-12 14:03:42,922 [INFO] Configuration loaded from config.json.
+2024-12-12 14:03:42,922 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:03:42,924 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:03:42,946 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:03:43,013 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:03:43,013 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:03:43,319 [INFO] Backend thread started.
+2024-12-12 14:03:46,564 [INFO] Restarting receiver...
+2024-12-12 14:03:46,597 [INFO] Stopping receiver thread...
+2024-12-12 14:03:46,597 [INFO] Receiver stopped.
+2024-12-12 14:03:46,647 [INFO] Receiver thread was not running.
+2024-12-12 14:03:46,647 [INFO] Receiver stopped.
+2024-12-12 14:03:46,647 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:03:46,647 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:03:46,677 [INFO] Receiver restarted.
+2024-12-12 14:03:46,697 [INFO] Reception restarted successfully.
+2024-12-12 14:03:58,694 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:03:58,724 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:03:58,775 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:03:58,805 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:03:58,845 [DEBUG] Audio normalization not required.
+2024-12-12 14:03:58,855 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:03:58,935 [INFO] Stopping receiver thread...
+2024-12-12 14:03:58,945 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:03:58,945 [INFO] Receiver stopped.
+2024-12-12 14:03:59,437 [INFO] WAV files generated successfully.
+2024-12-12 14:03:59,457 [INFO] Receiver thread was not running.
+2024-12-12 14:03:59,457 [INFO] Receiver stopped before transmission.
+2024-12-12 14:03:59,478 [INFO] Transmission started.
+2024-12-12 14:04:00,836 [INFO] Transmission done
+2024-12-12 14:04:00,845 [INFO] Transmission stopped.
+2024-12-12 14:04:00,845 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:04:00,845 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:04:00,855 [INFO] Receiver thread restarted.
+2024-12-12 14:04:23,432 [ERROR] Failed to update configuration: 'ConfigurationManager' object has no attribute 'update_config'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 52, in update_config
+    backend.config_manager.update_config(new_config)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ConfigurationManager' object has no attribute 'update_config'
+2024-12-12 14:06:28,606 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 14:06:28,636 [INFO] Shutting down...
+2024-12-12 14:06:28,653 [INFO] Stopping receiver thread...
+2024-12-12 14:06:28,668 [INFO] Receiver stopped.
+2024-12-12 14:06:29,195 [INFO] UDP Listener stopped on 127.0.0.1:14582.
+2024-12-12 14:06:29,215 [INFO] Receiver thread was not running.
+2024-12-12 14:06:29,216 [INFO] Configuration saved to config.json.
+2024-12-12 14:06:29,217 [INFO] Shutdown complete.
+2024-12-12 14:06:30,076 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 14:06:30,085 [INFO] Shutting down...
+2024-12-12 14:06:30,085 [INFO] Configuration saved to config.json.
+2024-12-12 14:06:30,085 [INFO] Shutdown complete.
+2024-12-12 14:06:32,007 [INFO] Configuration loaded from config.json.
+2024-12-12 14:06:32,008 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:06:32,009 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:06:32,009 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:06:32,076 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:06:32,091 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:06:32,155 [INFO] Backend thread started.
+2024-12-12 14:06:40,392 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:06:40,408 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:06:40,423 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:06:40,436 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:06:40,445 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:06:40,455 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:06:40,465 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:06:40,486 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:06:40,496 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:06:40,516 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:06:40,526 [INFO] Configuration update completed.
+2024-12-12 14:06:40,576 [INFO] Configuration saved to config.json.
+2024-12-12 14:06:40,586 [INFO] Configuration updated successfully.
+2024-12-12 14:06:54,453 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:06:54,474 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:06:54,493 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:06:54,514 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:06:54,524 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:06:54,544 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:06:54,554 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:06:54,564 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:06:54,584 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:06:54,594 [INFO] Configuration parameter 'carrier_only' updated to 'True'.
+2024-12-12 14:06:54,614 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:06:54,634 [INFO] Configuration update completed.
+2024-12-12 14:06:54,685 [INFO] Configuration saved to config.json.
+2024-12-12 14:06:54,705 [INFO] Configuration updated successfully.
+2024-12-12 14:07:07,344 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:07:07,358 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:07:07,388 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:07:07,398 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:07:07,418 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:07:07,438 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:07:07,448 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:07:07,488 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:07:07,498 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:07:07,530 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:07:07,556 [INFO] Configuration update completed.
+2024-12-12 14:07:07,641 [INFO] Configuration saved to config.json.
+2024-12-12 14:07:07,661 [INFO] Configuration updated successfully.
+2024-12-12 14:07:16,544 [INFO] Restarting receiver...
+2024-12-12 14:07:16,559 [INFO] Stopping receiver thread...
+2024-12-12 14:07:16,571 [INFO] Receiver stopped.
+2024-12-12 14:07:17,161 [INFO] Receiver thread was not running.
+2024-12-12 14:07:17,161 [INFO] Receiver stopped.
+2024-12-12 14:07:17,161 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:07:17,161 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:07:17,171 [INFO] Receiver restarted.
+2024-12-12 14:07:17,201 [INFO] Reception restarted successfully.
+2024-12-12 14:07:38,922 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:07:38,937 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:07:38,945 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:07:38,955 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:07:38,975 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:07:38,985 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:07:39,021 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:07:39,036 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:07:39,060 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:07:39,071 [INFO] Configuration parameter 'carrier_only' updated to 'True'.
+2024-12-12 14:07:39,095 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:07:39,108 [INFO] Configuration update completed.
+2024-12-12 14:07:39,162 [INFO] Configuration saved to config.json.
+2024-12-12 14:07:39,172 [INFO] Configuration updated successfully.
+2024-12-12 14:07:52,325 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:07:52,340 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:07:52,366 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:07:52,386 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:07:52,406 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:07:52,416 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:07:52,447 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:07:52,467 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:07:52,477 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:07:52,487 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:07:52,497 [INFO] Configuration update completed.
+2024-12-12 14:07:52,557 [INFO] Configuration saved to config.json.
+2024-12-12 14:07:52,567 [INFO] Configuration updated successfully.
+2024-12-12 14:09:28,000 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 14:09:28,020 [INFO] Shutting down...
+2024-12-12 14:09:28,051 [INFO] Stopping receiver thread...
+2024-12-12 14:09:28,071 [INFO] Receiver stopped.
+2024-12-12 14:09:28,588 [INFO] UDP Listener stopped on 127.0.0.1:14582.
+2024-12-12 14:09:28,612 [INFO] Receiver thread was not running.
+2024-12-12 14:09:28,613 [INFO] Configuration saved to config.json.
+2024-12-12 14:09:28,613 [INFO] Shutdown complete.
+2024-12-12 14:09:29,758 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 14:09:29,758 [INFO] Shutting down...
+2024-12-12 14:09:29,758 [INFO] Configuration saved to config.json.
+2024-12-12 14:09:29,758 [INFO] Shutdown complete.
+2024-12-12 14:09:31,904 [INFO] Configuration loaded from config.json.
+2024-12-12 14:09:31,905 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:09:31,906 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:09:31,906 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:09:31,931 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:09:31,931 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:09:31,960 [INFO] Carrier-only mode enabled in configuration. Queuing CARRIER_ONLY message.
+2024-12-12 14:09:32,251 [INFO] Initiating carrier-only transmission.
+2024-12-12 14:09:32,264 [INFO] Stopping receiver thread...
+2024-12-12 14:09:32,264 [INFO] Backend thread started.
+2024-12-12 14:09:32,266 [INFO] Receiver stopped.
+2024-12-12 14:09:32,325 [INFO] Receiver thread was not running.
+2024-12-12 14:09:32,326 [INFO] Receiver stopped before carrier transmission.
+2024-12-12 14:09:33,326 [INFO] Error in processing message
+2024-12-12 14:09:40,390 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:09:40,390 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:09:40,390 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:09:40,390 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:09:40,390 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:09:40,390 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:09:40,390 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:09:40,390 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:09:40,390 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:09:40,390 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:09:40,390 [INFO] Configuration update completed.
+2024-12-12 14:09:40,390 [INFO] Configuration saved to config.json.
+2024-12-12 14:09:40,390 [INFO] Configuration updated successfully.
+2024-12-12 14:09:47,269 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:09:47,269 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:09:47,269 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:09:47,269 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:09:47,269 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:09:47,269 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:09:47,269 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:09:47,269 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:09:47,269 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:09:47,269 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:09:47,269 [INFO] Configuration update completed.
+2024-12-12 14:09:47,269 [INFO] Configuration saved to config.json.
+2024-12-12 14:09:47,269 [INFO] Configuration updated successfully.
+2024-12-12 14:10:12,539 [INFO] Received SIGINT (Ctrl+C). Shutting down gracefully...
+2024-12-12 14:10:12,539 [INFO] Shutting down...
+2024-12-12 14:10:12,539 [INFO] Configuration saved to config.json.
+2024-12-12 14:10:12,539 [INFO] Shutdown complete.
+2024-12-12 14:10:12,834 [INFO] UDP Listener stopped on 127.0.0.1:14582.
+2024-12-12 14:10:17,775 [INFO] Configuration loaded from config.json.
+2024-12-12 14:10:17,775 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:10:17,775 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:10:17,785 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:10:17,815 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:10:17,826 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:10:17,896 [INFO] Carrier-only mode enabled in configuration. Queuing CARRIER_ONLY message.
+2024-12-12 14:10:18,591 [INFO] Initiating carrier-only transmission.
+2024-12-12 14:10:18,605 [INFO] Stopping receiver thread...
+2024-12-12 14:10:18,621 [INFO] Receiver stopped.
+2024-12-12 14:10:18,623 [INFO] Backend thread started.
+2024-12-12 14:10:18,693 [INFO] Receiver thread was not running.
+2024-12-12 14:10:18,693 [INFO] Receiver stopped before carrier transmission.
+2024-12-12 14:10:19,694 [INFO] Error in processing message
+2024-12-12 14:10:28,790 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:10:28,790 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:10:28,790 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:10:28,790 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:10:28,790 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:10:28,790 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:10:28,790 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:10:28,790 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:10:28,790 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:10:28,790 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:10:28,790 [INFO] Configuration update completed.
+2024-12-12 14:10:28,790 [INFO] Configuration saved to config.json.
+2024-12-12 14:10:28,790 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:10:28,790 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:10:28,790 [INFO] UDP Listener restarted with IP: 127.0.0.1 and Port: 14582.
+2024-12-12 14:10:28,790 [INFO] Configuration updated successfully.
+2024-12-12 14:10:28,790 [ERROR] UDP Listener encountered an error: [WinError 10048] Une seule utilisation de chaque adresse de socket (protocole/adresse réseau/port) est habituellement autorisée
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\udp_listener.py", line 54, in udp_listener_thread
+    udp_listener(ip, port, message_queue, stop_event)  # Assuming this function blocks and listens
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\core\udp_listener.py", line 10, in udp_listener
+    sock.bind((host, port))
+OSError: [WinError 10048] Une seule utilisation de chaque adresse de socket (protocole/adresse réseau/port) est habituellement autorisée
+2024-12-12 14:10:28,802 [INFO] UDP Listener stopped on 127.0.0.1:14582.
+2024-12-12 14:10:29,185 [INFO] UDP Listener stopped on 127.0.0.1:14582.
+2024-12-12 14:10:50,158 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:10:50,159 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:10:50,159 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:10:50,159 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:10:50,159 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:10:50,159 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:10:50,159 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:10:50,159 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:10:50,159 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:10:50,159 [INFO] Configuration parameter 'carrier_only' updated to 'True'.
+2024-12-12 14:10:50,159 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:10:50,159 [INFO] Configuration update completed.
+2024-12-12 14:10:50,159 [INFO] Configuration saved to config.json.
+2024-12-12 14:10:50,159 [INFO] Stopping UDP listener thread...
+2024-12-12 14:10:50,159 [INFO] UDP listener thread was not running.
+2024-12-12 14:10:50,159 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:10:50,168 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:10:50,168 [INFO] UDP Listener stopped on 127.0.0.1:14582.
+2024-12-12 14:10:50,168 [INFO] UDP Listener restarted with IP: 127.0.0.1 and Port: 14582.
+2024-12-12 14:10:50,176 [INFO] Configuration updated successfully.
+2024-12-12 14:11:24,272 [INFO] Configuration loaded from config.json.
+2024-12-12 14:11:24,272 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:11:24,272 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:11:24,282 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:11:24,323 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:11:24,323 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:11:24,366 [INFO] Backend thread started.
+2024-12-12 14:11:34,168 [ERROR] Failed to update configuration: 'Backend' object has no attribute 'apply_new_config'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Backend' object has no attribute 'apply_new_config'
+2024-12-12 14:11:38,368 [ERROR] Failed to update configuration: 'Backend' object has no attribute 'apply_new_config'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Backend' object has no attribute 'apply_new_config'
+2024-12-12 14:11:42,278 [INFO] Restarting receiver...
+2024-12-12 14:11:42,293 [INFO] Stopping receiver thread...
+2024-12-12 14:11:42,316 [INFO] Receiver stopped.
+2024-12-12 14:11:42,886 [INFO] Receiver thread was not running.
+2024-12-12 14:11:42,886 [INFO] Receiver stopped.
+2024-12-12 14:11:42,886 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:11:42,886 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:11:42,896 [INFO] Receiver restarted.
+2024-12-12 14:11:42,927 [INFO] Reception restarted successfully.
+2024-12-12 14:11:47,967 [INFO] Restarting receiver...
+2024-12-12 14:11:47,983 [INFO] Stopping receiver thread...
+2024-12-12 14:11:48,004 [INFO] Receiver stopped.
+2024-12-12 14:11:48,045 [INFO] Receiver thread was not running.
+2024-12-12 14:11:48,045 [INFO] Receiver stopped.
+2024-12-12 14:11:48,045 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:11:48,045 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:11:48,065 [INFO] Receiver restarted.
+2024-12-12 14:11:48,105 [INFO] Reception restarted successfully.
+2024-12-12 14:11:52,415 [INFO] Restarting receiver...
+2024-12-12 14:11:52,421 [INFO] Stopping receiver thread...
+2024-12-12 14:11:52,449 [INFO] Receiver stopped.
+2024-12-12 14:11:52,519 [INFO] Receiver thread was not running.
+2024-12-12 14:11:52,519 [INFO] Receiver stopped.
+2024-12-12 14:11:52,519 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:11:52,519 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:11:52,529 [INFO] Receiver restarted.
+2024-12-12 14:11:52,570 [INFO] Reception restarted successfully.
+2024-12-12 14:13:05,165 [ERROR] Failed to update configuration: 'Backend' object has no attribute 'apply_new_config'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Backend' object has no attribute 'apply_new_config'
+2024-12-12 14:14:05,070 [INFO] Configuration loaded from config.json.
+2024-12-12 14:14:05,070 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:14:05,070 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:14:05,070 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:14:05,110 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:14:05,110 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:14:05,141 [INFO] Backend thread started.
+2024-12-12 14:14:34,765 [INFO] Configuration loaded from config.json.
+2024-12-12 14:14:34,765 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:14:34,765 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:14:34,775 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:14:34,816 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:14:34,826 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:14:34,866 [INFO] Backend thread started.
+2024-12-12 14:14:46,284 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:14:46,305 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:14:46,375 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:14:46,385 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:14:46,415 [DEBUG] Audio normalization not required.
+2024-12-12 14:14:46,445 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:14:46,485 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:14:46,535 [INFO] Stopping receiver thread...
+2024-12-12 14:14:46,545 [INFO] Receiver stopped.
+2024-12-12 14:14:46,545 [INFO] WAV files generated successfully.
+2024-12-12 14:14:46,595 [INFO] Receiver thread was not running.
+2024-12-12 14:14:46,595 [INFO] Receiver stopped before transmission.
+2024-12-12 14:14:46,635 [INFO] Transmission started.
+2024-12-12 14:14:47,999 [INFO] Transmission done
+2024-12-12 14:14:48,009 [INFO] Transmission stopped.
+2024-12-12 14:14:48,009 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:14:48,009 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:14:48,029 [INFO] Receiver thread restarted.
+2024-12-12 14:14:52,774 [ERROR] Failed to update configuration: 'Backend' object has no attribute 'lock'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\backend.py", line 175, in apply_new_config
+    with self.lock:
+         ^^^^^^^^^
+AttributeError: 'Backend' object has no attribute 'lock'
+2024-12-12 14:17:05,930 [INFO] Configuration loaded from config.json.
+2024-12-12 14:17:05,930 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:17:05,930 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:17:05,930 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:17:05,940 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:17:05,940 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:17:06,060 [INFO] Backend thread started.
+2024-12-12 14:17:12,647 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:17:12,663 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:17:12,678 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:17:12,698 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:17:12,708 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:17:12,718 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:17:12,738 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:17:12,758 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:17:12,768 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:17:12,789 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:17:12,799 [INFO] Configuration update completed.
+2024-12-12 14:17:12,849 [INFO] Configuration saved to config.json.
+2024-12-12 14:17:12,869 [INFO] Configuration applied successfully.
+2024-12-12 14:17:12,889 [INFO] Configuration updated successfully.
+2024-12-12 14:17:21,196 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:17:21,235 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:17:21,265 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:17:21,295 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:17:21,355 [DEBUG] Audio normalization not required.
+2024-12-12 14:17:21,385 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:17:21,466 [INFO] Stopping receiver thread...
+2024-12-12 14:17:21,485 [INFO] Receiver stopped.
+2024-12-12 14:17:21,485 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:17:21,485 [INFO] WAV files generated successfully.
+2024-12-12 14:17:22,027 [INFO] Receiver thread was not running.
+2024-12-12 14:17:22,027 [INFO] Receiver stopped before transmission.
+2024-12-12 14:17:22,046 [INFO] Transmission started.
+2024-12-12 14:17:23,402 [INFO] Transmission done
+2024-12-12 14:17:23,412 [INFO] Transmission stopped.
+2024-12-12 14:17:23,412 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:17:23,412 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:17:23,442 [INFO] Receiver thread restarted.
+2024-12-12 14:17:33,628 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:17:33,638 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:17:33,658 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:17:33,678 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:17:33,699 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:17:33,709 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:17:33,719 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:17:33,729 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:17:33,749 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:17:33,769 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:17:33,789 [INFO] Configuration update completed.
+2024-12-12 14:17:33,850 [INFO] Configuration saved to config.json.
+2024-12-12 14:17:33,870 [INFO] Configuration applied successfully.
+2024-12-12 14:17:33,890 [INFO] Configuration updated successfully.
+2024-12-12 14:23:03,344 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:23:03,374 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:23:03,424 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:23:03,464 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:23:03,554 [DEBUG] Audio normalization not required.
+2024-12-12 14:23:03,564 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:23:03,564 [INFO] Stopping receiver thread...
+2024-12-12 14:23:03,644 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:23:03,654 [INFO] Receiver stopped.
+2024-12-12 14:23:03,654 [INFO] WAV files generated successfully.
+2024-12-12 14:23:04,216 [INFO] Receiver thread was not running.
+2024-12-12 14:23:04,216 [INFO] Receiver stopped before transmission.
+2024-12-12 14:23:04,236 [INFO] Transmission started.
+2024-12-12 14:23:05,600 [INFO] Transmission done
+2024-12-12 14:23:05,610 [INFO] Transmission stopped.
+2024-12-12 14:23:05,610 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:23:05,610 [INFO] Receiver thread restarted.
+2024-12-12 14:23:05,610 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:23:42,965 [INFO] Configuration parameter 'frequency_hz' updated to '50020000'.
+2024-12-12 14:23:42,976 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:23:42,991 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:23:43,000 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:23:43,009 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:23:43,024 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:23:43,040 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:23:43,048 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:23:43,060 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:23:43,081 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:23:43,092 [INFO] Configuration update completed.
+2024-12-12 14:23:43,148 [INFO] Configuration saved to config.json.
+2024-12-12 14:23:43,156 [INFO] Frequency updated to 50020000 Hz.
+2024-12-12 14:23:43,164 [INFO] Stopping receiver thread...
+2024-12-12 14:23:43,178 [INFO] Receiver stopped.
+2024-12-12 14:23:43,742 [INFO] Receiver thread was not running.
+2024-12-12 14:23:43,742 [INFO] Reception stopped.
+2024-12-12 14:23:43,742 [ERROR] Failed to update configuration: 'device_index_var'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\backend.py", line 194, in apply_new_config
+    self.start_reception()
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\backend.py", line 112, in start_reception
+    device_index=self.vars['device_index_var'].get(),
+                 ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'device_index_var'
+2024-12-12 14:25:05,215 [INFO] Configuration loaded from config.json.
+2024-12-12 14:25:05,215 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:25:05,215 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:25:05,215 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:25:05,225 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:25:05,255 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:25:05,981 [INFO] Backend thread started.
+2024-12-12 14:25:12,132 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:25:12,163 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:25:12,184 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:25:12,204 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:25:12,214 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:25:12,235 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:25:12,256 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:25:12,281 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:25:12,299 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:25:12,323 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:25:12,339 [INFO] Configuration update completed.
+2024-12-12 14:25:12,419 [INFO] Configuration saved to config.json.
+2024-12-12 14:25:12,445 [INFO] Frequency updated to 50010000 Hz.
+2024-12-12 14:25:12,461 [INFO] Stopping receiver thread...
+2024-12-12 14:25:12,468 [INFO] Receiver stopped.
+2024-12-12 14:25:12,519 [INFO] Receiver thread was not running.
+2024-12-12 14:25:12,519 [INFO] Reception stopped.
+2024-12-12 14:25:12,519 [ERROR] Failed to update configuration: 'device_index_var'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\backend.py", line 194, in apply_new_config
+    self.start_reception()
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\backend.py", line 112, in start_reception
+    device_index=self.vars['device_index_var'].get(),
+                 ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'device_index_var'
+2024-12-12 14:27:42,825 [INFO] Configuration loaded from config.json.
+2024-12-12 14:27:42,825 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:27:42,827 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:27:42,827 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:27:42,857 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:27:42,889 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:27:42,936 [INFO] Backend thread started.
+2024-12-12 14:27:47,887 [INFO] Configuration parameter 'frequency_hz' updated to '50020000'.
+2024-12-12 14:27:47,919 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:27:47,950 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:27:47,981 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:27:48,013 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:27:48,044 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:27:48,075 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:27:48,106 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:27:48,137 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:27:48,169 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:27:48,199 [INFO] Configuration update completed.
+2024-12-12 14:27:48,339 [INFO] Configuration saved to config.json.
+2024-12-12 14:27:48,385 [INFO] Frequency updated to 50020000 Hz.
+2024-12-12 14:27:48,417 [INFO] Stopping receiver thread...
+2024-12-12 14:27:48,433 [INFO] Receiver stopped.
+2024-12-12 14:27:48,473 [INFO] Receiver thread was not running.
+2024-12-12 14:27:48,473 [INFO] Reception stopped.
+2024-12-12 14:27:48,474 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:27:48,474 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:27:48,474 [INFO] Receiver stopped.
+2024-12-12 14:27:48,474 [INFO] Reception started.
+2024-12-12 14:27:48,717 [INFO] Receiver restarted with new frequency.
+2024-12-12 14:27:48,721 [INFO] Configuration applied successfully.
+2024-12-12 14:27:48,721 [INFO] Configuration updated successfully.
+2024-12-12 14:28:06,030 [INFO] Configuration parameter 'frequency_hz' updated to '50020000'.
+2024-12-12 14:28:06,030 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:28:06,031 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:28:06,031 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:28:06,031 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:28:06,032 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:28:06,033 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:28:06,033 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:28:06,033 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:28:06,034 [INFO] Configuration parameter 'carrier_only' updated to 'True'.
+2024-12-12 14:28:06,034 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:28:06,034 [INFO] Configuration update completed.
+2024-12-12 14:28:06,034 [INFO] Configuration saved to config.json.
+2024-12-12 14:28:06,034 [INFO] Carrier Only setting changed to True.
+2024-12-12 14:28:06,035 [ERROR] Failed to update configuration: CarrierTransmission.__init__() got an unexpected keyword argument 'backend'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\backend.py", line 260, in apply_new_config
+    self.queues['carrier_transmission'] = CarrierTransmission(
+                                          ^^^^^^^^^^^^^^^^^^^^
+TypeError: CarrierTransmission.__init__() got an unexpected keyword argument 'backend'
+2024-12-12 14:28:43,814 [INFO] Configuration loaded from config.json.
+2024-12-12 14:28:43,815 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:28:43,816 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:28:43,816 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:28:43,931 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:28:43,947 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:28:43,979 [INFO] Carrier-only mode enabled in configuration. Queuing CARRIER_ONLY message.
+2024-12-12 14:28:44,790 [INFO] Initiating carrier-only transmission.
+2024-12-12 14:28:44,805 [INFO] Backend thread started.
+2024-12-12 14:28:44,805 [INFO] Stopping receiver thread...
+2024-12-12 14:28:44,910 [INFO] Receiver stopped.
+2024-12-12 14:28:44,956 [INFO] Receiver thread was not running.
+2024-12-12 14:28:44,956 [INFO] Receiver stopped before carrier transmission.
+2024-12-12 14:28:45,957 [INFO] Error in processing message
+2024-12-12 14:28:56,079 [INFO] Configuration parameter 'frequency_hz' updated to '50020000'.
+2024-12-12 14:28:56,079 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:28:56,079 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:28:56,080 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:28:56,080 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:28:56,081 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:28:56,081 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:28:56,082 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:28:56,082 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:28:56,083 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:28:56,083 [INFO] Configuration update completed.
+2024-12-12 14:28:56,084 [INFO] Configuration saved to config.json.
+2024-12-12 14:28:56,085 [INFO] Configuration applied successfully.
+2024-12-12 14:28:56,085 [INFO] Configuration updated successfully.
+2024-12-12 14:29:07,791 [INFO] Configuration loaded from config.json.
+2024-12-12 14:29:07,791 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:29:07,793 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:29:07,793 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:29:07,821 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:29:07,836 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:29:07,836 [INFO] Carrier-only mode enabled in configuration. Queuing CARRIER_ONLY message.
+2024-12-12 14:29:07,899 [INFO] Initiating carrier-only transmission.
+2024-12-12 14:29:07,918 [INFO] Stopping receiver thread...
+2024-12-12 14:29:08,610 [INFO] Backend thread started.
+2024-12-12 14:29:08,610 [INFO] Receiver stopped.
+2024-12-12 14:29:08,670 [INFO] Receiver thread was not running.
+2024-12-12 14:29:08,670 [INFO] Receiver stopped before carrier transmission.
+2024-12-12 14:29:09,676 [INFO] Error in processing message
+2024-12-12 14:29:26,303 [INFO] Configuration loaded from config.json.
+2024-12-12 14:29:26,311 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:29:26,313 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:29:26,333 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:29:26,343 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:29:26,343 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:29:26,364 [INFO] Backend thread started.
+2024-12-12 14:29:51,815 [INFO] Configuration loaded from config.json.
+2024-12-12 14:29:51,815 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:29:51,815 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:29:51,815 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:29:51,835 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:29:51,855 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:29:51,915 [INFO] Backend thread started.
+2024-12-12 14:30:00,570 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:30:00,585 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:30:00,617 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:30:00,679 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:30:00,695 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:30:00,726 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:30:00,741 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:30:00,756 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:30:00,772 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:30:00,788 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:30:00,803 [INFO] Configuration update completed.
+2024-12-12 14:30:00,914 [INFO] Configuration saved to config.json.
+2024-12-12 14:30:00,945 [INFO] Frequency updated to 50010000 Hz.
+2024-12-12 14:30:00,960 [INFO] Stopping receiver thread...
+2024-12-12 14:30:00,976 [INFO] Receiver stopped.
+2024-12-12 14:30:01,070 [INFO] Receiver thread was not running.
+2024-12-12 14:30:01,071 [INFO] Reception stopped.
+2024-12-12 14:30:01,072 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:30:01,073 [INFO] Reception started.
+2024-12-12 14:30:01,073 [INFO] Receiver stopped.
+2024-12-12 14:30:01,073 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:30:01,074 [INFO] Receiver restarted with new frequency.
+2024-12-12 14:30:01,075 [INFO] Configuration applied successfully.
+2024-12-12 14:30:01,099 [INFO] Configuration updated successfully.
+2024-12-12 14:30:12,499 [INFO] Configuration loaded from config.json.
+2024-12-12 14:30:12,499 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:30:12,501 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:30:12,501 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:30:12,561 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:30:12,592 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:30:12,671 [INFO] Backend thread started.
+2024-12-12 14:30:16,725 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:30:16,756 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:30:16,771 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:30:16,802 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:30:16,832 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:30:16,896 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:30:16,911 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:30:16,942 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:30:16,974 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:30:17,021 [INFO] Configuration parameter 'carrier_only' updated to 'True'.
+2024-12-12 14:30:17,053 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:30:17,053 [INFO] Configuration update completed.
+2024-12-12 14:30:17,131 [INFO] Configuration saved to config.json.
+2024-12-12 14:30:17,147 [INFO] Carrier Only setting changed to True.
+2024-12-12 14:30:17,180 [INFO] Carrier-only transmission thread started.
+2024-12-12 14:30:17,193 [ERROR] Failed to initialize HackRF for carrier-only mode.
+2024-12-12 14:30:17,224 [INFO] Carrier Transmission started.
+2024-12-12 14:30:17,287 [INFO] Configuration applied successfully.
+2024-12-12 14:30:17,302 [INFO] Configuration updated successfully.
+2024-12-12 14:30:30,117 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:30:30,149 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:30:30,196 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:30:30,228 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:30:30,258 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:30:30,290 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:30:30,321 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:30:30,337 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:30:30,384 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:30:30,415 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:30:30,431 [INFO] Configuration update completed.
+2024-12-12 14:30:30,523 [INFO] Configuration saved to config.json.
+2024-12-12 14:30:30,554 [INFO] Configuration applied successfully.
+2024-12-12 14:30:30,584 [INFO] Configuration updated successfully.
+2024-12-12 14:30:51,041 [INFO] Configuration loaded from config.json.
+2024-12-12 14:30:51,041 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:30:51,041 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:30:51,041 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:30:51,056 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:30:51,056 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:30:51,132 [INFO] Backend thread started.
+2024-12-12 14:31:29,496 [INFO] Configuration parameter 'frequency_hz' updated to '50020000'.
+2024-12-12 14:31:29,511 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:31:29,527 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:31:29,542 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:31:29,574 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:31:29,605 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:31:29,621 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:31:29,637 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:31:29,652 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:31:29,683 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:31:29,715 [INFO] Configuration update completed.
+2024-12-12 14:31:29,809 [INFO] Configuration saved to config.json.
+2024-12-12 14:31:29,828 [INFO] Frequency updated to 50020000 Hz.
+2024-12-12 14:31:29,860 [INFO] Stopping receiver thread...
+2024-12-12 14:31:29,878 [INFO] Receiver stopped.
+2024-12-12 14:31:30,445 [INFO] Receiver thread was not running.
+2024-12-12 14:31:30,445 [INFO] Reception stopped.
+2024-12-12 14:31:30,446 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:31:30,446 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:31:30,446 [INFO] Receiver stopped.
+2024-12-12 14:31:30,446 [INFO] Reception started.
+2024-12-12 14:31:30,447 [INFO] Receiver restarted with new frequency.
+2024-12-12 14:31:30,493 [INFO] Configuration applied successfully.
+2024-12-12 14:31:30,788 [INFO] Configuration updated successfully.
+2024-12-12 14:34:07,597 [INFO] Configuration loaded from config.json.
+2024-12-12 14:34:07,597 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:34:07,599 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:34:07,599 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:34:07,637 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:34:07,653 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:34:08,368 [INFO] Backend thread started.
+2024-12-12 14:34:12,235 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:34:12,266 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:34:12,282 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:34:12,314 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:34:12,329 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:34:12,361 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:34:12,424 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:34:12,456 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:34:12,487 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:34:12,519 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:34:12,551 [INFO] Configuration update completed.
+2024-12-12 14:34:12,710 [INFO] Configuration saved to config.json.
+2024-12-12 14:34:12,741 [INFO] Frequency updated to 50010000 Hz.
+2024-12-12 14:34:12,772 [INFO] Stopping receiver thread...
+2024-12-12 14:34:12,805 [INFO] Receiver stopped.
+2024-12-12 14:34:12,843 [INFO] Receiver thread was not running.
+2024-12-12 14:34:12,843 [INFO] Receiver stopped.
+2024-12-12 14:34:12,843 [ERROR] Failed to update configuration: 'Backend' object has no attribute 'backend'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\backend.py", line 201, in apply_new_config
+    self.backend.socketio.emit('reception_status', {'status': 'idle'})
+    ^^^^^^^^^^^^
+AttributeError: 'Backend' object has no attribute 'backend'
+2024-12-12 14:35:43,702 [INFO] Configuration loaded from config.json.
+2024-12-12 14:35:43,702 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:35:43,703 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:35:43,703 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:35:43,790 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:35:43,806 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:35:44,586 [INFO] Backend thread started.
+2024-12-12 14:35:48,860 [INFO] Configuration parameter 'frequency_hz' updated to '50020000'.
+2024-12-12 14:35:48,890 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:35:48,921 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:35:48,952 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:35:48,984 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:35:49,015 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:35:49,046 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:35:49,062 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:35:49,078 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:35:49,094 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:35:49,141 [INFO] Configuration update completed.
+2024-12-12 14:35:49,282 [INFO] Configuration saved to config.json.
+2024-12-12 14:35:49,313 [INFO] Frequency updated to 50020000 Hz.
+2024-12-12 14:35:49,345 [INFO] Stopping receiver thread...
+2024-12-12 14:35:49,376 [INFO] Receiver stopped.
+2024-12-12 14:35:49,417 [INFO] Receiver thread was not running.
+2024-12-12 14:35:49,418 [INFO] Receiver stopped.
+2024-12-12 14:35:49,418 [ERROR] Failed to update configuration: 'Backend' object has no attribute 'backend'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\backend.py", line 209, in apply_new_config
+    backend=self.backend  # Pass reference to Backend for emitting events
+            ^^^^^^^^^^^^
+AttributeError: 'Backend' object has no attribute 'backend'
+2024-12-12 14:36:51,455 [INFO] Configuration loaded from config.json.
+2024-12-12 14:36:51,455 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:36:51,457 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:36:51,457 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:36:51,502 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:36:51,502 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:36:51,534 [INFO] Backend thread started.
+2024-12-12 14:36:58,216 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:36:58,247 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:36:58,263 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:36:58,295 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:36:58,327 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:36:58,358 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:36:58,390 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:36:58,421 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:36:58,452 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:36:58,484 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:36:58,515 [INFO] Configuration update completed.
+2024-12-12 14:36:58,594 [INFO] Configuration saved to config.json.
+2024-12-12 14:36:58,626 [INFO] Frequency updated to 50010000 Hz.
+2024-12-12 14:36:58,674 [INFO] Stopping receiver thread...
+2024-12-12 14:36:58,706 [INFO] Receiver stopped.
+2024-12-12 14:36:58,760 [INFO] Receiver thread was not running.
+2024-12-12 14:36:58,760 [INFO] Receiver stopped.
+2024-12-12 14:36:58,760 [ERROR] Failed to update configuration: Receiver.__init__() missing 1 required positional argument: 'backend'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\backend.py", line 204, in apply_new_config
+    receiver = Receiver(
+               ^^^^^^^^^
+TypeError: Receiver.__init__() missing 1 required positional argument: 'backend'
+2024-12-12 14:37:15,985 [INFO] Configuration loaded from config.json.
+2024-12-12 14:37:15,985 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:37:15,987 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:37:15,987 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:37:16,008 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:37:16,008 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:37:16,071 [INFO] Backend thread started.
+2024-12-12 14:37:19,830 [INFO] Configuration parameter 'frequency_hz' updated to '50020000'.
+2024-12-12 14:37:19,861 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:37:19,892 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:37:19,924 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:37:19,956 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:37:19,987 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:37:20,002 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:37:20,018 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:37:20,033 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:37:20,048 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:37:20,064 [INFO] Configuration update completed.
+2024-12-12 14:37:20,127 [INFO] Configuration saved to config.json.
+2024-12-12 14:37:20,143 [INFO] Frequency updated to 50020000 Hz.
+2024-12-12 14:37:20,174 [INFO] Stopping receiver thread...
+2024-12-12 14:37:20,190 [INFO] Receiver stopped.
+2024-12-12 14:37:20,245 [INFO] Receiver thread was not running.
+2024-12-12 14:37:20,245 [INFO] Receiver stopped.
+2024-12-12 14:37:20,246 [ERROR] Failed to update configuration: 'Backend' object has no attribute 'backend'
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\webui.py", line 53, in update_config
+    backend.apply_new_config(new_config)
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\backend.py", line 209, in apply_new_config
+    backend=self.backend  # Pass reference to Backend for emitting events
+            ^^^^^^^^^^^^
+AttributeError: 'Backend' object has no attribute 'backend'
+2024-12-12 14:37:46,751 [INFO] Configuration loaded from config.json.
+2024-12-12 14:37:46,751 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:37:46,761 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:37:46,761 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:37:46,811 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:37:46,811 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:37:46,871 [INFO] Backend thread started.
+2024-12-12 14:37:51,878 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:37:51,909 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:37:51,940 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:37:51,971 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:37:52,002 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:37:52,033 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:37:52,065 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:37:52,096 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:37:52,128 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:37:52,159 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:37:52,191 [INFO] Configuration update completed.
+2024-12-12 14:37:52,285 [INFO] Configuration saved to config.json.
+2024-12-12 14:37:52,316 [INFO] Frequency updated to 50010000 Hz.
+2024-12-12 14:37:52,348 [INFO] Stopping receiver thread...
+2024-12-12 14:37:52,381 [INFO] Receiver stopped.
+2024-12-12 14:37:52,420 [INFO] Receiver thread was not running.
+2024-12-12 14:37:52,420 [INFO] Receiver stopped.
+2024-12-12 14:37:52,421 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:37:52,426 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:37:52,474 [INFO] Receiver restarted.
+2024-12-12 14:37:52,490 [INFO] Configuration applied successfully.
+2024-12-12 14:37:52,522 [INFO] Configuration updated successfully.
+2024-12-12 14:38:00,437 [INFO] Configuration parameter 'frequency_hz' updated to '50020000'.
+2024-12-12 14:38:00,467 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:38:00,530 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:38:00,545 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:38:00,560 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:38:00,576 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:38:00,608 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:38:00,638 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:38:00,654 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:38:00,670 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:38:00,686 [INFO] Configuration update completed.
+2024-12-12 14:38:00,764 [INFO] Configuration saved to config.json.
+2024-12-12 14:38:00,779 [INFO] Frequency updated to 50020000 Hz.
+2024-12-12 14:38:00,811 [INFO] Stopping receiver thread...
+2024-12-12 14:38:00,833 [INFO] Receiver stopped.
+2024-12-12 14:38:00,889 [INFO] Receiver thread was not running.
+2024-12-12 14:38:00,889 [INFO] Receiver stopped.
+2024-12-12 14:38:00,890 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:38:00,890 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:38:00,903 [INFO] Receiver restarted.
+2024-12-12 14:38:00,965 [INFO] Configuration applied successfully.
+2024-12-12 14:38:01,043 [INFO] Configuration updated successfully.
+2024-12-12 14:45:14,282 [INFO] Configuration loaded from config.json.
+2024-12-12 14:45:14,282 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:45:14,289 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:45:14,289 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:45:14,298 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:45:14,314 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:45:14,512 [INFO] Backend thread started.
+2024-12-12 14:45:44,692 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:45:44,742 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:45:44,766 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:45:44,775 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:45:44,790 [DEBUG] Audio normalization not required.
+2024-12-12 14:45:44,799 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:45:44,940 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:45:45,040 [INFO] Stopping receiver thread...
+2024-12-12 14:45:45,057 [INFO] WAV files generated successfully.
+2024-12-12 14:45:45,065 [INFO] Receiver stopped.
+2024-12-12 14:45:45,707 [INFO] Receiver thread was not running.
+2024-12-12 14:45:45,707 [INFO] Receiver stopped before transmission.
+2024-12-12 14:45:45,751 [INFO] Transmission started.
+2024-12-12 14:45:47,112 [INFO] Transmission done
+2024-12-12 14:45:47,120 [INFO] Transmission stopped.
+2024-12-12 14:45:47,120 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:45:47,120 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:45:47,128 [INFO] Receiver thread restarted.
+2024-12-12 14:46:35,853 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:46:35,902 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:46:35,944 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:46:35,952 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:46:35,993 [DEBUG] Audio normalization not required.
+2024-12-12 14:46:36,044 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:46:36,192 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:46:36,275 [INFO] Stopping receiver thread...
+2024-12-12 14:46:36,284 [INFO] Receiver stopped.
+2024-12-12 14:46:36,284 [INFO] WAV files generated successfully.
+2024-12-12 14:46:36,933 [INFO] Receiver thread was not running.
+2024-12-12 14:46:36,933 [INFO] Receiver stopped before transmission.
+2024-12-12 14:46:36,982 [INFO] Transmission started.
+2024-12-12 14:46:38,346 [INFO] Transmission done
+2024-12-12 14:46:38,351 [INFO] Transmission stopped.
+2024-12-12 14:46:38,351 [INFO] Receiver thread started on device 0 at 50020000.00 Hz.
+2024-12-12 14:46:38,351 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:46:38,375 [INFO] Receiver thread restarted.
+2024-12-12 14:46:47,734 [INFO] Configuration parameter 'frequency_hz' updated to '50010000'.
+2024-12-12 14:46:47,751 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 14:46:47,768 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 14:46:47,784 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 14:46:47,810 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 14:46:47,818 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 14:46:47,843 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 14:46:47,875 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 14:46:47,892 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 14:46:47,908 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 14:46:47,933 [INFO] Configuration update completed.
+2024-12-12 14:46:48,018 [INFO] Configuration saved to config.json.
+2024-12-12 14:46:48,044 [INFO] Frequency updated to 50010000 Hz.
+2024-12-12 14:46:48,076 [INFO] Stopping receiver thread...
+2024-12-12 14:46:48,093 [INFO] Receiver stopped.
+2024-12-12 14:46:48,190 [INFO] Receiver thread was not running.
+2024-12-12 14:46:48,190 [INFO] Receiver stopped.
+2024-12-12 14:46:48,190 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:46:48,198 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:46:48,207 [INFO] Receiver restarted.
+2024-12-12 14:46:48,301 [INFO] Configuration applied successfully.
+2024-12-12 14:46:48,313 [INFO] Configuration updated successfully.
+2024-12-12 14:46:52,672 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:46:52,715 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:46:52,775 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:46:52,808 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:46:52,889 [DEBUG] Audio normalization not required.
+2024-12-12 14:46:53,032 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:46:53,054 [INFO] Stopping receiver thread...
+2024-12-12 14:46:53,055 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:46:53,129 [INFO] Receiver stopped.
+2024-12-12 14:46:53,141 [INFO] WAV files generated successfully.
+2024-12-12 14:46:53,216 [INFO] Receiver thread was not running.
+2024-12-12 14:46:53,216 [INFO] Receiver stopped before transmission.
+2024-12-12 14:46:53,273 [INFO] Transmission started.
+2024-12-12 14:46:54,635 [INFO] Transmission done
+2024-12-12 14:46:54,642 [INFO] Transmission stopped.
+2024-12-12 14:46:54,643 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:46:54,643 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:46:54,659 [INFO] Receiver thread restarted.
+2024-12-12 14:47:20,863 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:47:20,913 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:47:20,937 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:47:20,945 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:47:20,986 [DEBUG] Audio normalization not required.
+2024-12-12 14:47:21,003 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:47:21,135 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:47:21,310 [INFO] Stopping receiver thread...
+2024-12-12 14:47:21,327 [INFO] Receiver stopped.
+2024-12-12 14:47:21,328 [INFO] WAV files generated successfully.
+2024-12-12 14:47:21,956 [INFO] Receiver thread was not running.
+2024-12-12 14:47:21,956 [INFO] Receiver stopped before transmission.
+2024-12-12 14:47:21,986 [INFO] Transmission started.
+2024-12-12 14:47:23,355 [INFO] Transmission done
+2024-12-12 14:47:23,363 [INFO] Transmission stopped.
+2024-12-12 14:47:23,364 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:47:23,364 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:47:23,372 [INFO] Receiver thread restarted.
+2024-12-12 14:48:07,894 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:48:07,928 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:48:07,961 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:48:07,994 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:48:08,052 [DEBUG] Audio normalization not required.
+2024-12-12 14:48:08,119 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:48:08,275 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:48:08,358 [INFO] Stopping receiver thread...
+2024-12-12 14:48:08,400 [INFO] Receiver stopped.
+2024-12-12 14:48:08,400 [INFO] WAV files generated successfully.
+2024-12-12 14:48:09,014 [INFO] Receiver thread was not running.
+2024-12-12 14:48:09,014 [INFO] Receiver stopped before transmission.
+2024-12-12 14:48:09,063 [INFO] Transmission started.
+2024-12-12 14:48:15,264 [INFO] Transmission done
+2024-12-12 14:48:15,276 [INFO] Transmission stopped.
+2024-12-12 14:48:15,276 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:48:15,276 [INFO] Receiver thread restarted.
+2024-12-12 14:48:15,276 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:48:29,198 [INFO] Configuration loaded from config.json.
+2024-12-12 14:48:29,198 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:48:29,202 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:48:29,202 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:48:29,262 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:48:29,294 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:48:29,368 [INFO] Backend thread started.
+2024-12-12 14:48:41,149 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:48:41,166 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:48:41,206 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:48:41,214 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:48:41,281 [DEBUG] Audio normalization not required.
+2024-12-12 14:48:41,334 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:48:41,513 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:48:41,540 [INFO] Stopping receiver thread...
+2024-12-12 14:48:41,573 [INFO] Receiver stopped.
+2024-12-12 14:48:41,575 [INFO] WAV files generated successfully.
+2024-12-12 14:48:42,205 [INFO] Receiver thread was not running.
+2024-12-12 14:48:42,205 [INFO] Receiver stopped before transmission.
+2024-12-12 14:48:42,263 [INFO] Transmission started.
+2024-12-12 14:48:43,627 [INFO] Transmission done
+2024-12-12 14:48:43,632 [INFO] Transmission stopped.
+2024-12-12 14:48:43,632 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:48:43,635 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:48:43,651 [INFO] Receiver thread restarted.
+2024-12-12 14:48:56,380 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:48:56,430 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:48:56,463 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:48:56,479 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:48:56,512 [DEBUG] Audio normalization not required.
+2024-12-12 14:48:56,562 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:48:56,627 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:48:56,784 [INFO] Stopping receiver thread...
+2024-12-12 14:48:56,801 [INFO] WAV files generated successfully.
+2024-12-12 14:48:56,801 [INFO] Receiver stopped.
+2024-12-12 14:48:57,438 [INFO] Receiver thread was not running.
+2024-12-12 14:48:57,438 [INFO] Receiver stopped before transmission.
+2024-12-12 14:48:57,479 [INFO] Transmission started.
+2024-12-12 14:49:03,683 [INFO] Transmission done
+2024-12-12 14:49:03,691 [INFO] Transmission stopped.
+2024-12-12 14:49:03,691 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:49:03,691 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:49:03,699 [INFO] Receiver thread restarted.
+2024-12-12 14:50:00,969 [INFO] Configuration loaded from config.json.
+2024-12-12 14:50:00,969 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:50:00,978 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:50:00,978 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:50:00,995 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:50:01,010 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:50:01,110 [INFO] Backend thread started.
+2024-12-12 14:53:22,044 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:53:22,101 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 14:53:22,109 [DEBUG] Audio data type before processing: float32
+2024-12-12 14:53:22,109 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 14:53:22,216 [DEBUG] Audio normalization not required.
+2024-12-12 14:53:22,241 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 14:53:22,307 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 14:53:22,340 [INFO] Stopping receiver thread...
+2024-12-12 14:53:22,389 [INFO] Receiver stopped.
+2024-12-12 14:53:22,390 [INFO] WAV files generated successfully.
+2024-12-12 14:53:23,042 [INFO] Receiver thread was not running.
+2024-12-12 14:53:23,044 [INFO] Receiver stopped before transmission.
+2024-12-12 14:53:23,085 [INFO] Transmission started.
+2024-12-12 14:53:24,446 [INFO] Transmission done
+2024-12-12 14:53:24,454 [INFO] Transmission stopped.
+2024-12-12 14:53:24,454 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:53:24,454 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:53:24,473 [INFO] Receiver thread restarted.
+2024-12-12 14:55:13,630 [INFO] Configuration loaded from config.json.
+2024-12-12 14:55:13,630 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:55:13,630 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 14:55:13,630 [DEBUG] Using proactor: IocpProactor
+2024-12-12 14:55:13,640 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 14:55:13,650 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 14:55:13,740 [INFO] Backend thread started.
+2024-12-12 15:02:40,593 [INFO] Configuration loaded from config.json.
+2024-12-12 15:02:40,593 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:02:40,593 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 15:02:40,593 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:02:40,625 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:02:40,657 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:02:41,094 [INFO] Backend thread started.
+2024-12-12 15:03:10,083 [INFO] Configuration loaded from config.json.
+2024-12-12 15:03:10,083 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:03:10,083 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 15:03:10,083 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:03:10,107 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:03:10,140 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:03:10,205 [INFO] Backend thread started.
+2024-12-12 15:03:27,889 [INFO] Configuration loaded from config.json.
+2024-12-12 15:03:27,889 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:03:27,889 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 15:03:27,889 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:03:27,897 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:03:27,913 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:03:28,069 [INFO] Backend thread started.
+2024-12-12 15:04:12,081 [INFO] Configuration loaded from config.json.
+2024-12-12 15:04:12,081 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:04:12,081 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 15:04:12,081 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:04:12,162 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:04:12,212 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:04:12,277 [INFO] Backend thread started.
+2024-12-12 15:06:33,335 [INFO] Configuration loaded from config.json.
+2024-12-12 15:06:33,335 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:06:33,345 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 15:06:33,345 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:06:33,345 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:06:33,345 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:06:33,345 [INFO] Backend thread started.
+2024-12-12 15:07:05,108 [INFO] Configuration loaded from config.json.
+2024-12-12 15:07:05,108 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:07:05,108 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 15:07:05,108 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:07:05,157 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:07:05,173 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:07:05,669 [INFO] Backend thread started.
+2024-12-12 15:08:21,111 [INFO] Configuration loaded from config.json.
+2024-12-12 15:08:21,111 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:08:21,119 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 15:08:21,119 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:08:21,177 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:08:21,177 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:08:21,277 [INFO] Backend thread started.
+2024-12-12 15:09:09,700 [INFO] Configuration parameter 'frequency_hz' updated to '144390000'.
+2024-12-12 15:09:09,716 [INFO] Configuration parameter 'gain' updated to '14'.
+2024-12-12 15:09:09,741 [INFO] Configuration parameter 'if_gain' updated to '47'.
+2024-12-12 15:09:09,749 [INFO] Configuration parameter 'callsign_source' updated to 'VE2FPD'.
+2024-12-12 15:09:09,768 [INFO] Configuration parameter 'callsign_dest' updated to 'APRS'.
+2024-12-12 15:09:09,776 [INFO] Configuration parameter 'flags_before' updated to '50'.
+2024-12-12 15:09:09,792 [INFO] Configuration parameter 'flags_after' updated to '4'.
+2024-12-12 15:09:09,809 [INFO] Configuration parameter 'send_ip' updated to '127.0.0.1'.
+2024-12-12 15:09:09,862 [INFO] Configuration parameter 'send_port' updated to '14582'.
+2024-12-12 15:09:09,894 [INFO] Configuration parameter 'device_index' updated to '0'.
+2024-12-12 15:09:09,927 [INFO] Configuration update completed.
+2024-12-12 15:09:10,010 [INFO] Configuration saved to config.json.
+2024-12-12 15:09:10,045 [INFO] Frequency updated to 144390000 Hz.
+2024-12-12 15:09:10,053 [INFO] Stopping receiver thread...
+2024-12-12 15:09:10,094 [INFO] Receiver stopped.
+2024-12-12 15:09:10,753 [INFO] Receiver thread was not running.
+2024-12-12 15:09:10,753 [INFO] Receiver stopped.
+2024-12-12 15:09:10,753 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:09:10,753 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:09:10,784 [INFO] Receiver restarted.
+2024-12-12 15:09:10,901 [INFO] Configuration applied successfully.
+2024-12-12 15:09:10,917 [INFO] Configuration updated successfully.
+2024-12-12 15:09:24,349 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 15:09:24,372 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 15:09:24,390 [DEBUG] Audio data type before processing: float32
+2024-12-12 15:09:24,407 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 15:09:24,436 [DEBUG] Audio normalization not required.
+2024-12-12 15:09:24,447 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 15:09:24,469 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 15:09:24,579 [INFO] WAV files generated successfully.
+2024-12-12 15:09:24,669 [INFO] Stopping receiver thread...
+2024-12-12 15:09:24,689 [INFO] Receiver stopped.
+2024-12-12 15:09:24,752 [INFO] Receiver thread was not running.
+2024-12-12 15:09:24,752 [INFO] Receiver stopped before transmission.
+2024-12-12 15:09:24,786 [INFO] Transmission started.
+2024-12-12 15:09:26,149 [INFO] Transmission done
+2024-12-12 15:09:26,149 [INFO] Transmission stopped.
+2024-12-12 15:09:26,149 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:09:26,159 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:09:26,169 [INFO] Receiver thread restarted.
+2024-12-12 15:11:25,308 [INFO] Configuration loaded from config.json.
+2024-12-12 15:11:25,308 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:11:25,317 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:11:25,317 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:11:25,400 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:11:25,416 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:11:25,871 [INFO] Backend thread started.
+2024-12-12 15:13:22,416 [INFO] Configuration loaded from config.json.
+2024-12-12 15:13:22,416 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:13:22,422 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:13:22,422 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:13:22,506 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:13:22,522 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:13:22,587 [INFO] Backend thread started.
+2024-12-12 15:13:52,428 [INFO] Configuration loaded from config.json.
+2024-12-12 15:13:52,428 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:13:52,428 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:13:52,436 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:13:52,461 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:13:52,469 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:13:52,567 [INFO] Backend thread started.
+2024-12-12 15:15:06,112 [INFO] Configuration loaded from config.json.
+2024-12-12 15:15:06,112 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:15:06,112 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:15:06,120 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:15:06,153 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:15:06,153 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:15:06,235 [INFO] Backend thread started.
+2024-12-12 15:16:22,727 [INFO] Configuration loaded from config.json.
+2024-12-12 15:16:22,737 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:16:22,737 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:16:22,747 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:16:22,757 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:16:22,768 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:16:22,828 [INFO] Backend thread started.
+2024-12-12 15:16:43,255 [INFO] Configuration loaded from config.json.
+2024-12-12 15:16:43,255 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:16:43,255 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:16:43,263 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:16:43,296 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:16:43,345 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:16:43,410 [INFO] Backend thread started.
+2024-12-12 15:17:21,602 [INFO] Configuration loaded from config.json.
+2024-12-12 15:17:21,602 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:17:21,602 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:17:21,605 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:17:21,626 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:17:21,626 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:17:21,686 [INFO] Backend thread started.
+2024-12-12 15:17:33,403 [INFO] Configuration loaded from config.json.
+2024-12-12 15:17:33,403 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:17:33,409 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:17:33,409 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:17:33,444 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:17:33,464 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:17:33,831 [INFO] Backend thread started.
+2024-12-12 15:20:37,767 [INFO] Configuration loaded from config.json.
+2024-12-12 15:20:37,767 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:20:37,767 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:20:37,767 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:20:37,808 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:20:37,828 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:20:38,777 [INFO] Backend thread started.
+2024-12-12 15:21:32,759 [INFO] Configuration loaded from config.json.
+2024-12-12 15:21:32,759 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:21:32,759 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:21:32,764 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:21:32,776 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:21:32,776 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:21:32,892 [INFO] Backend thread started.
+2024-12-12 15:22:22,982 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:23:37,315 [INFO] Configuration loaded from config.json.
+2024-12-12 15:23:37,315 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:23:37,315 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:23:37,315 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:23:37,315 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:23:37,315 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:23:37,348 [INFO] Backend thread started.
+2024-12-12 15:24:17,877 [INFO] Configuration loaded from config.json.
+2024-12-12 15:24:17,877 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:24:17,887 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:24:17,887 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:24:17,907 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:24:17,907 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:24:18,869 [INFO] Backend thread started.
+2024-12-12 15:29:25,655 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:29:42,262 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:39:04,907 [INFO] Configuration loaded from config.json.
+2024-12-12 15:39:04,907 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:39:04,915 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:39:04,915 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:39:04,981 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:39:04,981 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:39:05,046 [INFO] Backend thread started.
+2024-12-12 15:39:15,682 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:41:02,161 [INFO] Configuration loaded from config.json.
+2024-12-12 15:41:02,161 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:41:02,164 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:41:02,164 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:41:02,186 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:41:02,186 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:41:02,278 [INFO] Backend thread started.
+2024-12-12 15:41:14,286 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:42:27,852 [INFO] Configuration loaded from config.json.
+2024-12-12 15:42:27,860 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:42:27,863 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:42:27,863 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:42:27,877 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:42:27,894 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:42:28,387 [INFO] Backend thread started.
+2024-12-12 15:42:39,739 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:45:57,219 [INFO] Configuration loaded from config.json.
+2024-12-12 15:45:57,219 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:45:57,219 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:45:57,244 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:45:57,268 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:45:57,268 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:45:57,319 [INFO] Backend thread started.
+2024-12-12 15:46:07,160 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:46:07,160 [INFO] SocketIO Event Emitted: aprs_message - VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:49:42,323 [INFO] Configuration loaded from config.json.
+2024-12-12 15:49:42,323 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:49:42,331 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:49:42,331 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:49:42,396 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:49:42,445 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:49:42,527 [INFO] Backend thread started.
+2024-12-12 15:49:43,649 [INFO] A client has connected to the server.
+2024-12-12 15:49:59,000 [INFO] A client has connected to the server.
+2024-12-12 15:50:03,143 [INFO] A client has connected to the server.
+2024-12-12 15:50:08,666 [INFO] A client has connected to the server.
+2024-12-12 15:50:31,501 [INFO] Configuration loaded from config.json.
+2024-12-12 15:50:31,501 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:50:31,503 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:50:31,503 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:50:31,531 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:50:31,531 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:50:32,033 [INFO] Backend thread started.
+2024-12-12 15:50:37,081 [INFO] A client has connected to the server.
+2024-12-12 15:50:47,866 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:50:47,866 [INFO] SocketIO Event Emitted: aprs_message - VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:51:24,299 [INFO] A client has connected to the server.
+2024-12-12 15:51:42,807 [INFO] Configuration loaded from config.json.
+2024-12-12 15:51:42,807 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:51:42,807 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:51:42,807 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:51:42,848 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:51:42,870 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:51:43,030 [INFO] Backend thread started.
+2024-12-12 15:51:47,423 [INFO] A client has connected to the server.
+2024-12-12 15:58:04,986 [INFO] Configuration loaded from config.json.
+2024-12-12 15:58:04,986 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:58:04,986 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 15:58:04,994 [DEBUG] Using proactor: IocpProactor
+2024-12-12 15:58:05,027 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 15:58:05,027 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 15:58:05,175 [INFO] Backend thread started.
+2024-12-12 15:58:16,216 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 15:58:16,216 [INFO] SocketIO Event Emitted: aprs_message - VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 16:00:16,781 [INFO] Configuration loaded from config.json.
+2024-12-12 16:00:16,787 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:00:16,787 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 16:00:16,787 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:00:16,836 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 16:00:16,844 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 16:00:16,975 [INFO] Backend thread started.
+2024-12-12 16:00:18,526 [INFO] A client has connected to the server.
+2024-12-12 16:00:29,839 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 16:00:29,839 [INFO] SocketIO Event Emitted: aprs_message - VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 16:01:06,299 [INFO] A client has connected to the server.
+2024-12-12 16:05:11,187 [INFO] Configuration loaded from config.json.
+2024-12-12 16:05:11,187 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:05:11,187 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 16:05:11,187 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:05:11,203 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 16:05:11,219 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 16:05:11,335 [INFO] Backend thread started.
+2024-12-12 16:05:13,190 [INFO] A client has connected to the server.
+2024-12-12 16:05:23,969 [INFO] Receiver received message: VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 16:05:23,969 [INFO] SocketIO Event Emitted: aprs_message - VE2FPD>VE2FPD:('TEST 123!', 50, 4, 0, False)
+2024-12-12 16:05:59,277 [INFO] A client has connected to the server.
+2024-12-12 16:06:04,487 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 16:06:04,507 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 16:06:04,547 [DEBUG] Audio data type before processing: float32
+2024-12-12 16:06:04,557 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 16:06:04,587 [DEBUG] Audio normalization not required.
+2024-12-12 16:06:04,607 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 16:06:04,657 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 16:06:04,747 [INFO] WAV files generated successfully.
+2024-12-12 16:06:04,777 [INFO] Stopping receiver thread...
+2024-12-12 16:06:04,787 [INFO] Receiver stopped.
+2024-12-12 16:06:04,897 [INFO] Receiver thread was not running.
+2024-12-12 16:06:04,897 [INFO] Receiver stopped before transmission.
+2024-12-12 16:06:04,937 [ERROR] HackRF initialization failed.
+2024-12-12 16:06:04,939 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 16:06:04,939 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:06:04,977 [INFO] Receiver thread restarted.
+2024-12-12 16:06:31,331 [INFO] Configuration loaded from config.json.
+2024-12-12 16:06:31,331 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:06:31,339 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 16:06:31,339 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:06:31,363 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 16:06:31,379 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 16:06:31,437 [INFO] Backend thread started.
+2024-12-12 16:06:32,506 [INFO] A client has connected to the server.
+2024-12-12 16:06:38,715 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 16:06:38,781 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 16:06:38,824 [DEBUG] Audio data type before processing: float32
+2024-12-12 16:06:38,830 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 16:06:38,847 [DEBUG] Audio normalization not required.
+2024-12-12 16:06:38,923 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 16:06:39,063 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 16:06:39,223 [INFO] WAV files generated successfully.
+2024-12-12 16:06:39,239 [INFO] Stopping receiver thread...
+2024-12-12 16:06:39,314 [INFO] Receiver stopped.
+2024-12-12 16:06:39,400 [INFO] Receiver thread was not running.
+2024-12-12 16:06:39,400 [INFO] Receiver stopped before transmission.
+2024-12-12 16:06:39,420 [ERROR] HackRF initialization failed.
+2024-12-12 16:06:39,428 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 16:06:39,428 [INFO] Receiver thread restarted.
+2024-12-12 16:06:39,428 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:07:35,441 [INFO] Configuration loaded from config.json.
+2024-12-12 16:07:35,450 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:07:35,450 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 16:07:35,450 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:07:35,450 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 16:07:35,458 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 16:07:35,533 [INFO] Backend thread started.
+2024-12-12 16:07:38,754 [INFO] A client has connected to the server.
+2024-12-12 16:07:39,481 [INFO] A client has connected to the server.
+2024-12-12 16:07:41,351 [INFO] Restarting receiver...
+2024-12-12 16:07:41,375 [INFO] Stopping receiver thread...
+2024-12-12 16:07:41,392 [INFO] Receiver stopped.
+2024-12-12 16:07:41,513 [INFO] Receiver thread was not running.
+2024-12-12 16:07:41,513 [INFO] Receiver stopped.
+2024-12-12 16:07:41,513 [INFO] Receiver thread started on device 0 at 144390000.00 Hz.
+2024-12-12 16:07:41,513 [DEBUG] Using proactor: IocpProactor
+2024-12-12 16:07:41,561 [INFO] Receiver restarted.
+2024-12-12 16:07:41,726 [INFO] Reception restarted successfully.
+2024-12-12 16:08:25,326 [INFO] A client has connected to the server.

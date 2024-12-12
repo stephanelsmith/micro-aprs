@@ -3,7 +3,7 @@
 import threading
 import logging
 import sys
-import queue  # Import the queue module
+import queue
 from typing import Any, Dict
 import time
 
@@ -13,14 +13,17 @@ from backend.udp_listener import UDPListenerThread
 from backend.carrier_transmission import CarrierTransmission
 from backend.message_processor import MessageProcessor
 
-from core.thread_safe import ThreadSafeVariable  # Import ThreadSafeVariable
+from core.thread_safe import ThreadSafeVariable
 
 logger = logging.getLogger(__name__)
 
 class Backend:
-    def __init__(self, config_file: str):
+    def __init__(self, config_file: str, socketio):
         # Configuration Manager
         self.config_manager = ConfigurationManager(config_file)
+
+        # SocketIO instance for emitting events
+        self.socketio = socketio
 
         # Variables
         self.vars = {
@@ -50,7 +53,8 @@ class Backend:
         self.message_processor = MessageProcessor(
             config_manager=self.config_manager,
             queues=self.queues,
-            vars=self.vars
+            vars=self.vars,
+            backend=self  # Pass reference to Backend for emitting events
         )
 
         # Initialize Receiver
@@ -59,7 +63,8 @@ class Backend:
                 stop_event=self.queues['receiver_stop_event'],
                 message_queue=self.queues['received_message_queue'],
                 device_index=self.queues['device_index_var'].get(),
-                frequency=self.vars['frequency_var'].get()
+                frequency=self.vars['frequency_var'].get(),
+                backend=self  # Pass reference to Backend for emitting events
             )
             self.receiver.start()
             self.queues['receiver'] = self.receiver
@@ -70,7 +75,8 @@ class Backend:
                 stop_event=self.queues['stop_event'],
                 message_queue=self.queues['message_queue'],
                 ip=self.config_manager.get('send_ip', "127.0.0.1"),
-                port=self.config_manager.get('send_port', 14581)
+                port=self.config_manager.get('send_port', 14581),
+                backend=self  # Pass reference to Backend for emitting events
             )
             self.udp_listener.start()
 
@@ -99,12 +105,14 @@ class Backend:
             self.receiver = Receiver(
                 stop_event=self.queues['receiver_stop_event'],
                 message_queue=self.queues['received_message_queue'],
-                device_index=self.queues['device_index_var'].get(),
-                frequency=self.vars['frequency_var'].get()
+                device_index=self.vars['device_index_var'].get(),
+                frequency=self.vars['frequency_var'].get(),
+                backend=self  # Pass reference to Backend for emitting events
             )
             self.receiver.start()
             self.queues['receiver'] = self.receiver
             logger.info("Reception started.")
+            self.socketio.emit('reception_status', {'status': 'active'})
         else:
             logger.info("Receiver is already running.")
 
@@ -112,11 +120,13 @@ class Backend:
         """ Stop the receiver thread. """
         if self.queues.get('receiver') is not None:
             self.queues['receiver'].stop()
+            self.queues['receiver_stop_event'].set()  # Signal receiver thread to stop
             self.queues['receiver'] = None
             logger.info("Reception stopped.")
+            self.socketio.emit('reception_status', {'status': 'idle'})
         else:
             logger.info("Receiver is not running.")
-            
+                
     def shutdown(self):
         """
         Perform a graceful shutdown of all components.
@@ -127,16 +137,20 @@ class Backend:
         if self.queues.get('carrier_transmission'):
             self.queues['carrier_transmission'].stop()
             self.queues['carrier_transmission'] = None
+            self.socketio.emit('carrier_status', {'status': 'stopped'})
 
         # Stop UDP listener
         if self.udp_listener:
             self.udp_listener.stop()
             self.udp_listener = None
+            self.socketio.emit('udp_listener_status', {'status': 'stopped'})
 
         # Stop receiver
         if self.queues.get('receiver'):
             self.queues['receiver'].stop()
+            self.queues['receiver_stop_event'].set()
             self.queues['receiver'] = None
+            self.socketio.emit('reception_status', {'status': 'stopped'})
 
         # Save configuration
         self.config_manager.save_config()
@@ -149,6 +163,7 @@ class Backend:
         Run the main processing loop.
         """
         try:
+            self.socketio.emit('system_status', {'status': 'running'})
             while not self.queues['stop_event'].is_set():
                 try:
                     message = self.queues['message_queue'].get_nowait()
@@ -157,6 +172,7 @@ class Backend:
                     pass
                 except Exception as e:
                     logger.exception("Error in message processing: %s", e)
+                    self.socketio.emit('system_error', {'message': f"Message processing error: {e}"})
                 time.sleep(0.1)  # Prevents CPU overuse
         except KeyboardInterrupt:
             logger.info("KeyboardInterrupt received. Exiting gracefully.")

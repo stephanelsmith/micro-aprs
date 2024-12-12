@@ -1,0 +1,36 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Radio Transmission Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js" integrity="sha512-bW7PhgOGHKFTSn/G7QAA3fDAu4+e+3sOFmB4r7m5g6YlD7qIBzYjXjAL0KUjC3jEIXY57R1tujxRmn9lHQuIiw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Radio Transmission Application</h1>
+        
+        <div class="status">
+            <p id="transmission-status">Transmission: Idle</p>
+            <p id="reception-status">Reception: Idle</p>
+            <button id="restart-reception">Restart Reception</button>
+        </div>
+        
+        <div class="config">
+            <h2>Current Configuration</h2>
+            <form id="config-form">
+                <!-- Configuration fields will be populated here -->
+            </form>
+            <button id="save-config">Save Configuration</button>
+        </div>
+        
+        <div class="messages">
+            <h2>Received APRS Messages</h2>
+            <textarea id="received-messages" readonly></textarea>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>

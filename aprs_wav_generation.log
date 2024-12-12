@@ -4109,3 +4109,36 @@ AttributeError: 'Event' object has no attribute 'stop'
 2024-12-12 13:13:19,890 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
 2024-12-12 13:13:19,890 [DEBUG] Using proactor: IocpProactor
 2024-12-12 13:13:19,890 [INFO] Receiver thread restarted.
+2024-12-12 13:26:24,037 [INFO] Configuration loaded from config.json.
+2024-12-12 13:26:53,769 [INFO] Configuration loaded from config.json.
+2024-12-12 13:34:44,999 [INFO] Configuration loaded from config.json.
+2024-12-12 13:34:44,999 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:38:06,443 [INFO] Configuration loaded from config.json.
+2024-12-12 13:38:06,443 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:38:06,443 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:38:06,443 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:39:11,866 [INFO] Configuration loaded from config.json.
+2024-12-12 13:39:11,866 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:39:11,866 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:39:11,866 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:39:11,896 [INFO] UDP Listener started on 127.0.0.1:14582.
+2024-12-12 13:39:11,906 [INFO] UDP listener thread started on 127.0.0.1:14582.
+2024-12-12 13:39:11,936 [INFO] APRS message queue has been set.
+2024-12-12 13:39:22,432 [INFO] Processing message: allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 13:39:22,462 [INFO] Generating APRS WAV for message: VE2FPD>APRS:allafgsdfasdlkfamdlfkmakflalksfmasldko1233
+2024-12-12 13:39:22,531 [DEBUG] Audio data type before processing: float32
+2024-12-12 13:39:22,581 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-12 13:39:22,651 [DEBUG] Audio normalization not required.
+2024-12-12 13:39:22,661 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-12 13:39:22,761 [INFO] Stopping receiver thread...
+2024-12-12 13:39:22,791 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-12 13:39:22,791 [INFO] Receiver stopped.
+2024-12-12 13:39:22,791 [INFO] WAV files generated successfully.
+2024-12-12 13:39:22,832 [INFO] Receiver thread was not running.
+2024-12-12 13:39:22,832 [INFO] Receiver stopped before transmission.
+2024-12-12 13:39:22,852 [INFO] Transmission started.
+2024-12-12 13:39:24,207 [INFO] Transmission done
+2024-12-12 13:39:24,217 [INFO] Transmission stopped.
+2024-12-12 13:39:24,217 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-12 13:39:24,217 [DEBUG] Using proactor: IocpProactor
+2024-12-12 13:39:24,257 [INFO] Receiver thread restarted.

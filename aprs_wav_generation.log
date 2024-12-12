@@ -119,3 +119,672 @@
 2024-12-11 16:10:13,558 [DEBUG] Using proactor: IocpProactor
 2024-12-11 16:11:27,377 [DEBUG] Using proactor: IocpProactor
 2024-12-11 16:11:38,433 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:15:10,983 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:19:11,881 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:19:24,895 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:20:02,121 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:21:19,613 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:22:16,577 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:23:09,795 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:23:20,603 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:24:53,715 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:25:17,694 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:25:44,723 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:27:36,824 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:27:36,824 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 21:27:36,847 [DEBUG] Audio data type before processing: float32
+2024-12-11 21:27:36,855 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 21:27:36,855 [DEBUG] Audio normalization not required.
+2024-12-11 21:27:36,855 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 21:27:36,855 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 21:27:41,992 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:27:54,367 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:27:54,367 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 21:27:54,393 [DEBUG] Audio data type before processing: float32
+2024-12-11 21:27:54,393 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 21:27:54,393 [DEBUG] Audio normalization not required.
+2024-12-11 21:27:54,393 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 21:27:54,397 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 21:27:59,515 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:28:51,891 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:29:34,349 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:44:39,368 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:45:26,229 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:46:18,051 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:46:23,901 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:46:43,032 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:46:47,694 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:47:27,771 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:51:57,065 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:53:03,989 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:53:32,186 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:54:01,421 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:54:19,204 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:54:30,883 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:54:48,945 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:54:59,078 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:56:14,683 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:56:27,123 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:57:02,876 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:57:12,218 [DEBUG] Using proactor: IocpProactor
+2024-12-11 21:57:40,219 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:01:05,865 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:01:13,589 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:01:27,782 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:01:35,701 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:04:04,460 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:04:37,939 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:04:58,628 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:06:04,102 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:06:16,687 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:06:47,221 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:08:28,837 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:11:46,294 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:11:57,262 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:11:57,262 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 22:11:57,279 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:11:57,279 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:11:57,279 [DEBUG] Audio normalization not required.
+2024-12-11 22:11:57,279 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:11:57,279 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:12:02,385 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:13:28,160 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:13:28,166 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 22:13:28,183 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:13:28,183 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:13:28,188 [DEBUG] Audio normalization not required.
+2024-12-11 22:13:28,188 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:13:28,191 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:13:33,315 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:13:44,693 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:15:13,158 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:15:47,094 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:18:17,210 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:18:55,476 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:19:09,043 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:21:09,986 [INFO] Configuration loaded from config.json.
+2024-12-11 22:21:09,986 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:21:09,986 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:21:09,986 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:21:20,020 [INFO] Signal 2 received. Shutting down...
+2024-12-11 22:21:20,434 [INFO] Configuration loaded from config.json.
+2024-12-11 22:21:20,434 [INFO] Configuration saved to config.json.
+2024-12-11 22:21:20,434 [INFO] Shutdown complete.
+2024-12-11 22:21:20,437 [INFO] Shutting down...
+2024-12-11 22:21:20,526 [INFO] Configuration saved to config.json.
+2024-12-11 22:21:20,526 [INFO] Shutdown complete.
+2024-12-11 22:22:45,109 [INFO] Configuration loaded from config.json.
+2024-12-11 22:22:45,109 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:22:45,109 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:22:45,109 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:22:46,700 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:22:46,722 [INFO] Shutting down...
+2024-12-11 22:22:46,923 [INFO] Configuration saved to config.json.
+2024-12-11 22:22:46,923 [INFO] Shutdown complete.
+2024-12-11 22:23:31,038 [INFO] Configuration loaded from config.json.
+2024-12-11 22:23:31,048 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:23:31,048 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:23:31,048 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:23:33,047 [ERROR] Failed to initialize HackRF for carrier-only mode.
+2024-12-11 22:23:34,240 [INFO] Carrier-only transmission started.
+2024-12-11 22:23:38,369 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:23:38,376 [INFO] Shutting down...
+2024-12-11 22:23:38,692 [INFO] Configuration saved to config.json.
+2024-12-11 22:23:38,692 [INFO] Shutdown complete.
+2024-12-11 22:24:26,855 [INFO] Configuration loaded from config.json.
+2024-12-11 22:24:26,856 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:24:26,856 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:24:26,857 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:24:28,734 [INFO] Carrier-only transmission started.
+2024-12-11 22:24:31,454 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:24:43,521 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:24:44,220 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:25:23,933 [INFO] Configuration loaded from config.json.
+2024-12-11 22:25:23,933 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:25:23,933 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:25:23,933 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:25:25,878 [INFO] Carrier-only transmission started.
+2024-12-11 22:25:30,160 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:26:35,675 [INFO] Configuration loaded from config.json.
+2024-12-11 22:26:35,676 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:26:35,676 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:26:35,677 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:26:36,783 [ERROR] Failed to initialize HackRF for carrier-only mode.
+2024-12-11 22:26:38,004 [ERROR] Failed to initialize HackRF for carrier-only mode.
+2024-12-11 22:26:39,225 [ERROR] Failed to initialize HackRF for carrier-only mode.
+2024-12-11 22:26:40,447 [ERROR] Failed to initialize HackRF for carrier-only mode.
+2024-12-11 22:26:40,500 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:26:40,551 [INFO] Shutting down...
+2024-12-11 22:26:40,745 [INFO] Configuration saved to config.json.
+2024-12-11 22:26:40,745 [INFO] Shutdown complete.
+2024-12-11 22:26:43,820 [INFO] Configuration loaded from config.json.
+2024-12-11 22:26:43,830 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:26:43,830 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:26:43,830 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:26:45,380 [INFO] Carrier-only transmission started.
+2024-12-11 22:26:53,316 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:26:53,342 [INFO] Shutting down...
+2024-12-11 22:26:53,447 [INFO] Configuration saved to config.json.
+2024-12-11 22:26:53,447 [INFO] Shutdown complete.
+2024-12-11 22:27:37,303 [INFO] Configuration loaded from config.json.
+2024-12-11 22:27:37,303 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:27:37,303 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:27:37,303 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:27:38,110 [ERROR] Failed to initialize HackRF for carrier-only mode.
+2024-12-11 22:27:44,852 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:27:44,952 [INFO] Shutting down...
+2024-12-11 22:27:45,175 [INFO] Configuration saved to config.json.
+2024-12-11 22:27:45,175 [INFO] Shutdown complete.
+2024-12-11 22:27:47,893 [INFO] Configuration loaded from config.json.
+2024-12-11 22:27:47,893 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:27:47,893 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:27:47,893 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:27:48,338 [ERROR] Failed to initialize HackRF for carrier-only mode.
+2024-12-11 22:27:51,471 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:27:51,571 [INFO] Shutting down...
+2024-12-11 22:27:51,937 [INFO] Configuration saved to config.json.
+2024-12-11 22:27:51,937 [INFO] Shutdown complete.
+2024-12-11 22:29:38,123 [INFO] Configuration loaded from config.json.
+2024-12-11 22:29:38,123 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:29:38,123 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:29:38,123 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:29:38,123 [INFO] Carrier-only mode enabled in configuration. Queuing CARRIER_ONLY message.
+2024-12-11 22:29:38,131 [INFO] Initiating carrier-only transmission.
+2024-12-11 22:29:40,000 [INFO] Carrier-only transmission thread started.
+2024-12-11 22:29:40,030 [INFO] Carrier-only transmission started.
+2024-12-11 22:29:45,390 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:29:45,465 [INFO] Shutting down...
+2024-12-11 22:29:47,337 [INFO] Carrier-only transmission stopped.
+2024-12-11 22:29:47,346 [INFO] Configuration saved to config.json.
+2024-12-11 22:29:47,346 [INFO] Shutdown complete.
+2024-12-11 22:30:02,268 [INFO] Configuration loaded from config.json.
+2024-12-11 22:30:02,278 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:30:02,278 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:30:02,278 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:30:05,748 [INFO] Signal 2 received. Initiating shutdown...
+2024-12-11 22:30:05,784 [INFO] Shutting down...
+2024-12-11 22:30:06,093 [INFO] Configuration saved to config.json.
+2024-12-11 22:30:06,093 [INFO] Shutdown complete.
+2024-12-11 22:43:56,403 [INFO] Configuration loaded from config.json.
+2024-12-11 22:45:29,127 [INFO] Configuration loaded from config.json.
+2024-12-11 22:45:29,137 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:45:29,137 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:45:29,137 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:45:44,848 [INFO] Configuration loaded from config.json.
+2024-12-11 22:45:44,848 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:45:44,848 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:45:44,848 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:45:53,857 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:45:53,857 [INFO] Shutting down...
+2024-12-11 22:45:54,268 [INFO] UDP listener thread stopped.
+2024-12-11 22:45:54,449 [INFO] Configuration saved to config.json.
+2024-12-11 22:45:54,460 [INFO] Shutdown complete.
+2024-12-11 22:46:21,001 [INFO] Configuration loaded from config.json.
+2024-12-11 22:46:21,001 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:46:21,001 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:46:21,001 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:46:21,001 [INFO] Starting in carrier-only mode via CLI.
+2024-12-11 22:46:21,011 [INFO] Processing message: CARRIER_ONLY
+2024-12-11 22:46:21,051 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:46:21,934 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:CARRIER_ONLY
+2024-12-11 22:46:21,955 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:46:21,955 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:46:21,955 [DEBUG] Audio normalization not required.
+2024-12-11 22:46:21,955 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:46:21,955 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:46:22,126 [ERROR] HackRF initialization failed.
+2024-12-11 22:46:32,642 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:46:32,642 [INFO] Shutting down...
+2024-12-11 22:46:33,066 [INFO] UDP listener thread stopped.
+2024-12-11 22:46:33,201 [INFO] Configuration saved to config.json.
+2024-12-11 22:46:33,201 [INFO] Shutdown complete.
+2024-12-11 22:46:38,790 [INFO] Configuration loaded from config.json.
+2024-12-11 22:46:38,797 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:46:38,797 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:46:38,797 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:46:44,769 [INFO] Processing message: "test123"
+2024-12-11 22:46:44,769 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:46:44,769 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 22:46:44,790 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:46:44,790 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:46:44,800 [DEBUG] Audio normalization not required.
+2024-12-11 22:46:44,800 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:46:44,800 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:46:44,981 [ERROR] HackRF initialization failed.
+2024-12-11 22:47:01,531 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:47:01,531 [INFO] Shutting down...
+2024-12-11 22:47:01,968 [INFO] UDP listener thread stopped.
+2024-12-11 22:47:02,080 [INFO] Configuration saved to config.json.
+2024-12-11 22:47:02,080 [INFO] Shutdown complete.
+2024-12-11 22:47:05,932 [INFO] Configuration loaded from config.json.
+2024-12-11 22:47:05,932 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:47:05,932 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:47:05,932 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:47:11,184 [INFO] Processing message: "test123"
+2024-12-11 22:47:11,184 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:47:11,184 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 22:47:11,212 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:47:11,212 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:47:11,212 [DEBUG] Audio normalization not required.
+2024-12-11 22:47:11,212 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:47:11,212 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:47:11,384 [ERROR] HackRF initialization failed.
+2024-12-11 22:47:29,355 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:47:29,355 [INFO] Shutting down...
+2024-12-11 22:47:29,402 [INFO] UDP listener thread stopped.
+2024-12-11 22:47:29,473 [INFO] Configuration saved to config.json.
+2024-12-11 22:47:29,473 [INFO] Shutdown complete.
+2024-12-11 22:48:21,584 [INFO] Configuration loaded from config.json.
+2024-12-11 22:48:21,584 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:48:21,584 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:48:21,594 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:48:21,594 [INFO] Starting in carrier-only mode via CLI.
+2024-12-11 22:48:21,614 [INFO] Processing message: CARRIER_ONLY
+2024-12-11 22:48:21,624 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:48:22,497 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:CARRIER_ONLY
+2024-12-11 22:48:22,517 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:48:22,517 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:48:22,517 [DEBUG] Audio normalization not required.
+2024-12-11 22:48:22,517 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:48:22,517 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:48:22,677 [ERROR] HackRF initialization failed.
+2024-12-11 22:48:36,559 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:48:36,559 [INFO] Shutting down...
+2024-12-11 22:48:36,651 [INFO] UDP listener thread stopped.
+2024-12-11 22:48:36,774 [INFO] Configuration saved to config.json.
+2024-12-11 22:48:36,774 [INFO] Shutdown complete.
+2024-12-11 22:52:55,370 [INFO] Configuration loaded from config.json.
+2024-12-11 22:52:55,370 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:52:55,370 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:52:55,370 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:52:55,370 [INFO] Starting in carrier-only mode via CLI.
+2024-12-11 22:52:55,381 [INFO] Processing message: CARRIER_ONLY
+2024-12-11 22:52:55,411 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:52:56,231 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:CARRIER_ONLY
+2024-12-11 22:52:56,251 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:52:56,251 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:52:56,251 [DEBUG] Audio normalization not required.
+2024-12-11 22:52:56,251 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:52:56,251 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:52:56,422 [ERROR] HackRF initialization failed.
+2024-12-11 22:53:00,252 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:53:00,252 [INFO] Shutting down...
+2024-12-11 22:53:00,286 [INFO] UDP listener thread stopped.
+2024-12-11 22:53:00,286 [INFO] Stopping receiver thread...
+2024-12-11 22:53:00,424 [INFO] Receiver thread was not running.
+2024-12-11 22:53:00,424 [INFO] Configuration saved to config.json.
+2024-12-11 22:53:00,429 [INFO] Shutdown complete.
+2024-12-11 22:53:03,550 [INFO] Configuration loaded from config.json.
+2024-12-11 22:53:03,550 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:53:03,550 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:53:03,561 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:53:03,581 [INFO] Starting in carrier-only mode via CLI.
+2024-12-11 22:53:03,592 [INFO] Processing message: CARRIER_ONLY
+2024-12-11 22:53:04,057 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:53:04,068 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:CARRIER_ONLY
+2024-12-11 22:53:04,078 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:53:04,078 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:53:04,078 [DEBUG] Audio normalization not required.
+2024-12-11 22:53:04,078 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:53:04,078 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:53:04,251 [ERROR] HackRF initialization failed.
+2024-12-11 22:53:18,411 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:53:18,421 [INFO] Shutting down...
+2024-12-11 22:53:18,742 [INFO] UDP listener thread stopped.
+2024-12-11 22:53:18,742 [INFO] Stopping receiver thread...
+2024-12-11 22:53:18,860 [INFO] Receiver thread was not running.
+2024-12-11 22:53:18,860 [INFO] Configuration saved to config.json.
+2024-12-11 22:53:18,860 [INFO] Shutdown complete.
+2024-12-11 22:54:20,515 [INFO] Configuration loaded from config.json.
+2024-12-11 22:54:20,515 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:54:20,515 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:54:20,515 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:54:20,515 [INFO] Carrier-only mode enabled in configuration. Queuing CARRIER_ONLY message.
+2024-12-11 22:54:20,515 [INFO] Starting in carrier-only mode via CLI.
+2024-12-11 22:54:20,525 [INFO] Initiating carrier-only transmission.
+2024-12-11 22:54:20,566 [INFO] Stopping receiver thread...
+2024-12-11 22:54:21,596 [INFO] Receiver thread was not running.
+2024-12-11 22:54:21,596 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 22:54:21,606 [INFO] Carrier-only transmission thread started.
+2024-12-11 22:54:21,626 [INFO] Carrier-only transmission started.
+2024-12-11 22:54:21,726 [INFO] Initiating carrier-only transmission.
+2024-12-11 22:54:27,738 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:54:27,738 [INFO] Shutting down...
+2024-12-11 22:54:29,881 [INFO] Carrier-only transmission stopped.
+2024-12-11 22:54:29,891 [INFO] Carrier-only transmission thread stopped.
+2024-12-11 22:54:30,052 [INFO] UDP listener thread stopped.
+2024-12-11 22:54:30,052 [INFO] Configuration saved to config.json.
+2024-12-11 22:54:30,052 [INFO] Shutdown complete.
+2024-12-11 22:54:39,194 [INFO] Configuration loaded from config.json.
+2024-12-11 22:54:39,204 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:54:39,204 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:54:39,204 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:54:39,204 [INFO] Carrier-only mode enabled in configuration. Queuing CARRIER_ONLY message.
+2024-12-11 22:54:39,204 [INFO] Initiating carrier-only transmission.
+2024-12-11 22:54:39,214 [INFO] Stopping receiver thread...
+2024-12-11 22:54:40,129 [INFO] Receiver thread was not running.
+2024-12-11 22:54:40,129 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 22:54:40,129 [INFO] Carrier-only transmission thread started.
+2024-12-11 22:54:40,149 [ERROR] Failed to initialize HackRF for carrier-only mode.
+2024-12-11 22:54:46,947 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:54:46,947 [INFO] Shutting down...
+2024-12-11 22:54:47,128 [INFO] UDP listener thread stopped.
+2024-12-11 22:54:47,128 [INFO] Configuration saved to config.json.
+2024-12-11 22:54:47,128 [INFO] Shutdown complete.
+2024-12-11 22:54:49,974 [INFO] Configuration loaded from config.json.
+2024-12-11 22:54:49,974 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:54:49,974 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:54:49,974 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:54:49,974 [INFO] Carrier-only mode enabled in configuration. Queuing CARRIER_ONLY message.
+2024-12-11 22:54:49,974 [INFO] Initiating carrier-only transmission.
+2024-12-11 22:54:49,984 [INFO] Stopping receiver thread...
+2024-12-11 22:54:50,535 [INFO] Receiver thread was not running.
+2024-12-11 22:54:50,535 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 22:54:50,535 [INFO] Carrier-only transmission thread started.
+2024-12-11 22:54:50,555 [ERROR] Failed to initialize HackRF for carrier-only mode.
+2024-12-11 22:54:52,742 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:54:52,752 [INFO] Shutting down...
+2024-12-11 22:54:52,992 [INFO] UDP listener thread stopped.
+2024-12-11 22:54:52,992 [INFO] Configuration saved to config.json.
+2024-12-11 22:54:52,992 [INFO] Shutdown complete.
+2024-12-11 22:55:02,892 [INFO] Configuration loaded from config.json.
+2024-12-11 22:55:02,892 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:55:02,892 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:55:02,892 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:55:02,892 [INFO] Carrier-only mode enabled in configuration. Queuing CARRIER_ONLY message.
+2024-12-11 22:55:02,892 [INFO] Starting in carrier-only mode via CLI.
+2024-12-11 22:55:02,902 [INFO] Initiating carrier-only transmission.
+2024-12-11 22:55:03,693 [INFO] Stopping receiver thread...
+2024-12-11 22:55:03,834 [INFO] Receiver thread was not running.
+2024-12-11 22:55:03,834 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 22:55:03,834 [INFO] Carrier-only transmission thread started.
+2024-12-11 22:55:03,864 [INFO] Carrier-only transmission started.
+2024-12-11 22:55:03,968 [INFO] Initiating carrier-only transmission.
+2024-12-11 22:55:07,234 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:55:07,234 [INFO] Shutting down...
+2024-12-11 22:55:09,156 [INFO] Carrier-only transmission stopped.
+2024-12-11 22:55:09,156 [INFO] Carrier-only transmission thread stopped.
+2024-12-11 22:55:09,206 [INFO] UDP listener thread stopped.
+2024-12-11 22:55:09,206 [INFO] Configuration saved to config.json.
+2024-12-11 22:55:09,206 [INFO] Shutdown complete.
+2024-12-11 22:55:18,405 [INFO] Configuration loaded from config.json.
+2024-12-11 22:55:18,405 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:55:18,405 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:55:18,405 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:55:25,549 [INFO] Processing message: "test123"
+2024-12-11 22:55:25,549 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:55:25,549 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 22:55:25,559 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:55:25,559 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:55:25,559 [DEBUG] Audio normalization not required.
+2024-12-11 22:55:25,559 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:55:25,569 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:55:25,719 [ERROR] HackRF initialization failed.
+2024-12-11 22:56:13,346 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:56:13,346 [INFO] Shutting down...
+2024-12-11 22:56:13,676 [INFO] UDP listener thread stopped.
+2024-12-11 22:56:13,676 [INFO] Stopping receiver thread...
+2024-12-11 22:56:13,776 [INFO] Receiver thread was not running.
+2024-12-11 22:56:13,776 [INFO] Configuration saved to config.json.
+2024-12-11 22:56:13,786 [INFO] Shutdown complete.
+2024-12-11 22:58:13,381 [INFO] Configuration loaded from config.json.
+2024-12-11 22:58:13,391 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:58:13,391 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:58:13,391 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:58:18,616 [INFO] Processing message: "test123"
+2024-12-11 22:58:18,616 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:58:18,616 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 22:58:18,631 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:58:18,631 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:58:18,631 [DEBUG] Audio normalization not required.
+2024-12-11 22:58:18,631 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:58:18,631 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:58:18,781 [INFO] Stopping receiver thread...
+2024-12-11 22:58:18,911 [INFO] Receiver thread was not running.
+2024-12-11 22:58:18,911 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 22:58:18,951 [ERROR] HackRF initialization failed.
+2024-12-11 22:58:18,951 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:58:18,951 [INFO] Receiver thread restarted.
+2024-12-11 22:58:18,951 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:58:24,993 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:58:24,993 [INFO] Shutting down...
+2024-12-11 22:58:25,154 [INFO] UDP listener thread stopped.
+2024-12-11 22:58:25,154 [INFO] Stopping receiver thread...
+2024-12-11 22:58:25,214 [INFO] Receiver thread was not running.
+2024-12-11 22:58:25,224 [INFO] Configuration saved to config.json.
+2024-12-11 22:58:25,224 [INFO] Shutdown complete.
+2024-12-11 22:58:30,445 [INFO] Configuration loaded from config.json.
+2024-12-11 22:58:30,455 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:58:30,455 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:58:30,455 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:58:36,984 [INFO] Processing message: "test123"
+2024-12-11 22:58:36,984 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:58:36,984 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 22:58:36,997 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:58:36,997 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:58:36,997 [DEBUG] Audio normalization not required.
+2024-12-11 22:58:36,997 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:58:36,997 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:58:37,158 [INFO] Stopping receiver thread...
+2024-12-11 22:58:37,280 [INFO] Receiver thread was not running.
+2024-12-11 22:58:37,290 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 22:58:37,320 [ERROR] HackRF initialization failed.
+2024-12-11 22:58:37,320 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:58:37,320 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:58:37,320 [INFO] Receiver thread restarted.
+2024-12-11 22:59:14,233 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:59:14,233 [INFO] Shutting down...
+2024-12-11 22:59:14,564 [INFO] UDP listener thread stopped.
+2024-12-11 22:59:14,564 [INFO] Stopping receiver thread...
+2024-12-11 22:59:14,634 [INFO] Receiver thread was not running.
+2024-12-11 22:59:14,634 [INFO] Configuration saved to config.json.
+2024-12-11 22:59:14,644 [INFO] Shutdown complete.
+2024-12-11 22:59:16,143 [INFO] Configuration loaded from config.json.
+2024-12-11 22:59:16,143 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:59:16,143 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:59:16,143 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:59:22,318 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:59:22,323 [INFO] Shutting down...
+2024-12-11 22:59:22,513 [INFO] UDP listener thread stopped.
+2024-12-11 22:59:22,513 [INFO] Stopping receiver thread...
+2024-12-11 22:59:22,573 [INFO] Receiver thread was not running.
+2024-12-11 22:59:22,573 [INFO] Configuration saved to config.json.
+2024-12-11 22:59:22,573 [INFO] Shutdown complete.
+2024-12-11 22:59:24,593 [INFO] Configuration loaded from config.json.
+2024-12-11 22:59:24,593 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:59:24,593 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:59:24,593 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:59:31,530 [INFO] Processing message: "test123"
+2024-12-11 22:59:31,531 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:59:31,532 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 22:59:31,541 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:59:31,541 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:59:31,541 [DEBUG] Audio normalization not required.
+2024-12-11 22:59:31,541 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:59:31,541 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:59:31,681 [INFO] Stopping receiver thread...
+2024-12-11 22:59:31,811 [INFO] Receiver thread was not running.
+2024-12-11 22:59:31,811 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 22:59:31,842 [ERROR] HackRF initialization failed.
+2024-12-11 22:59:31,842 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:59:31,842 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:59:31,852 [INFO] Receiver thread restarted.
+2024-12-11 22:59:36,114 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 22:59:36,114 [INFO] Shutting down...
+2024-12-11 22:59:36,555 [INFO] UDP listener thread stopped.
+2024-12-11 22:59:36,555 [INFO] Stopping receiver thread...
+2024-12-11 22:59:36,615 [INFO] Receiver thread was not running.
+2024-12-11 22:59:36,615 [INFO] Configuration saved to config.json.
+2024-12-11 22:59:36,615 [INFO] Shutdown complete.
+2024-12-11 22:59:54,701 [INFO] Configuration loaded from config.json.
+2024-12-11 22:59:54,701 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 22:59:54,701 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:59:54,701 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 22:59:57,918 [INFO] Processing message: "test123"
+2024-12-11 22:59:57,918 [DEBUG] Using proactor: IocpProactor
+2024-12-11 22:59:57,918 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 22:59:57,933 [DEBUG] Audio data type before processing: float32
+2024-12-11 22:59:57,933 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 22:59:57,933 [DEBUG] Audio normalization not required.
+2024-12-11 22:59:57,933 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 22:59:57,937 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 22:59:58,050 [INFO] Stopping receiver thread...
+2024-12-11 22:59:58,201 [INFO] Receiver thread was not running.
+2024-12-11 22:59:58,201 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 22:59:58,201 [ERROR] Error processing message: name 'time' is not defined
+Traceback (most recent call last):
+  File "C:\Users\Francis\Documents\GitHub\hackrf-aprs\backend\message_processor.py", line 84, in process_message
+    time.sleep(5)
+    ^^^^
+NameError: name 'time' is not defined
+2024-12-11 23:00:09,519 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 23:00:09,519 [INFO] Shutting down...
+2024-12-11 23:00:10,020 [INFO] UDP listener thread stopped.
+2024-12-11 23:00:10,020 [INFO] Configuration saved to config.json.
+2024-12-11 23:00:10,023 [INFO] Shutdown complete.
+2024-12-11 23:00:12,248 [INFO] Configuration loaded from config.json.
+2024-12-11 23:00:12,248 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:00:12,248 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:00:12,248 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 23:00:17,431 [INFO] Processing message: "test123"
+2024-12-11 23:00:17,431 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:00:17,431 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 23:00:17,446 [DEBUG] Audio data type before processing: float32
+2024-12-11 23:00:17,452 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 23:00:17,452 [DEBUG] Audio normalization not required.
+2024-12-11 23:00:17,452 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 23:00:17,452 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 23:00:17,587 [INFO] Stopping receiver thread...
+2024-12-11 23:00:17,708 [INFO] Receiver thread was not running.
+2024-12-11 23:00:17,708 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 23:00:22,771 [INFO] Transmission started.
+2024-12-11 23:00:27,776 [INFO] Transmission stopped.
+2024-12-11 23:00:27,776 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:00:27,776 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:00:27,782 [INFO] Receiver thread restarted.
+2024-12-11 23:00:57,408 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 23:00:57,408 [INFO] Shutting down...
+2024-12-11 23:00:57,419 [INFO] UDP listener thread stopped.
+2024-12-11 23:00:57,419 [INFO] Stopping receiver thread...
+2024-12-11 23:00:57,489 [INFO] Receiver thread was not running.
+2024-12-11 23:00:57,489 [INFO] Configuration saved to config.json.
+2024-12-11 23:00:57,489 [INFO] Shutdown complete.
+2024-12-11 23:01:03,650 [INFO] Configuration loaded from config.json.
+2024-12-11 23:01:03,650 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:01:03,650 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:01:03,650 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 23:01:06,725 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 23:01:06,725 [INFO] Shutting down...
+2024-12-11 23:01:06,996 [INFO] UDP listener thread stopped.
+2024-12-11 23:01:06,996 [INFO] Stopping receiver thread...
+2024-12-11 23:01:07,106 [INFO] Receiver thread was not running.
+2024-12-11 23:01:07,106 [INFO] Configuration saved to config.json.
+2024-12-11 23:01:07,116 [INFO] Shutdown complete.
+2024-12-11 23:01:10,820 [INFO] Configuration loaded from config.json.
+2024-12-11 23:01:10,830 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:01:10,830 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:01:10,830 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 23:01:15,958 [INFO] Processing message: "test123"
+2024-12-11 23:01:15,958 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:01:15,958 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 23:01:15,968 [DEBUG] Audio data type before processing: float32
+2024-12-11 23:01:15,968 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 23:01:15,968 [DEBUG] Audio normalization not required.
+2024-12-11 23:01:15,968 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 23:01:15,968 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 23:01:16,098 [INFO] Stopping receiver thread...
+2024-12-11 23:01:16,208 [INFO] Receiver thread was not running.
+2024-12-11 23:01:16,208 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 23:01:17,250 [INFO] Transmission started.
+2024-12-11 23:01:22,253 [INFO] Transmission stopped.
+2024-12-11 23:01:22,261 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:01:22,261 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:01:22,261 [INFO] Receiver thread restarted.
+2024-12-11 23:01:43,101 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 23:01:43,101 [INFO] Shutting down...
+2024-12-11 23:01:43,311 [INFO] UDP listener thread stopped.
+2024-12-11 23:01:43,311 [INFO] Stopping receiver thread...
+2024-12-11 23:01:43,371 [INFO] Receiver thread was not running.
+2024-12-11 23:01:43,371 [INFO] Configuration saved to config.json.
+2024-12-11 23:01:43,371 [INFO] Shutdown complete.
+2024-12-11 23:01:47,109 [INFO] Configuration loaded from config.json.
+2024-12-11 23:01:47,119 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:01:47,119 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:01:47,119 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 23:01:52,148 [INFO] Processing message: "test123"
+2024-12-11 23:01:52,148 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:01:52,150 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 23:01:52,158 [DEBUG] Audio data type before processing: float32
+2024-12-11 23:01:52,158 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 23:01:52,158 [DEBUG] Audio normalization not required.
+2024-12-11 23:01:52,158 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 23:01:52,158 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 23:01:52,300 [INFO] Stopping receiver thread...
+2024-12-11 23:01:52,420 [INFO] Receiver thread was not running.
+2024-12-11 23:01:52,420 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 23:01:53,606 [INFO] Transmission started.
+2024-12-11 23:01:58,619 [INFO] Transmission stopped.
+2024-12-11 23:01:58,619 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:01:58,619 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:01:58,619 [INFO] Receiver thread restarted.
+2024-12-11 23:02:26,639 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 23:02:26,639 [INFO] Shutting down...
+2024-12-11 23:02:26,749 [INFO] UDP listener thread stopped.
+2024-12-11 23:02:26,749 [INFO] Stopping receiver thread...
+2024-12-11 23:02:26,819 [INFO] Receiver thread was not running.
+2024-12-11 23:02:26,819 [INFO] Configuration saved to config.json.
+2024-12-11 23:02:26,819 [INFO] Shutdown complete.
+2024-12-11 23:02:28,430 [INFO] Configuration loaded from config.json.
+2024-12-11 23:02:28,434 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:02:28,434 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:02:28,436 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 23:02:33,706 [INFO] Processing message: "test123"
+2024-12-11 23:02:33,706 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:02:33,706 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 23:02:33,710 [DEBUG] Audio data type before processing: float32
+2024-12-11 23:02:33,710 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 23:02:33,710 [DEBUG] Audio normalization not required.
+2024-12-11 23:02:33,720 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 23:02:33,720 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 23:02:33,850 [INFO] Stopping receiver thread...
+2024-12-11 23:02:33,960 [INFO] Receiver thread was not running.
+2024-12-11 23:02:33,960 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 23:02:35,002 [INFO] Transmission started.
+2024-12-11 23:02:40,011 [INFO] Transmission stopped.
+2024-12-11 23:02:41,013 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:02:41,013 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:02:41,013 [INFO] Receiver thread restarted.
+2024-12-11 23:03:21,325 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 23:03:21,325 [INFO] Shutting down...
+2024-12-11 23:03:21,696 [INFO] UDP listener thread stopped.
+2024-12-11 23:03:21,696 [INFO] Stopping receiver thread...
+2024-12-11 23:03:21,776 [INFO] Receiver thread was not running.
+2024-12-11 23:03:21,776 [INFO] Configuration saved to config.json.
+2024-12-11 23:03:21,776 [INFO] Shutdown complete.
+2024-12-11 23:03:24,103 [INFO] Configuration loaded from config.json.
+2024-12-11 23:03:24,103 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:03:24,103 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:03:24,110 [INFO] UDP listener started on 127.0.0.1:14582.
+2024-12-11 23:03:29,346 [INFO] Processing message: "test123"
+2024-12-11 23:03:29,346 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:03:29,346 [INFO] Generating APRS WAV for message: VE2FPD>VE2FPD:"test123"
+2024-12-11 23:03:29,354 [DEBUG] Audio data type before processing: float32
+2024-12-11 23:03:29,354 [DEBUG] Audio sample range before processing: -32767.0 to 32767.0
+2024-12-11 23:03:29,354 [DEBUG] Audio normalization not required.
+2024-12-11 23:03:29,354 [DEBUG] Audio sample range after normalization and clipping: -32767.0 to 32767.0
+2024-12-11 23:03:29,364 [INFO] WAV file successfully generated: raw_output.wav
+2024-12-11 23:03:29,494 [INFO] Stopping receiver thread...
+2024-12-11 23:03:29,614 [INFO] Receiver thread was not running.
+2024-12-11 23:03:29,614 [INFO] Receiver stopped before carrier transmission.
+2024-12-11 23:03:30,656 [INFO] Transmission started.
+2024-12-11 23:03:35,666 [INFO] Transmission stopped.
+2024-12-11 23:03:35,666 [INFO] Receiver thread started on device 0 at 50010000.00 Hz.
+2024-12-11 23:03:35,666 [DEBUG] Using proactor: IocpProactor
+2024-12-11 23:03:35,666 [INFO] Receiver thread restarted.
+2024-12-11 23:03:41,354 [INFO] KeyboardInterrupt received. Exiting gracefully.
+2024-12-11 23:03:41,354 [INFO] Shutting down...
+2024-12-11 23:03:41,664 [INFO] UDP listener thread stopped.
+2024-12-11 23:03:41,664 [INFO] Stopping receiver thread...
+2024-12-11 23:03:41,725 [INFO] Receiver thread was not running.
+2024-12-11 23:03:41,734 [INFO] Configuration saved to config.json.
+2024-12-11 23:03:41,734 [INFO] Shutdown complete.

@@ -43,8 +43,15 @@ class MessageProcessor:
                 # Stop receiver if it's running
                 if self.queues['receiver']:
                     self.queues['receiver'].stop()
+                    self.queues['receiver_stop_event'].set()  # Signal receiver thread to stop
                     self.queues['receiver'] = None
                     logger.info("Receiver stopped before carrier transmission.")
+                
+                if self.queues.get('receiver_done_event'):
+                    logger.info("Waiting for receiver thread to stop...")
+                    self.queues['receiver_done_event'].wait()
+
+                time.sleep(1)
 
                 # Start carrier-only transmission if not already running
                 if not self.queues.get('carrier_transmission'):
@@ -78,11 +85,19 @@ class MessageProcessor:
 
             # Transmit
             reset_hackrf()
+
+            # Stop receiver before transmission if it's running
             if self.queues['receiver']:
                 self.queues['receiver'].stop()
+                self.queues['receiver_stop_event'].set()  # Signal receiver thread to stop
                 self.queues['receiver'] = None
                 logger.info("Receiver stopped before carrier transmission.")
-            time.sleep(1)
+            
+            if self.queues.get('receiver_done_event'):
+                logger.info("Waiting for receiver thread to stop...")
+                self.queues['receiver_done_event'].wait()
+            
+            # Now, initialize transmission
             tb = ResampleAndSend("processed_output.wav", 2205000, device_index=device_index)
             if tb.initialize_hackrf(gain, if_gain):
                 current_frequency = self.vars['frequency_var'].get()
@@ -90,7 +105,8 @@ class MessageProcessor:
                 self.vars['transmitting_var'].set()
                 tb.start()
                 logger.info("Transmission started.")
-                time.sleep(5)
+                tb.wait()  # Wait for transmission to complete
+                logger.info("Transmission done")
                 tb.stop_and_wait()
                 self.vars['transmitting_var'].clear()
                 logger.info("Transmission stopped.")
@@ -98,16 +114,19 @@ class MessageProcessor:
                 logger.error("HackRF initialization failed.")
 
             # Restart receiver
-            #if not self.queues.get('receiver'):
-            receiver = Receiver(
-                stop_event=self.queues['receiver_stop_event'],
-                message_queue=self.queues['received_message_queue'],
-                device_index=device_index,
-                frequency=self.vars['frequency_var'].get()
-            )
-            receiver.start()
-            self.queues['receiver'] = receiver
-            logger.info("Receiver thread restarted.")
+            if not self.queues.get('receiver'):
+                receiver_stop_event = threading.Event()  # Make sure the stop event is reset here
+                receiver = Receiver(
+                    stop_event=receiver_stop_event,
+                    message_queue=self.queues['received_message_queue'],
+                    device_index=device_index,
+                    frequency=self.vars['frequency_var'].get()
+                )
+                receiver.start()
+                self.queues['receiver'] = receiver
+                logger.info("Receiver thread restarted.")
+            else:
+                logger.info("Receiver is already running, not restarting.")
 
             # Handle received messages
             while not self.queues['received_message_queue'].empty():
@@ -126,3 +145,26 @@ class MessageProcessor:
 
         except Exception as e:
             logger.exception("Error processing message: %s", e)
+
+    def restart_receiver(self):
+        """ Restart the receiver by stopping and then restarting it. """
+        logger.info("Restarting receiver...")
+
+        # Stop the receiver if it's currently running
+        if self.queues.get('receiver'):
+            receiver = self.queues['receiver']
+            receiver.stop()  # Stop the receiver thread
+            self.queues['receiver'] = None  # Clear the reference
+            logger.info("Receiver stopped.")
+
+        # Start a new receiver instance
+        receiver_stop_event = threading.Event()
+        receiver = Receiver(
+            stop_event=receiver_stop_event,
+            message_queue=self.queues['received_message_queue'],
+            device_index=self.config_manager.get("device_index", 0),
+            frequency=self.vars['frequency_var'].get()
+        )
+        receiver.start()
+        self.queues['receiver'] = receiver  # Store the new receiver instance
+        logger.info("Receiver restarted.")

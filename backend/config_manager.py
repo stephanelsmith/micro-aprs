@@ -12,7 +12,7 @@ DEFAULT_CONFIG = {
     "gain": 14,
     "if_gain": 47,
     "callsign_source": "VE2FPD",
-    "callsign_dest": "VE2FPD-2",
+    "callsign_dest": "VE2FPD",
     "flags_before": 10,
     "flags_after": 4,
     "send_ip": "127.0.0.1",

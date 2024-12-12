@@ -9,16 +9,10 @@ logger = logging.getLogger(__name__)
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Radio Transmission CLI")
-    parser.add_argument('--carrier', action='store_true', help="Start in carrier-only mode")
-    args = parser.parse_args()
+    args = parser.parse_args()  # No --carrier argument needed now
 
     # Initialize Backend
     backend = Backend("config.json")
-
-    # Handle carrier-only mode if specified
-    if args.carrier:
-        logger.info("Starting in carrier-only mode via CLI.")
-        backend.queues['message_queue'].put("CARRIER_ONLY")
 
     # Run Backend
     try:

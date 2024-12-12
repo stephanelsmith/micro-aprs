@@ -54,28 +54,37 @@ class Backend:
         )
 
         # Initialize Receiver
-        self.receiver = Receiver(
-            stop_event=self.queues['receiver_stop_event'],
-            message_queue=self.queues['received_message_queue'],
-            device_index=self.queues['device_index_var'].get(),
-            frequency=self.vars['frequency_var'].get()
-        )
-        self.receiver.start()
-        self.queues['receiver'] = self.receiver
+        if not hasattr(self, 'receiver') or self.queues['receiver'] is None:   
+            self.receiver = Receiver(
+                stop_event=self.queues['receiver_stop_event'],
+                message_queue=self.queues['received_message_queue'],
+                device_index=self.queues['device_index_var'].get(),
+                frequency=self.vars['frequency_var'].get()
+            )
+            self.receiver.start()
+            self.queues['receiver'] = self.receiver
 
         # Initialize UDP Listener
-        self.udp_listener = UDPListenerThread(
-            stop_event=self.queues['stop_event'],
-            message_queue=self.queues['message_queue'],
-            ip=self.config_manager.get('send_ip', "127.0.0.1"),
-            port=self.config_manager.get('send_port', 14581)
-        )
-        self.udp_listener.start()
+        if not hasattr(self, 'udp_listener') or self.udp_listener is None:
+            self.udp_listener = UDPListenerThread(
+                stop_event=self.queues['stop_event'],
+                message_queue=self.queues['message_queue'],
+                ip=self.config_manager.get('send_ip', "127.0.0.1"),
+                port=self.config_manager.get('send_port', 14581)
+            )
+            self.udp_listener.start()
 
-        # Initialize Carrier Transmission if enabled
+        # Initialize Carrier Transmission if enabled in config
         if self.config_manager.get("carrier_only", False):
             logger.info("Carrier-only mode enabled in configuration. Queuing CARRIER_ONLY message.")
             self.queues['message_queue'].put("CARRIER_ONLY")
+
+    def set_aprs_queue(self, aprs_queue: queue.Queue):
+        """
+        Set the queue to which received APRS messages will be sent.
+        """
+        self.queues['received_message_queue'] = aprs_queue
+        logger.info("APRS message queue has been set.")
 
     def handle_signal(self, signum: int, frame: Any):
         """
@@ -84,6 +93,30 @@ class Backend:
         logger.info("Signal %d received. Initiating shutdown...", signum)
         self.shutdown()
 
+    def start_reception(self):
+        """ Start the receiver thread. """
+        if self.queues['receiver'] is None or not self.queues['receiver'].is_alive():
+            self.receiver = Receiver(
+                stop_event=self.queues['receiver_stop_event'],
+                message_queue=self.queues['received_message_queue'],
+                device_index=self.queues['device_index_var'].get(),
+                frequency=self.vars['frequency_var'].get()
+            )
+            self.receiver.start()
+            self.queues['receiver'] = self.receiver
+            logger.info("Reception started.")
+        else:
+            logger.info("Receiver is already running.")
+
+    def stop_reception(self):
+        """ Stop the receiver thread. """
+        if self.queues.get('receiver') is not None:
+            self.queues['receiver'].stop()
+            self.queues['receiver'] = None
+            logger.info("Reception stopped.")
+        else:
+            logger.info("Receiver is not running.")
+            
     def shutdown(self):
         """
         Perform a graceful shutdown of all components.

@@ -3,10 +3,11 @@
     "gain": 14.0,
     "if_gain": 47.0,
     "callsign_source": "VE2FPD",
-    "callsign_dest": "VE2FPD",
+    "callsign_dest": "APRS",
     "flags_before": 50,
     "flags_after": 4,
     "send_ip": "127.0.0.1",
     "send_port": 14582,
-    "carrier_only": false
+    "carrier_only": false,
+    "device_index": 0
 }

@@ -191,7 +191,11 @@ class AFSKReceiver(gr.top_block):
         except Exception as e:
             print(f"Error during disconnect: {e}")
         self.stop()
-        self.wait()
+        try:
+            self.wait()  # Ensure the flowgraph completes any remaining processing
+            print("Receiver Flowgraph stopped and resources released.")
+        except Exception as e:
+            print(f"Error while waiting for flowgraph stop: {e}")
 
 
 async def consume_ax25(ax25_q, received_message_queue):
@@ -222,7 +226,7 @@ async def demod_core(samples_q, bits_q, ax25_q):
     except Exception as err:
         print(f"Error in demod_core: {err}")
 
-def start_receiver(stop_event, received_message_queue, device_index=0, frequency = 50.01e6):
+def start_receiver(stop_event, received_message_queue, device_index=0, frequency=50.01e6):
     def run_receiver():
         # Create a new event loop for the receiver thread
         loop = asyncio.new_event_loop()
@@ -244,17 +248,25 @@ def start_receiver(stop_event, received_message_queue, device_index=0, frequency
         ]
 
         try:
+            # Keep running until the stop event is triggered
             while not stop_event.is_set():
-                loop.run_until_complete(asyncio.sleep(1))
+                stop_event.wait()
         finally:
+            # Cancel tasks and stop the flowgraph gracefully
             for t in tasks:
                 t.cancel()
-            tb.stop_and_wait()
+            tb.stop_and_wait()  # Ensure the flowgraph is properly stopped
+            tb.wait()  # Ensure we wait for the flowgraph to fully stop
+            print("Receiver flowgraph stopped and cleaned up.")
+
+            # Clean up the event loop
             loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
             loop.stop()
             loop.close()
             print("Receiver thread stopped.")
 
+    # Start the receiver thread
     receiver_thread = threading.Thread(target=run_receiver, daemon=True)
     receiver_thread.start()
     return receiver_thread
+

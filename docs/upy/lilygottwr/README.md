@@ -27,10 +27,6 @@ py -m esptool --chip esp32s3 --port COM9 write_flash -z 0 .\build-SS_TTWR\firmwa
 ```
 Finally, click ```reset``` again to begin execution.
 
-
-## Trying the TinyS3 Port
-
-
 Fire up a terminal
 ```
 py -m serial.tools.miniterm COM8

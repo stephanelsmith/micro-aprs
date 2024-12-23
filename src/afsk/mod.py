@@ -25,7 +25,9 @@ class AFSKModulator():
     def __init__(self, sampling_rate = 22050,
                        signed        = True,
                        amplitude     = 0x7fff,
-                       verbose       = False,):
+                       is_square     = False,  # generate a square instead of sine
+                       verbose       = False,
+                       ):
 
         self.verbose = verbose 
         self.signed  = signed
@@ -44,9 +46,10 @@ class AFSKModulator():
 
         #pre-compute sine table
         self.sintbl_sz = 1024
-        self.sintbl = get_sin_table(size   = self.sintbl_sz,
-                                    signed = signed,
-                                    ampli  = amplitude,
+        self.sintbl = get_sin_table(size    = self.sintbl_sz,
+                                    signed  = signed,
+                                    ampli   = amplitude,
+                                    square  = is_square,
                                     )
 
         #get step sizes (integer and residue)
@@ -79,12 +82,14 @@ class AFSKModulator():
     async def __aexit__(self, *args):
         pass
 
-    async def pad_zeros(self, ms=1):
+    async def pad_zeros(self, ms=1, bias=None):
         zpad_ms = 1
         siz = int(zpad_ms/1000/self.ts)
         v = 0
         if not self.signed:
             v = 0x7FFF
+        if bias != None:
+            v = bias
         await self._q.put( (
             array(self.arr_t,[v for x in range(siz)]), 
             siz

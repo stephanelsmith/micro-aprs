@@ -26,8 +26,8 @@ from lilygottwr.xpower import start as xpower_start
 import lib.upydash as _
 
 _FPWM = const(500_000)
-# _FOUT = const(22_050)
-_FOUT = const(44_100)
+_FOUT = const(22_050)
+# _FOUT = const(44_100)
 
 AFSK_OUT_PIN = sa868_defs.AUDIO_MIC
 
@@ -36,10 +36,13 @@ _MIC_CH_SEL  = const(17)     # mic channel select, 0->mic, 1->esp
 _I2C_SCA = 8
 _I2C_SCL = 9
 
+AFSK_LOCK = False
+
 async def gc_coro():
     try:
         while True:
-            gc.collect()
+            if not AFSK_LOCK:
+                gc.collect()
             await asyncio.sleep(5)
     except asyncio.CancelledError:
         raise
@@ -72,14 +75,16 @@ async def sa868_tx_rx(sa868_uart, rx_q, msg):
             await asyncio.sleep_ms(1000)
             continue
 
-async def out_afsk(arr, siz):
+async def out_afsk(pwm, arr, siz):
+    global AFSK_LOCK
 
     try:
+        AFSK_LOCK = True
         tsf = ThreadSafeFlag()
-        pwm = PWM(Pin(AFSK_OUT_PIN), freq=_FPWM, duty_u16=0) # resolution = 26.2536 - 1.4427 log(fpwm)
         tim = Timer(1)
 
-        nl = array('H', [0,]) # viper nonlocals
+        # viper nonlocals
+        nl = array('H', [0,])
 
         @micropython.viper
         def cb(tim):
@@ -101,17 +106,21 @@ async def out_afsk(arr, siz):
         sys.print_exception(err)
     finally:
         tim.deinit()
-        pwm.deinit()
+        # pwm.deinit()
+        AFSK_LOCK = False
+
 
 async def start():
 
     try:
         gc_task = asyncio.create_task(gc_coro())
         rx_q = Queue()
+        bias = 0x7FFF
 
         async with AFSKModulator(sampling_rate = _FOUT,
                                  signed        = False,
-                                 amplitude     = 0x6000,
+                                 amplitude     = 0x7fff,
+                                 is_square     = False,
                                  verbose       = False) as afsk_mod:
             aprs = b'KI5TOF>APRS:>hello world!'
             ax25 = AX25(aprs    = aprs,
@@ -119,13 +128,13 @@ async def start():
             #AFSK
             afsk,stop_bit = ax25.to_afsk()
 
-            await afsk_mod.pad_zeros(ms = 1000)
-            await afsk_mod.send_flags(50)
+            await afsk_mod.pad_zeros(ms = 1000, bias = bias)
+            await afsk_mod.send_flags(100)
             await afsk_mod.to_samples(afsk     = afsk, 
                                       stop_bit = stop_bit,
                                       )
-            await afsk_mod.send_flags(10)
-            await afsk_mod.pad_zeros(ms = 1000)
+            await afsk_mod.send_flags(50)
+            await afsk_mod.pad_zeros(ms = 1000, bias = bias)
             arr,siz = await afsk_mod.flush()
 
 
@@ -143,6 +152,10 @@ async def start():
 
         # 0->low power, 1->high power
         hl = Pin(sa868_defs.HL_POWER, Pin.OUT, value=0)
+
+        # debug
+        dbg15 = Pin(15, Pin.OUT, value=0)
+        dbg16 = Pin(16, Pin.OUT, value=0)
 
         # start the xpower pmu module
         i2c = I2C(0, scl = Pin(_I2C_SCL), sda  = Pin(_I2C_SCA), freq=400000)
@@ -162,6 +175,7 @@ async def start():
 
             await asyncio.sleep_ms(100)
 
+
             # connect to SA868
             await sa868_tx_rx(sa868_uart, rx_q, msg=b'AT+DMOCONNECT')
 
@@ -169,23 +183,30 @@ async def start():
             # ：AT+DMOSETGROUP=TXPower，TFV，RFV，Tx_CXCSS，SQ，Rx_CXCSS
             await sa868_tx_rx(sa868_uart, rx_q, msg=b'AT+DMOSETGROUP=1,144.4000,144.4000,0000,1,0000')
 
-            x = 0
-            while True:
-                x += 1
-                try:
-                    print(':{}'.format(x))
-                    ptt.value(0)
-                    print(1)
-                    await asyncio.sleep_ms(1000)
-                    print(2)
-                    await out_afsk(arr, siz)
-                finally:
-                    print(3)
-                    await asyncio.sleep_ms(1000)
-                    print(4)
-                    ptt.value(1)
-                    print(5)
-                    await asyncio.sleep_ms(1000)
+            # AT+SETFILTER=PRE/DE-EMPH,HIGHPASS,LOWPASS
+            # 0->on, 1->off
+            await sa868_tx_rx(sa868_uart, rx_q, msg=b'AT+SETFILTER=1,0,0')
+            
+            try:
+                pwm = PWM(Pin(AFSK_OUT_PIN), freq=_FPWM, duty_u16=bias) # resolution = 26.2536 - 1.4427 log(fpwm)
+                print('start')
+                x = 0
+                while True:
+                    x += 1
+                    try:
+                        print(':{}'.format(x))
+                        # pwm.duty_u16(bias)
+                        ptt.value(0)
+                        dbg15.value(1)
+                        await out_afsk(pwm, arr, siz)
+                        # pwm.duty_u16(bias)
+                    finally:
+                        dbg15.value(0)
+                        ptt.value(1)
+                        print('done')
+                        await asyncio.sleep_ms(2000)
+            finally:
+                pwm.deinit()
 
     except Exception as err:
         sys.print_exception(err)

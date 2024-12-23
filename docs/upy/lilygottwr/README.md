@@ -21,6 +21,17 @@ Build micropython port with C modules
 make BOARD=SS_TTWR USER_C_MODULES=~/micro-aprs/c_modules/esp32s3.cmake
 ```
 
+Flash the esp32 chip.  Before flashing the ESP32S3 needs to be in the bootloader.
+```
+py -m esptool --chip esp32s3 --port COM9 write_flash -z 0 .\build-SS_TTWR\firmware.bin
+```
+Finally, click ```reset``` again to begin execution.
+
+Fire up a terminal
+```
+py -m serial.tools.miniterm COM8
+```
+
 
 ## :raised_hands: Acknowledgements
 - Images and information from [LilyGo T-TWR Store](https://www.lilygo.cc/products/t-twr-plus?srsltid=AfmBOooEmV2bkOz1-0ceEJCwkFkITOXYzLGBPkWvyBfF2cm7XqGT4BYH).

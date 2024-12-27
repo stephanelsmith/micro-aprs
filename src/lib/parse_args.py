@@ -90,7 +90,7 @@ def demod_parse_args(args):
             'options' : {},
         },
         'in' : {
-            # 'type' : 'raw',
+            'type' : 's16',
             'file'  : '-', #from stdin
         },
         'out' : {
@@ -114,7 +114,7 @@ OPTIONS:
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:
-intype       'raw' 16 bit signed samples
+intype       's16' | 'u16'
 infile       '-' (default stdin) | 'filename.raw' raw file | 'rtl_fm' input from rtl_fm
 
 -t OUTPUT TYPE OPTIONS:
@@ -148,7 +148,7 @@ outfile       '-' (default stdout)
             pass
     try:
         _in = spl.pop(0)
-        # r['in']['type'] = _in[0]
+        r['in']['type'] = _in[0]
         r['in']['file'] = _in[-1]
     except IndexError:
         pass

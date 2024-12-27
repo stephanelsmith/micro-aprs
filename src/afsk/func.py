@@ -91,6 +91,23 @@ else:
                 run = 1
         return True if act > 10 else False # 10 - minimum number of run we need to declare signal detected
 
+def create_outlier_fixer():
+    # PYTHON
+    delay = 3
+    dat = array('i', (0 for x in range(delay)))
+    idx = 0
+    def inner(v:int)->int:
+        nonlocal idx,dat,delay
+        dat[idx] = v
+        o = dat[idx]
+        idx = (idx+1)%delay
+        if sign(dat[(idx)%delay]) == sign(dat[(idx+1)%delay]) and\
+           sign(dat[(idx)%delay]) != sign(dat[idx-1]):
+            return dat[idx-1] * -1
+        else:
+            return dat[idx-1]
+    return inner
+
 def create_nrzi():
     #process the bit stream bit-by-bit with closure
     if IS_UPY:
@@ -312,9 +329,9 @@ def create_sampler(fbaud,
                 buf[idx] = 0x7fffffff
             else:
                 buf[idx] = -0x7fffffff
-        # f (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0):
-        if (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0) and\
-           (buf[(idx-1)%buflen] == buf[(idx-2)%buflen]):
+        if (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0):
+        # if (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0) and\
+           # (buf[(idx-1)%buflen] == buf[(idx-2)%buflen]):
             #detected crossing
             if lastx > ibaud_2 and lastx < ibaud*8:
                 oidx = (lastx - ibaud_2)//ibaud+1 #number of baud periods

@@ -28,8 +28,9 @@ from lib.compat import get_stdin_streamreader
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
 
-async def read_samples_from_pipe(samples_q, 
-                             ):
+async def read_samples_from_pipe(samples_q,
+                                 type = 's16',
+                                 ):
     unpack = struct.unpack
     q_put = samples_q.put
 
@@ -46,6 +47,7 @@ async def read_samples_from_pipe(samples_q,
             except EOFError:
                 break #eof break
             arr[idx] = unpack('<h', a)[0]
+            # arr[idx] = (unpack('<H', a)[0] - 32768)//6
             # eprint(arr[idx])
             idx += 1
             if idx%defs.SAMPLES_SIZE == 0:
@@ -101,7 +103,8 @@ async def read_samples_from_rtl_fm(samples_q,
                         eprint('eof')
                         break
                     #eprint(a)
-                    arr[idx] = struct.unpack('<h', a)[0]
+                    # arr[idx] = struct.unpack('<h', a)[0]
+                    arr[idx] = unpack('<H', a)[0] - 32768
                     # arr[idx] = int.from_bytes(a,'little',signed=True)
                     idx += 1
                     if idx%defs.SAMPLES_SIZE == 0:
@@ -231,7 +234,9 @@ async def main():
 
         #from .raw file
         if args['in']['file'] == '-':
-            await read_samples_from_pipe(samples_q)
+            await read_samples_from_pipe(samples_q,
+                                         type = args['in']['type'],
+                                         )
         elif args['in']['file'] == 'rtl_fm':
             await read_samples_from_rtl_fm(samples_q)
         elif args['in']['file']:

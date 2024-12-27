@@ -19,6 +19,7 @@ from afsk.func import lpf_fir_design
 from afsk.func import bandpass_fir_design
 from afsk.func import create_sampler
 from afsk.func import create_fir
+from afsk.func import create_outlier_fixer
 
 from lib.compat import print_exc
 
@@ -137,6 +138,8 @@ class AFSKDemodulator():
                                       fs    = self.fs)
         self.unnrzi = create_unnrzi()
 
+        self.outlier_fixer = create_outlier_fixer()
+
         #how much we need to flush internal filters to process all sampled data
         self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(self.tbaud/self.ts))
 
@@ -155,6 +158,7 @@ class AFSKDemodulator():
             # Process a chunk of samples
             corr     = self.corr
             lpf      = self.lpf
+            outfix   = self.outlier_fixer
             bpf      = self.bpf
             sampler  = self.sampler
             unnrzi   = self.unnrzi
@@ -169,10 +173,11 @@ class AFSKDemodulator():
 
                 for i in range(arr_size):
                     o = arr[i]
+                    # o = outfix(o)
+                    # print(o)
                     o = bpf(o)
                     o = corr(o)
                     o = lpf(o)
-                    # eprint(o)
                     bs = sampler(o)
                     if bs != 2: # _NONE
                         b = unnrzi(bs)

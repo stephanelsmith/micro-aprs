@@ -312,9 +312,9 @@ def create_sampler(fbaud,
                 buf[idx] = 0x7fffffff
             else:
                 buf[idx] = -0x7fffffff
-        # f (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0):
-        if (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0) and\
-           (buf[(idx-1)%buflen] == buf[(idx-2)%buflen]):
+        if (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0):
+        # if (buf[(idx-1)%buflen] > 0) != (buf[idx] > 0) and\
+           # (buf[(idx-1)%buflen] == buf[(idx-2)%buflen]):
             #detected crossing
             if lastx > ibaud_2 and lastx < ibaud*8:
                 oidx = (lastx - ibaud_2)//ibaud+1 #number of baud periods

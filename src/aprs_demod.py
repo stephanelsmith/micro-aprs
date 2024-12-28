@@ -28,8 +28,9 @@ from lib.compat import get_stdin_streamreader
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
 
-async def read_samples_from_pipe(samples_q, 
-                             ):
+async def read_samples_from_pipe(samples_q,
+                                 type = 's16',
+                                 ):
     unpack = struct.unpack
     q_put = samples_q.put
 
@@ -45,7 +46,12 @@ async def read_samples_from_pipe(samples_q,
                 a = await readexactly(2)
             except EOFError:
                 break #eof break
-            arr[idx] = unpack('<h', a)[0]
+            if type == 'u16':
+                # unsigned little endian
+                arr[idx] = (unpack('<H', a)[0] - 32768)//6
+            else:
+                # signed little endian (default)
+                arr[idx] = unpack('<h', a)[0]
             # eprint(arr[idx])
             idx += 1
             if idx%defs.SAMPLES_SIZE == 0:
@@ -101,7 +107,8 @@ async def read_samples_from_rtl_fm(samples_q,
                         eprint('eof')
                         break
                     #eprint(a)
-                    arr[idx] = struct.unpack('<h', a)[0]
+                    # arr[idx] = struct.unpack('<h', a)[0]
+                    arr[idx] = unpack('<H', a)[0] - 32768
                     # arr[idx] = int.from_bytes(a,'little',signed=True)
                     idx += 1
                     if idx%defs.SAMPLES_SIZE == 0:
@@ -160,13 +167,16 @@ async def read_samples_from_file(samples_q,
     except asyncio.CancelledError:
         raise
 
-async def consume_ax25(ax25_q):
+async def consume_ax25(ax25_q, 
+                       is_quite = False, # suppress stdout
+                       ):
     try:
         count = 1
         while True:
             ax25 = await ax25_q.get()
-            sys.stdout.write('[{}] {}\n'.format(count, ax25))
-            sys.stdout.flush()
+            if not is_quite:
+                sys.stdout.write('[{}] {}\n'.format(count, ax25))
+                sys.stdout.flush()
             count += 1
             ax25_q.task_done()
             await asyncio.sleep(0)
@@ -187,6 +197,7 @@ async def demod_core(samples_q,
                                    samples_in_q  = samples_q,
                                    bits_out_q    = bits_q,
                                    verbose       = args['args']['verbose'],
+                                   debug_samples = args['args']['debug_samples'],
                                    options       = args['args']['options'],
                                    ) as afsk_demod:
             # AX25FromAFSK - convert bits to ax25 objects
@@ -222,7 +233,9 @@ async def main():
         tasks = []
 
         #create ax25 consumer
-        tasks.append(asyncio.create_task(consume_ax25(ax25_q = ax25_q)))
+        tasks.append(asyncio.create_task(consume_ax25(ax25_q   = ax25_q,
+                                                      is_quite = args['args']['debug_samples']), # no output when debugging samples
+                                        ))
         tasks.append(asyncio.create_task(demod_core(samples_q,
                                                     bits_q,
                                                     ax25_q,
@@ -231,7 +244,9 @@ async def main():
 
         #from .raw file
         if args['in']['file'] == '-':
-            await read_samples_from_pipe(samples_q)
+            await read_samples_from_pipe(samples_q,
+                                         type = args['in']['type'],
+                                         )
         elif args['in']['file'] == 'rtl_fm':
             await read_samples_from_rtl_fm(samples_q)
         elif args['in']['file']:

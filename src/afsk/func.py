@@ -21,6 +21,22 @@ else:
     def sign(a:int)->int:
         return (a > 0) - (a < 0)
 
+if IS_UPY:
+    @micropython.viper
+    def clamps16(o:int) -> int:
+        if o > 32767:
+            return 32767
+        if o < -32768:
+            return -32768
+        return o
+else:
+    def clamps16(o):
+        if o > 32767:
+            return 32767
+        if o < -32768:
+            return -32768
+        return o
+
 def frange(start, stop, step, rnd=None):
     n = int(math.ceil((stop - start) / step))
     if isinstance(rnd,int):
@@ -90,6 +106,23 @@ else:
                 pol = not pol
                 run = 1
         return True if act > 10 else False # 10 - minimum number of run we need to declare signal detected
+
+def create_outlier_fixer():
+    # PYTHON
+    delay = 3
+    dat = array('i', (0 for x in range(delay)))
+    idx = 0
+    def inner(v:int)->int:
+        nonlocal idx,dat,delay
+        dat[idx] = v
+        o = dat[idx]
+        idx = (idx+1)%delay
+        if sign(dat[(idx)%delay]) == sign(dat[(idx+1)%delay]) and\
+           sign(dat[(idx)%delay]) != sign(dat[idx-1]):
+            return dat[idx-1] * -1
+        else:
+            return dat[idx-1]
+    return inner
 
 def create_nrzi():
     #process the bit stream bit-by-bit with closure

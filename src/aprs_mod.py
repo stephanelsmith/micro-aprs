@@ -150,7 +150,7 @@ async def afsk_out(afsk_q,
             if out_file == '-':
                 if arr and siz:
                     for i in range(siz):
-                        samp = struct.pack('<h', arr[i])
+                        samp = struct.pack('<h', arr[i]) # little-endian signed output
                         write(samp) #buffer write binary
                     flush()
             elif out_file == 'null':

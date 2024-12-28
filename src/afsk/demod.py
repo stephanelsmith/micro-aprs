@@ -1,5 +1,6 @@
 
 import sys
+import struct
 import asyncio
 from array import array
 import math
@@ -19,6 +20,8 @@ from afsk.func import lpf_fir_design
 from afsk.func import bandpass_fir_design
 from afsk.func import create_sampler
 from afsk.func import create_fir
+from afsk.func import create_outlier_fixer
+from afsk.func import clamps16
 
 from lib.compat import print_exc
 
@@ -26,13 +29,15 @@ class AFSKDemodulator():
     def __init__(self, samples_in_q,
                        bits_out_q,
                        sampling_rate = 22050,
-                       verbose       = False,
+                       verbose       = False, # output intermediate steps to stderr
+                       debug_samples = False, # output intermediate samples to stderr
                        options       = {},
                        ):
 
         self.samples_q  = samples_in_q
         self.bits_q = bits_out_q
         self.verbose = verbose
+        self.debug_samples = debug_samples
 
         self.fmark = 1200
         self.tmark = 1/self.fmark
@@ -47,26 +52,30 @@ class AFSKDemodulator():
         do_memoize = True
         if options:
             eprint('OPTIONS: {}'.format(options))
-        options = dict({
-            'bandpass_ncoefsbaud' : 3,
-            'bandpass_width'      : 460,
-            'bandpass_amark'      : 7,
-            'bandpass_aspace'     : 24,
-            'lpf_ncoefsbaud'      : 4,
-            'lpf_f'               : 1000,
-            'lpf_width'           : 360,
-            'lpf_aboost'          : 3,
-        }, **options)
+
+        # germany tuned
         # options = dict({
-            # 'bandpass_ncoefsbaud' : 5,
+            # 'bandpass_ncoefsbaud' : 3,
             # 'bandpass_width'      : 460,
             # 'bandpass_amark'      : 7,
             # 'bandpass_aspace'     : 24,
-            # 'lpf_ncoefsbaud'      : 7,
+            # 'lpf_ncoefsbaud'      : 4,
             # 'lpf_f'               : 1000,
             # 'lpf_width'           : 360,
             # 'lpf_aboost'          : 3,
         # }, **options)
+
+        # rtl_fm test tuning
+        options = dict({
+            'bandpass_ncoefsbaud' : 5,
+            'bandpass_width'      : 460,
+            'bandpass_amark'      : 6,
+            'bandpass_aspace'     : 6,
+            'lpf_ncoefsbaud'      : 5,
+            'lpf_f'               : 1000,
+            'lpf_width'           : 360,
+            'lpf_aboost'          : 3,
+        }, **options)
 
         nmark = int(self.tmark/self.ts)
         bandpass_ncoefsbaud = options['bandpass_ncoefsbaud']
@@ -137,6 +146,8 @@ class AFSKDemodulator():
                                       fs    = self.fs)
         self.unnrzi = create_unnrzi()
 
+        self.outlier_fixer = create_outlier_fixer()
+
         #how much we need to flush internal filters to process all sampled data
         self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(self.tbaud/self.ts))
 
@@ -155,6 +166,7 @@ class AFSKDemodulator():
             # Process a chunk of samples
             corr     = self.corr
             lpf      = self.lpf
+            outfix   = self.outlier_fixer
             bpf      = self.bpf
             sampler  = self.sampler
             unnrzi   = self.unnrzi
@@ -169,15 +181,31 @@ class AFSKDemodulator():
 
                 for i in range(arr_size):
                     o = arr[i]
+                    # o = outfix(o)
+                    # print(o)
+                    if self.debug_samples == 'in':
+                        s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        sys.stdout.buffer.write(s)
                     o = bpf(o)
+                    if self.debug_samples == 'bpf':
+                        s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        sys.stdout.buffer.write(s)
                     o = corr(o)
+                    if self.debug_samples == 'cor':
+                        s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        sys.stdout.buffer.write(s)
                     o = lpf(o)
-                    # eprint(o)
+                    if self.debug_samples == 'lpf':
+                        s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        sys.stdout.buffer.write(s)
                     bs = sampler(o)
                     if bs != 2: # _NONE
                         b = unnrzi(bs)
                         # eprint(b,end='')
                         await bits_q.put(b) #bits_out_q
+
+                if self.debug_samples:
+                    sys.stdout.buffer.flush()
 
                 samp_q.task_done() # done
         except Exception as err:

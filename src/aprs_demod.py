@@ -46,8 +46,12 @@ async def read_samples_from_pipe(samples_q,
                 a = await readexactly(2)
             except EOFError:
                 break #eof break
-            arr[idx] = unpack('<h', a)[0]
-            # arr[idx] = (unpack('<H', a)[0] - 32768)//6
+            if type == 'u16':
+                # unsigned little endian
+                arr[idx] = (unpack('<H', a)[0] - 32768)//6
+            else:
+                # signed little endian (default)
+                arr[idx] = unpack('<h', a)[0]
             # eprint(arr[idx])
             idx += 1
             if idx%defs.SAMPLES_SIZE == 0:

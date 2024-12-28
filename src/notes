@@ -68,14 +68,10 @@ python aprs_demod.py -t test/tnc_test02.raw
 rtl_fm -M wbfm -f 94.5M -r 22500 | play -r 22500 -t raw -e s -b 16 -c 1 -v 0.1 -
 rtl_fm -f 144.390M -s 22050 -g 1 - | multimon-ng -t raw -A -a AFSK1200 -
 rtl_fm -f 144.390M -s 22050 -g 1 - | python aprs_demod.py -t u16 -
-rtl_fm -f 144.390M -s 22050 -g 1 - | sox -t raw -b 16 -e signed-integer -c 1 -v 1 -r 22050 -  -t wav test/ttwr.wav
-sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
-rtl_fm -f 144.390M -s 22050 -g 1 - | sox -t raw -b 16 -e signed-integer -c 1 -v 1 -r 22050 -  -t wav static.wav
-rtl_fm -f 144.390M -s 22050 -g 1 - | python aprs_demod.py -t u16 -
 rtl_fm -f 144.390M -s 22050 -g 1 - | pypy3 aprs_demod.py -t u16 -
-
-#STATIC
-sox -t wav test/static.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python squelch_test.py
+rtl_fm -f 144.390M -s 22050 -g 1 - | sox -t raw -b 16 -e unsigned-integer -c 1 -v 1 -r 22050 -  -t wav test/ttwr.wav
+sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
+rtl_fm -f 144.390M -s 22050 -g 1 - | python aprs_demod.py -t u16 -
 
 #APRS IS
 echo "KI5TOF>APRS:>hello world!" | python aprs_is.py -c KI5TOF-10 -p 17081 -lat 29.699616621630348 -lon -95.75020574442557 -msg micro-aprs-modem 144.390MHz rx only APRS iGate

@@ -85,6 +85,7 @@ def demod_parse_args(args):
     r = {
         'args' : {
             'verbose' : False,
+            'debug_samples'   : False,
             'quiet'   : False,
             'rate'    : 22050,
             'options' : {},
@@ -113,6 +114,11 @@ OPTIONS:
 -r, --rate       22050 (default)
 -v, --verbose    verbose intermediate output to stderr
 
+DETAIL DEBUG MODE, output samples at specific stages within pipeline. Nominall use this
+option to create wav files at each step and view them in audacity to see what's up.
+Stages: input, bandpass filter, correlator, and lowpass filter.
+-d, --debug_samples 'in' | 'bpf' | 'cor' | 'lpf'
+
 -t INPUT TYPE OPTIONS:
 intype       's16' | 'u16'
 infile       '-' (default stdin) | 'filename.raw' raw file | 'rtl_fm' input from rtl_fm
@@ -128,15 +134,19 @@ outfile       '-' (default stdout)
     try:
         #general args
         args = spl.pop(0)
-        if '-rate' in args:
-            r['args']['rate'] = get_arg_val(args, '-rate', int)
+        if '--rate' in args:
+            r['args']['rate'] = get_arg_val(args, '--rate', int)
         if '-r' in args:
             r['args']['rate'] = get_arg_val(args, '-r', int)
-        if '-v' in args or '-verbose' in args:
+        if '-v' in args or '--verbose' in args:
             r['args']['verbose'] = True
-        if '-o' in args:
-            r['args']['options'] = loads(get_arg_val(args, '-o', str))
-            # print('OPTIONS:{}'.format(r['args']['options']))
+        if '--debug_samples' in args:
+            r['args']['debug_samples'] = get_arg_val(args, '--debug_samples', str)
+        if '-d' in args:
+            r['args']['debug_samples'] = get_arg_val(args, '-d', str)
+        # if '-o' in args:
+            # r['args']['options'] = loads(get_arg_val(args, '-o', str))
+            # # print('OPTIONS:{}'.format(r['args']['options']))
     except IndexError:
         pass
     if len(spl) == 2:

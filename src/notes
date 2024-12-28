@@ -17,7 +17,6 @@ atest test/test.wav
 sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
 sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
 
-
 #demod
 sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
 sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
@@ -48,6 +47,13 @@ bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
 #convert wav->raw
 sox -t wav tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 tnc_test02.raw
 find -name "*wav" | xargs basename -s .wav | xargs -i sox -t wav {}.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 {}.raw
+
+# DEBUG DEMOD SAMPLES BY STAGE
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -v -t -
+sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -v -t -
+sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d bpf -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_1bpf.wav
+sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d cor -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_2cor.wav
+sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d lpf -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_3lpf.wav
 
 #ISS
 sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -

@@ -167,13 +167,16 @@ async def read_samples_from_file(samples_q,
     except asyncio.CancelledError:
         raise
 
-async def consume_ax25(ax25_q):
+async def consume_ax25(ax25_q, 
+                       is_quite = False, # suppress stdout
+                       ):
     try:
         count = 1
         while True:
             ax25 = await ax25_q.get()
-            sys.stdout.write('[{}] {}\n'.format(count, ax25))
-            sys.stdout.flush()
+            if not is_quite:
+                sys.stdout.write('[{}] {}\n'.format(count, ax25))
+                sys.stdout.flush()
             count += 1
             ax25_q.task_done()
             await asyncio.sleep(0)
@@ -194,6 +197,7 @@ async def demod_core(samples_q,
                                    samples_in_q  = samples_q,
                                    bits_out_q    = bits_q,
                                    verbose       = args['args']['verbose'],
+                                   debug_samples = args['args']['debug_samples'],
                                    options       = args['args']['options'],
                                    ) as afsk_demod:
             # AX25FromAFSK - convert bits to ax25 objects
@@ -229,7 +233,9 @@ async def main():
         tasks = []
 
         #create ax25 consumer
-        tasks.append(asyncio.create_task(consume_ax25(ax25_q = ax25_q)))
+        tasks.append(asyncio.create_task(consume_ax25(ax25_q   = ax25_q,
+                                                      is_quite = args['args']['debug_samples']), # no output when debugging samples
+                                        ))
         tasks.append(asyncio.create_task(demod_core(samples_q,
                                                     bits_q,
                                                     ax25_q,

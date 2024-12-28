@@ -21,6 +21,22 @@ else:
     def sign(a:int)->int:
         return (a > 0) - (a < 0)
 
+if IS_UPY:
+    @micropython.viper
+    def clamps16(o:int) -> int:
+        if o > 32767:
+            return 32767
+        if o < -32768:
+            return -32768
+        return o
+else:
+    def clamps16(o):
+        if o > 32767:
+            return 32767
+        if o < -32768:
+            return -32768
+        return o
+
 def frange(start, stop, step, rnd=None):
     n = int(math.ceil((stop - start) / step))
     if isinstance(rnd,int):

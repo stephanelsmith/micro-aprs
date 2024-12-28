@@ -17,13 +17,16 @@ We also implement a basic LPF, where $` R = 6.4K Ohm `$ and $` C = 4.7\mu F `$. 
 Some micropython ports include a function ```write_timed``` which ["Initiates a burst of RAM to DAC using a DMA transfer"](https://docs.micropython.org/en/latest/library/pyb.DAC.html) We again do not have this function built-in functionality with the ESP32S3 port.  Fortunately, this functionality is easy to implement with good old fashion timers and interrupts as is done in the [```out_afsk```](https://github.com/stephanelsmith/micro-aprs/blob/66a3320c805cfefc5a061813a750ab156988ca0d/src/tinys3.py#L38) function.
 
 ### AFSK Output rate comparison
+AFSK sampling rates from 11k to 44k all functional for creating demodulatable signal.  One consideration I noticed was at 44.1kHz, the microcontroller was periodically having issues keeping up.  Recommendation going with 22kHz or even 11kHz depending on application and timing margin needed.
 
-While digital-to-analog on esp32s3 seems to be full of work-arounds, we can finally take advantage of esp32s3's massive 8Mb of RAM to bump the output rate as we can easily save the entire waveform in RAM. 
+#### 44.1kHz
+<img src="44k.jpg" width="600">
 
-| --- |
-| ![11.025 kHz](11k.jpg?raw=true) |
-| ![22.050 kHz](22k.jpg?raw=true) |
-| ![44.10 kHz](44k.jpg?raw=true)  |
+#### 22.05kHz
+<img src="22k.jpg" width="600">
+
+#### 11.025kHz
+<img src="11k.jpg" width="600">
 
 
 ## :raised_hands: Acknowledgements

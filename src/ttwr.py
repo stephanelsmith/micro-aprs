@@ -25,8 +25,12 @@ from lilygottwr.xpower import start as xpower_start
 
 import lib.upydash as _
 
+# pwm frequency
 _FPWM = const(500_000)
-_FOUT = const(22_050)
+
+# afsk sample frequency
+_FOUT = const(11_025)
+# _FOUT = const(22_050)
 # _FOUT = const(44_100)
 
 AFSK_OUT_PIN = sa868_defs.AUDIO_MIC
@@ -119,7 +123,7 @@ async def start():
 
         async with AFSKModulator(sampling_rate = _FOUT,
                                  signed        = False,
-                                 amplitude     = 0x7fff,
+                                 amplitude     = 0x7000,
                                  is_square     = False,
                                  verbose       = False) as afsk_mod:
             aprs = b'KI5TOF>APRS:>hello world!'

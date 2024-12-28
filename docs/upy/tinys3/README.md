@@ -55,7 +55,7 @@ make BOARD=UM_TINYS3
 
 Flash the esp32 chip.  Before flashing the ESP32S3 needs to be in the bootloader.  This is done by holding the ```boot``` button and clicking ```reset```.  You can find the right comm port with ```py -m serial.tools.list_ports```.  You may need to ```py -m pip install pyserial``` first.
 ```
-py -m esptool --chip esp32s3 --port COM13 write_flash -z 0 .\build-SS_TINYS3\firmware.bin
+py -m esptool --chip esp32s3 --port COM11 write_flash -z 0 .\build-SS_TINYS3\firmware.bin
 ```
 Finally, click ```reset``` again to begin execution.
 
@@ -65,7 +65,7 @@ Finally, click ```reset``` again to begin execution.
 
 Fire up a terminal
 ```
-py -m serial.tools.miniterm COM18
+py -m serial.tools.miniterm COM10
 ```
 
 Start afsk "hello world" example

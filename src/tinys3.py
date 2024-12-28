@@ -18,9 +18,13 @@ from ax25.ax25 import AX25
 
 import lib.upydash as _
 
+# pwm frequency
 _FPWM = const(500_000)
-# _FOUT = const(22_050)
-_FOUT = const(44_100)
+
+# afsk sample frequency
+# _FOUT = const(11_025)
+_FOUT = const(22_050)
+# _FOUT = const(44_100)
 
 _AFSK_OUT_PIN = const(1)
 _AFSK_PTT_PIN = const(9)

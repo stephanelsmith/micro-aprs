@@ -37,6 +37,7 @@ As many who've gone down this path have mentioned, there's surprisingly little u
 * [AX25/APRS Encoding and Decoding](docs/encdec/README.md). Step-by-step encoding/decoding APRS and AX25.
 * [144.39MHz 1/4 Wave Ground Plane Antenna Design](docs/ant/README.md).
 * [Build Micrpython Firware](docs/upy/README.md)
+* [ESP32-S3 Implementation Considerations - Missing DAC](docs/upy/dac/README.md)
 
 
 ## :snake: Python Compatibility

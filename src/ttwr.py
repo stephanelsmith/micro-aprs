@@ -189,7 +189,7 @@ async def start():
 
             # AT+SETFILTER=PRE/DE-EMPH,HIGHPASS,LOWPASS
             # 0->on, 1->off
-            await sa868_tx_rx(sa868_uart, rx_q, msg=b'AT+SETFILTER=1,0,0')
+            await sa868_tx_rx(sa868_uart, rx_q, msg=b'AT+SETFILTER=0,0,0')
             
             try:
                 pwm = PWM(Pin(AFSK_OUT_PIN), freq=_FPWM, duty_u16=bias) # resolution = 26.2536 - 1.4427 log(fpwm)
@@ -199,16 +199,13 @@ async def start():
                     x += 1
                     try:
                         print(':{}'.format(x))
-                        # pwm.duty_u16(bias)
                         ptt.value(0)
                         dbg15.value(1)
                         await out_afsk(pwm, arr, siz)
-                        # pwm.duty_u16(bias)
                     finally:
                         dbg15.value(0)
                         ptt.value(1)
-                        print('done')
-                        await asyncio.sleep_ms(2000)
+                        await asyncio.sleep_ms(5000)
             finally:
                 pwm.deinit()
 

@@ -175,7 +175,10 @@ async def consume_ax25(ax25_q,
         while True:
             ax25 = await ax25_q.get()
             if not is_quite:
-                sys.stdout.write('[{}] {}\n'.format(count, ax25))
+                try:
+                    sys.stdout.write('[{}] {}\n'.format(count, ax25))
+                except UnicodeDecodeError:
+                    sys.stdout.write('[{}] ERR\n'.format(count))
                 sys.stdout.flush()
             count += 1
             ax25_q.task_done()

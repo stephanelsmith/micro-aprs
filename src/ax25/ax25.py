@@ -80,17 +80,13 @@ class AX25():
         dst_digis = b','.join([self.dst.to_aprs()]+[digi.to_aprs() for digi in self.digis])
         if isinstance(self.info, (bytes, bytearray)):
             info = self.info.strip()
-            # try:
-                # info = self.info.decode().strip()
-            # except UnicodeDecodeError:
-                # info = str(self.info).strip()
         elif isinstance(self.info, str):
             info = self.info.encode().strip()
         else:
             raise Exception('info unknown type {}'.format(info))
-        # return '{}>{}:{}'.format(src,
-                                 # dst_digis,
-                                 # info)
+        # return b'{}>{}:{}'.format(src,
+                                  # dst_digis,
+                                  # info)
         return src + b'>' + dst_digis + b':' + info
 
     # some fancy highlighting if we have rich
@@ -310,9 +306,11 @@ class AX25():
 
         return (frame,stop_bit)
 
-    # def encode(self):
-        # return self.to_aprs().encode()
-
     def __repr__(self):
-        return self.to_aprs().decode()
+        try:
+            return self.to_aprs().decode()
+        except UnicodeDecodeError:
+            eprint('ERR',self.src, self.info)
+            return ''
+            # return '{}>:{}'.format(str(self.src), str(self.info))
 

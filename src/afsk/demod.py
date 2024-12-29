@@ -52,30 +52,30 @@ class AFSKDemodulator():
         do_memoize = True
         if options:
             eprint('OPTIONS: {}'.format(options))
+        else:
+            # germany tuned
+            # options = dict({
+                # 'bandpass_ncoefsbaud' : 3,
+                # 'bandpass_width'      : 460,
+                # 'bandpass_amark'      : 7,
+                # 'bandpass_aspace'     : 24,
+                # 'lpf_ncoefsbaud'      : 4,
+                # 'lpf_f'               : 1000,
+                # 'lpf_width'           : 360,
+                # 'lpf_aboost'          : 3,
+            # }, **options)
 
-        # germany tuned
-        # options = dict({
-            # 'bandpass_ncoefsbaud' : 3,
-            # 'bandpass_width'      : 460,
-            # 'bandpass_amark'      : 7,
-            # 'bandpass_aspace'     : 24,
-            # 'lpf_ncoefsbaud'      : 4,
-            # 'lpf_f'               : 1000,
-            # 'lpf_width'           : 360,
-            # 'lpf_aboost'          : 3,
-        # }, **options)
-
-        # rtl_fm test tuning
-        options = dict({
-            'bandpass_ncoefsbaud' : 5,
-            'bandpass_width'      : 460,
-            'bandpass_amark'      : 6,
-            'bandpass_aspace'     : 6,
-            'lpf_ncoefsbaud'      : 5,
-            'lpf_f'               : 1000,
-            'lpf_width'           : 360,
-            'lpf_aboost'          : 3,
-        }, **options)
+            # rtl_fm test tuning
+            options = dict({
+                'bandpass_ncoefsbaud' : 5,
+                'bandpass_width'      : 460,
+                'bandpass_amark'      : 6,
+                'bandpass_aspace'     : 6,
+                'lpf_ncoefsbaud'      : 5,
+                'lpf_f'               : 1000,
+                'lpf_width'           : 360,
+                'lpf_aboost'          : 3,
+            }, **options)
 
         nmark = int(self.tmark/self.ts)
         bandpass_ncoefsbaud = options['bandpass_ncoefsbaud']

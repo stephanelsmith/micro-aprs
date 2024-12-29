@@ -264,7 +264,7 @@ async def main():
         await ax25_q.join()
 
     except Exception as err:
-        print_exc(err)
+        raise
     except asyncio.CancelledError:
         raise
     finally:

@@ -307,10 +307,5 @@ class AX25():
         return (frame,stop_bit)
 
     def __repr__(self):
-        try:
-            return self.to_aprs().decode()
-        except UnicodeDecodeError:
-            eprint('ERR',self.src, self.info)
-            return ''
-            # return '{}>:{}'.format(str(self.src), str(self.info))
+        return self.to_aprs().decode()
 

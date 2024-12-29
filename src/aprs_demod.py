@@ -221,7 +221,7 @@ async def demod_core(samples_q,
         print_exc(err)
 
 async def main():
-
+    # print('***',sys.argv)
     args = demod_parse_args(sys.argv)
     eprint('# APRS DEMOD')
     eprint('# RATE {}'.format(args['args']['rate']))

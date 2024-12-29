@@ -1,6 +1,6 @@
 
 import sys
-from json import loads
+from json import loads as jsonloads
 
 def mod_parse_args(args):
     r = {
@@ -60,10 +60,6 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
             r['args']['verbose'] = True
         if '-q' in args or '-quiet' in args:
             r['args']['quiet'] = True
-        if '-o' in args:
-            r['args']['options'] = loads(get_arg_val(args, '-o'))
-        if '-options' in args:
-            r['args']['options'] = loads(get_arg_val(args, '-options'))
     except IndexError:
         pass
     if len(spl) == 2:
@@ -144,9 +140,12 @@ outfile       '-' (default stdout)
             r['args']['debug_samples'] = get_arg_val(args, '--debug_samples', str)
         if '-d' in args:
             r['args']['debug_samples'] = get_arg_val(args, '-d', str)
-        # if '-o' in args:
-            # r['args']['options'] = loads(get_arg_val(args, '-o', str))
-            # # print('OPTIONS:{}'.format(r['args']['options']))
+        if '-o' in args:
+            jsonstr = get_arg_val(args, '-o', str)
+            jsonstr = jsonstr.replace('\'','')
+            jsonstr = jsonstr.replace('\\','')
+            r['args']['options'] = jsonloads(jsonstr)
+            # print('OPTIONS:{}'.format(r['args']['options']))
     except IndexError:
         pass
     if len(spl) == 2:

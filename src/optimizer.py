@@ -9,37 +9,38 @@ from json import dumps
 from copy import deepcopy
 import lib.upydash as _
 
-async def decode_async(raw_file = 'test/ISSpkt.raw', 
-                       options = {},
-                       ):
-    cmd = 'python aprs_demod.py -o {} -t raw {}'.format(
-        dumps(options).replace(' ',''),
-        raw_file,
-    )
-    p = await asyncio.subprocess.create_subprocess_exec(
-            cmd.split()[0], *cmd.split()[1:],
-			stdout=asyncio.subprocess.PIPE,
-			)
-    count = 0
-    while True:
-        d = await p.stdout.readline()
-        if not d:
-            break
-        msg = d.decode().strip()
-        m = re.match('\d+:', msg)
-        if m:
-            count += 1
-            print('{} {}'.format(count, msg), flush=True)
-        else:
-            print('{}'.format(msg), flush=True)
-    print(' === DECODED {} FRAMES === '.format(count))
-    return count
+# async def decode_async(raw_file = 'test/ISSpkt.raw', 
+                       # options = {},
+                       # ):
+    # print('DECODE SYNC')
+    # cmd = 'python aprs_demod.py -o {} -t raw {}'.format(
+        # dumps(options).replace(' ',''),
+        # raw_file,
+    # )
+    # p = await asyncio.subprocess.create_subprocess_exec(
+            # cmd.split()[0], *cmd.split()[1:],
+			# stdout=asyncio.subprocess.PIPE,
+			# )
+    # count = 0
+    # while True:
+        # d = await p.stdout.readline()
+        # if not d:
+            # break
+        # msg = d.decode().strip()
+        # m = re.match('\d+:', msg)
+        # if m:
+            # count += 1
+            # print('{} {}'.format(count, msg), flush=True)
+        # else:
+            # print('{}'.format(msg), flush=True)
+    # print(' === DECODED {} FRAMES === '.format(count))
+    # return count
 
 def decode_sync(raw_file = 'test/ISSpkt.raw', 
                 options = {},
                 ):
     # cmd = 'python aprs_demod.py -o {} -t raw {}'.format(
-    cmd = 'pypy3 aprs_demod.py -o {} -t raw {}'.format(
+    cmd = 'pypy3 aprs_demod.py -o \'{}\' -t raw {}'.format(
         dumps(options).replace(' ',''),
         raw_file,
     )
@@ -77,7 +78,7 @@ async def memoize_firs(argss):
     tbaud = 1/fbaud
     for args in argss:
         options = args[1]
-        print('memoize',options)
+        print('optimizer','memoize',options)
         nmark = int(tmark/ts)
         bandpass_ncoefsbaud = options['bandpass_ncoefsbaud']
         bandpass_ncoefs = int(nmark*bandpass_ncoefsbaud) if int(nmark*bandpass_ncoefsbaud)%2==1 else int(nmark*bandpass_ncoefsbaud)+1
@@ -119,13 +120,13 @@ async def memoize_firs(argss):
 async def main():
     testdefs = {
             'bandpass_ncoefsbaud' : [5],
-            'bandpass_width'      : [460],
-            'bandpass_amark'      : [6],
-            'bandpass_aspace'     : [6],
+            'bandpass_width'      : [400],
+            'bandpass_amark'      : range(1,10,2),
+            'bandpass_aspace'     : range(1,10,2),
             'lpf_ncoefsbaud'      : [5],
-            'lpf_f'               : [1000],
-            'lpf_width'           : [360],
-            'lpf_aboost'          : [3],
+            'lpf_f'               : [800],
+            'lpf_width'           : [250],
+            'lpf_aboost'          : range(1,10,2),
     }
     # raw_file = 'test/ISSpkt.raw'
     raw_file = 'test/tnc_test02.raw'

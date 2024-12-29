@@ -34,12 +34,43 @@ static mp_obj_t mp_sign(mp_obj_t a_obj) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(sign_obj, mp_sign);
 
-// TO INT
+// TO INT, perform a uint32 to int32 type cast
 static mp_obj_t mp_uint_to_int(mp_obj_t a_obj) {
     uint32_t a = mp_obj_get_int(a_obj);
     return mp_obj_new_int((int32_t)a);
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(uint_to_int_obj, mp_uint_to_int);
+
+
+////////////////////////////
+// CLZ (count leading zeros)
+////////////////////////////
+// count leading zeros of nonzero 32-bit unsigned integer
+// for gcc, use builtin
+// #define clz32 __builtin_clz
+// alternative implementation
+// static const uint8_t clz_tab[32] = 
+// {
+    // 31, 22, 30, 21, 18, 10, 29,  2, 20, 17, 15, 13, 9,  6, 28, 1,
+    // 23, 19, 11,  3, 16, 14,  7, 24, 12,  4,  8, 25, 5, 26, 27, 0
+// };
+// uint8_t clz32 (uint32_t a)
+// {
+    // a |= a >> 16;
+    // a |= a >> 8;
+    // a |= a >> 4;
+    // a |= a >> 2;
+    // a |= a >> 1;
+    // return clz_tab [0x07c4acdd * a >> 27];
+// }
+
+// static mp_obj_t mp_clz(mp_obj_t a_obj) {
+    // int a = mp_obj_get_int(a_obj);
+	// return mp_obj_new_int(clz32(a));
+// }
+// static MP_DEFINE_CONST_FUN_OBJ_1(clz_obj, mp_clz);
+
+
 
 // Reference for sqrt implementation
 // https://stackoverflow.com/questions/65986056/is-there-a-non-looping-unsigned-32-bit-integer-square-root-function-c

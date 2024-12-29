@@ -9,12 +9,12 @@ from json import dumps
 from copy import deepcopy
 import lib.upydash as _
 
-async def decode_async(wav_file = 'test/ISSpkt.wav', 
+async def decode_async(raw_file = 'test/ISSpkt.raw', 
                        options = {},
                        ):
-    cmd = 'python aprs_demod.py -o {} -t wav {}'.format(
+    cmd = 'python aprs_demod.py -o {} -t raw {}'.format(
         dumps(options).replace(' ',''),
-        wav_file,
+        raw_file,
     )
     p = await asyncio.subprocess.create_subprocess_exec(
             cmd.split()[0], *cmd.split()[1:],
@@ -35,13 +35,13 @@ async def decode_async(wav_file = 'test/ISSpkt.wav',
     print(' === DECODED {} FRAMES === '.format(count))
     return count
 
-def decode_sync(wav_file = 'test/ISSpkt.wav', 
+def decode_sync(raw_file = 'test/ISSpkt.raw', 
                 options = {},
                 ):
-    # cmd = 'python aprs_demod.py -o {} -t wav {}'.format(
-    cmd = 'pypy3 aprs_demod.py -o {} -t wav {}'.format(
+    # cmd = 'python aprs_demod.py -o {} -t raw {}'.format(
+    cmd = 'pypy3 aprs_demod.py -o {} -t raw {}'.format(
         dumps(options).replace(' ',''),
-        wav_file,
+        raw_file,
     )
     print(cmd)
     p = Popen(cmd.split(),
@@ -119,16 +119,16 @@ async def memoize_firs(argss):
 async def main():
     testdefs = {
             'bandpass_ncoefsbaud' : [5],
-            'bandpass_width'      : range(100,1000,50),
+            'bandpass_width'      : [460],
             'bandpass_amark'      : [6],
             'bandpass_aspace'     : [6],
             'lpf_ncoefsbaud'      : [5],
             'lpf_f'               : [1000],
-            'lpf_width'           : range(100,1000,50),
+            'lpf_width'           : [360],
             'lpf_aboost'          : [3],
     }
-    # wav_file = 'test/ISSpkt.wav'
-    wav_file = 'test/tnc_test02.wav'
+    # raw_file = 'test/ISSpkt.raw'
+    raw_file = 'test/tnc_test02.raw'
     
     tests = []
 
@@ -147,7 +147,7 @@ async def main():
         # for v in vs:
             # tests.append({k:v})
     
-    argss = _.map(tests, lambda options: (wav_file, options))
+    argss = _.map(tests, lambda options: (raw_file, options))
 
     #memoize all the fir coefs, pypy3 doesn't have scipy
     await memoize_firs(argss)

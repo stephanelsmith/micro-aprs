@@ -3,7 +3,7 @@
 
 # Micro APRS MODEM
 
-A python/micropython based library for encoding/decoding, modulating/demodulating APRS/AX.25 packets in AFSK.  
+A python/micropython based library for encoding/decoding, modulating/demodulating APRS/AX.25 packets in AFSK audio.  
 <!---
 ![AFSK hello world](docs/afsk_hello.png?raw=true "AFSK hello")
 --->

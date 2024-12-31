@@ -2,12 +2,6 @@
 
 I struggled to find solid examples, especially regarding the order of operations for encoding/decoding AX25 frames to AFSK samples (spoiler alert it's: byte reverse, bit stuff, NRZI).  For anyone else looking for a definitive answer, ```aprs_mod.py``` and ```aprs_demod.py``` have a verbose mode which outputs the intermediate steps to stderr.  This way you should have no problem providing your inputs and compare intermediate steps in addition to the final output.
 
-## Encoding APRS messages to AX25 format
-
-For encoding APRS and AX25, there are in fact lots of great references which document this in detail, including:
-* [The best readable reference covering AX25 Frame.](https://www.mssl.ucl.ac.uk/~mcrw/QB50/Documents/11-%20QB50-EPFL-SSC-SCS-ICD-AX.25-TFF-3-1.pdf)
-* [Direwolf's packet assembler is a great refernce and well commented](https://github.com/wb2osz/direwolf/blob/master/src/ax25_pad.c)
-* [Not Black Magic HDLC/AX25 was helpful](https://notblackmagic.com/bitsnpieces/ax.25/)
 
 ## Encoding AX25 to Output Samples for Modulation
 
@@ -19,10 +13,10 @@ Here are the steps, in order, to generate AFSK samples:
 - Stuff bits
 - NRZI
 
-With ```aprs_mod.py```, we flip the verbose option with ```-v```.  The following parameters ```-t null null -t aprs -``` specify the output is null and the input is of type APRS from stdin.
+Aprs_mod verbose option allows for viewing the step-by-step rocess.  In ```aprs_mod.py```, enable verbose option with ```-v```.  The following parameters ```-t null -t -``` specifies no output (null) and the aprs string input from stdin.
 
 ```
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t null null -t aprs -
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t null -t -
 ```
 
 The result:
@@ -74,13 +68,13 @@ To note:
 
 ## Decoding Bit Stream to AX25 Byte Array
 
-Once you got encode, decode is easy, just the flip.  We can again use out utilities, this time piping the raw samples from ```aprs_mod.py``` into ```aprs_demo.py```, again with the verbose option.
+Once you got encode, decode is easy, just the flip.  We can again use the built-in utilities, this time piping the raw samples from ```aprs_mod.py``` into ```aprs_demod.py```, again with the verbose option.
 
 ```
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -t raw - -t aprs -  | python aprs_demod.py -v -t raw -
 ```
 
-The output here shows the reverse process of above.  In this case, NRZI is performed before the I show the demod frame.
+The output is the reverse process of above.  In this case, NRZI is performed before the I show the demod frame.
 
 ```
 # APRS DEMOD
@@ -110,8 +104,9 @@ frame
 
 ```
 
-
-
-
+## :raised_hands: Acknowledgements
+* [The best readable reference covering AX25 Frame.](https://www.mssl.ucl.ac.uk/~mcrw/QB50/Documents/11-%20QB50-EPFL-SSC-SCS-ICD-AX.25-TFF-3-1.pdf)
+* [Direwolf's packet assembler is a great reference and well commented](https://github.com/wb2osz/direwolf/blob/master/src/ax25_pad.c)
+* [Not Black Magic HDLC/AX25 was helpful](https://notblackmagic.com/bitsnpieces/ax.25/)
 
 

@@ -36,25 +36,25 @@ As many who've gone down this path have mentioned, there's surprisingly little u
 * [AFSK Modulation](docs/mod/README.md). Convert byte arrays to AFSK samples
 * [AX25/APRS Encoding and Decoding](docs/encdec/README.md). Step-by-step encoding/decoding APRS and AX25.
 * [144.39MHz 1/4 Wave Ground Plane Antenna Design](docs/ant/README.md).
-* [Build Micrpython Firware](docs/upy/README.md)
-* [ESP32-S3 Implementation Considerations - Missing DAC](docs/upy/dac/README.md)
+* [Building Micrpython Firware](docs/ports/README.md)
+* [ESP32-S3 Implementation Considerations - Missing DAC](docs/ports/dac/README.md)
 
 
-## :snake: Python Compatibility
-Care has been taken to make the source fully compatible across target python versions:
-* Python/Pypy3
-    * Run examples below from the [src](src/) folder.
-* Micropython (See micropython ports below)
-    * [Viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter) for numeric type loops (FIR)
-    * [C module optimization](https://docs.micropython.org/en/latest/develop/cmodules.html) for numeric loops if you are building your own firmware (faster!)
+<!--## :snake: Python Compatibility-->
+<!--* Python/Pypy3-->
+    <!--* Directly run examples below from the [src](src/) folder.-->
+<!--* Micropython (See micropython ports below)-->
+    <!--* [Viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter) for numeric type loops (FIR)-->
+    <!--* [C module optimization](https://docs.micropython.org/en/latest/develop/cmodules.html) for numeric loops if you are building your own firmware (faster!)-->
 
-## <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/upy/micropython-icon.jpg?raw=true" alt="" width="25"> Micropython Ports
-* Unix/Linux Port
-	* [Getting Started and build instructions](docs/upy/unix/README.md)
-	* TerMux (command line for cell phones)
-* Embedded ESP32S3 Based Ports
-	* [TinyS3](docs/upy/tinys3/README.md), a quality and accessible esp32s3 board.
-	* [LilyGo T-TWR Plus](docs/upy/lilygottwr/README.md), a commerically available esp32s3 board with SA868 Wireless Transceiver.
+<!--## <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/ports/micropython-icon.jpg?raw=true" alt="" width="25"> Ports-->
+## :snake: Ports
+* Python/Pypy ports
+	* [CLI/Linux](docs/ports/cli/README.md)
+* Micropython ports
+	* [CLI/Linux](docs/ports/upy/README.md)
+	* [TinyS3](docs/ports/tinys3/README.md), a quality and accessible esp32s3 board.
+	* [LilyGo T-TWR Plus](docs/ports/lilygottwr/README.md), a commerically available esp32s3 board with SA868 Wireless Transceiver.
 
 
 ## :satellite: APRS to AFSK Modulation

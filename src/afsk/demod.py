@@ -107,14 +107,11 @@ class AFSKDemodulator():
         bandpass_width = options['bandpass_width']
         bandpass_amark = options['bandpass_amark']
         bandpass_aspace = options['bandpass_aspace']
-        if do_memoize:
-            coefs_g = memoize_loads('bpf', self.fmark, self.fspace, self.fs, 
-                                           bandpass_ncoefs,
-                                           bandpass_width, 
-                                           bandpass_amark, 
-                                           bandpass_aspace)
-        else:
-            coefs_g = None
+        coefs_g = memoize_loads('bpf', self.fmark, self.fspace, self.fs, 
+                                        bandpass_ncoefs,
+                                        bandpass_width, 
+                                        bandpass_amark, 
+                                        bandpass_aspace)
         if coefs_g:
             coefs,g = coefs_g
         else: 
@@ -126,12 +123,11 @@ class AFSKDemodulator():
                                           amark  = bandpass_amark,
                                           aspace = bandpass_aspace,
                                           )
-            if do_memoize:
-                memoize_dumps('bpf', (coefs,g), self.fmark, self.fspace, self.fs,
-                                            bandpass_ncoefs,
-                                            bandpass_width, 
-                                            bandpass_amark, 
-                                            bandpass_aspace)
+            memoize_dumps('bpf', (coefs,g), self.fmark, self.fspace, self.fs,
+                                        bandpass_ncoefs,
+                                        bandpass_width, 
+                                        bandpass_amark, 
+                                        bandpass_aspace)
         self.bpf = create_fir(coefs = coefs, scale = g)
 
         self.corr = create_corr(ts    = self.ts,)

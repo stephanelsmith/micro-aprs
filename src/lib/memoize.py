@@ -39,7 +39,11 @@ def memoize_dumps(name, res, *args):
         'res'  : res,
     })
 
-    with open('memoize.json', 'w') as f:
-        f.write(dumps(j))
+    try:
+        with open('memoize.json', 'w') as f:
+            f.write(dumps(j))
+    except:
+        # failed to memoize save
+        pass
 
 

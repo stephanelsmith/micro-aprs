@@ -40,21 +40,11 @@ As many who've gone down this path have mentioned, there's surprisingly little u
 * [ESP32-S3 Implementation Considerations - Missing DAC](docs/ports/dac/README.md)
 
 
-<!--## :snake: Python Compatibility-->
-<!--* Python/Pypy3-->
-    <!--* Directly run examples below from the [src](src/) folder.-->
-<!--* Micropython (See micropython ports below)-->
-    <!--* [Viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter) for numeric type loops (FIR)-->
-    <!--* [C module optimization](https://docs.micropython.org/en/latest/develop/cmodules.html) for numeric loops if you are building your own firmware (faster!)-->
-
-<!--## <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/ports/micropython-icon.jpg?raw=true" alt="" width="25"> Ports-->
-## :snake: Ports
-* Python/Pypy ports
-	* [CLI/Linux](docs/ports/cli/README.md)
-* Micropython ports
-	* [CLI/Linux](docs/ports/upy/README.md)
-	* [TinyS3](docs/ports/tinys3/README.md), a quality and accessible esp32s3 board.
-	* [LilyGo T-TWR Plus](docs/ports/lilygottwr/README.md), a commerically available esp32s3 board with SA868 Wireless Transceiver.
+## :radio: Ports and Examples
+* [CLI with Python/Pypy](docs/ports/cli/README.md)
+* [CLI with Micropython](docs/ports/upy/README.md)
+* [TinyS3](docs/ports/tinys3/README.md), a quality and accessible esp32s3 board.
+* [LilyGo T-TWR Plus](docs/ports/lilygottwr/README.md), a commerically available esp32s3 board with SA868 Wireless Transceiver.
 
 
 ## :satellite: APRS to AFSK Modulation

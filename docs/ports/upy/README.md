@@ -1,14 +1,12 @@
-# Unix/Linux Port
+# Micropython CLI
 
-Does the Micropython port require a custom firmware build?
+Running micropython can be run directly from the command line, interchangeable with all python and pypy examples.  For micropython, tight loops have been optimized using [viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter).
 
-No, building a custom firmware is not necessary for the Micropython port.  By default, tight loops are optimized with the [Viper emitter](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter) which provides a significant performance boost.
-
-That said, it's a great idea to get next level performance with C optimized functions!
+Try any of the examples below!
 
 ## Building Micropython Firware
 
-[Official install instructions](https://github.com/micropython/micropython/tree/master/ports/unix).  In short:
+I've also included [C level optimization](https://docs.micropython.org/en/latest/develop/cmodules.html) for tight loops which are accessible by building micropython.  [The process is actually quite painless](https://github.com/micropython/micropython/tree/master/ports/unix).  In short:
 
 ```
 git clone git@github.com:micropython/micropython.git
@@ -116,3 +114,4 @@ frame
 echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | python aprs_demod.py -v -t -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | micropython aprs_demod.py -v -t -
 ```
+

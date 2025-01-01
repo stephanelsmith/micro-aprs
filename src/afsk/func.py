@@ -296,7 +296,10 @@ def lpf_fir_design(ncoefs,       # filter size
                    width  = 400, #transition band size
                    aboost = 1,   #gain at on-set of cut-off
                    ):
-    from scipy import signal
+    try:
+        from scipy import signal
+    except ImportError:
+        raise Exception('Missing LPF FIR coefficients.  Re-run with python with scipy to generate coefs.')
     coefs = signal.firls(ncoefs,
                         (0, fa,       fa+width, fs/2),
                         (1, aboost,   0,        0), 
@@ -311,7 +314,10 @@ def bandpass_fir_design(ncoefs,            # filter size
                         width=600,         # transition freqency begin/end
                         amark=1, aspace=1, # mark/space gain
                         ):
-    from scipy import signal
+    try:
+        from scipy import signal
+    except ImportError:
+        raise Exception('Missing Bandpass FIR coefficients.  Re-run with python with scipy to generate coefs.')
     coefs = signal.firls(ncoefs,
                         (0, fmark-width, fmark, fspace, fspace+width, fs/2),
                         (0, 0,           amark, aspace, 0,            0), 

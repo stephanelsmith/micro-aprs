@@ -1,9 +1,11 @@
 
 # Getting Started with Python
 
-All examples
+```aprs_mod.py``` and ```aprs_demod.py``` are the two primary utilities built around stdin and stdout piping to interconnect stages.
 
-## :satellite: APRS to AFSK Modulation
+:point_up: ```aprs_demod.py``` pre-saves fir filter coefficients.  If you are changing the bpf and lpf parameters in demod (not common), please have scipy installed to memoize the computed filter coefficients.
+
+## :sound: APRS to AFSK Modulation
 
 ```aprs_mod.py``` provides conversion from APRS string(s) into raw 16 bit signed integer raw format with a default sampling rate 22050. 
 
@@ -39,29 +41,23 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
 
 ### Examples
 
-* aprs_mod.py micropython generated wav file, decode with:
-	* Direwolf ```atest```
- 	* Multimon-ng
-  	* aprs_demod
+* Generate AFSK wave audio file.  Decode with direwolf, multimon-ng, and aprd_demod.
 ```
-echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 -  -t wav test/test.wav
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t test/test.wav -t -
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/test.wav
 atest test/test.wav
 sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multimon-ng -t raw -A -a AFSK1200 -
-sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t play -t -
+sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 ```
 
-* ```aprs_mod.py``` python inline decode
+* ```aprs_mod.py```  inline decode.
 ```
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -t - -t aprs - | multimon-ng -t raw -A -a AFSK1200 -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | multimon-ng -t raw -A -a AFSK1200 -
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t -
-echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t -
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -t -
 ```
 
 
-## :satellite: AFSK Demodulation to APRS Strings
+## :sound: AFSK Demodulation to APRS Strings
 
 ```aprs_demod.py``` reads in raw 16 bit signed integers from standard input or file and output detected APRS strings.
 
@@ -97,17 +93,15 @@ outfile       '-' (default stdout)
 
 ### Examples
 
-* Demod with python, micropython, and pypy
+* Demod
 ```
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t -
-echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t -
-echo "KI5TOF>APRS:>hello world!" | pypy3 aprs_mod.py -v | pypy3 aprs_demod.py -v -t -
 ```
 
 * Decode Direwolf generated sample
 ```
 gen_packets -r 22050 -o test/test.wav
-sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
+sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 ```
 ```
 WB2OSZ-11>TEST:,The quick brown fox jumps over the lazy dog!  1 of 4
@@ -136,3 +130,4 @@ bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
 ```
 sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 ```
+

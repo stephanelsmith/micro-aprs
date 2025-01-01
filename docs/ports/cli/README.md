@@ -5,7 +5,8 @@
 
 :point_up: ```aprs_demod.py``` pre-saves fir filter coefficients.  If you are changing the bpf and lpf parameters in demod (not common), please have scipy installed to memoize the computed filter coefficients.
 
-## :sound: APRS to AFSK Modulation
+
+## :loud_sound: APRS to AFSK audio samples
 
 ```aprs_mod.py``` provides conversion from APRS string(s) into raw 16 bit signed integer raw format with a default sampling rate 22050. 
 
@@ -41,6 +42,12 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
 
 ### Examples
 
+* APRS to AFSK verbose (-v flag)
+Just show verbose output, but don't output the samples to stdout (setting stdout to null).
+```
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t null -t -
+```
+
 * Generate AFSK wave audio file.  Decode with direwolf, multimon-ng, and aprd_demod.
 ```
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/test.wav
@@ -57,7 +64,7 @@ echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -t 
 ```
 
 
-## :sound: AFSK Demodulation to APRS Strings
+## :loud_sound: AFSK Demodulation to APRS Strings
 
 ```aprs_demod.py``` reads in raw 16 bit signed integers from standard input or file and output detected APRS strings.
 
@@ -93,7 +100,7 @@ outfile       '-' (default stdout)
 
 ### Examples
 
-* Demod
+* Demod with verbose output (-v flag).
 ```
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t -
 ```

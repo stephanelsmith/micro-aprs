@@ -26,10 +26,10 @@ In practice this means we:
 
 ## :mortar_board: Tutorials
 As many who've gone down this path have mentioned, there's surprisingly little useful information out there covering these topics.  I hope these tutorial sections will provide you additional information on getting started!
-* [AFSK Demodulation](docs/demod/README.md). Convert raw AFSK samples to bits.
-* [AFSK Modulation](docs/mod/README.md). Convert byte arrays to AFSK samples
-* [AX25/APRS Encoding and Decoding](docs/encdec/README.md). Step-by-step encoding/decoding APRS and AX25.
-* [144.39MHz 1/4 Wave Ground Plane Antenna Design](docs/ant/README.md).
+* [AFSK Demodulation](docs/tuts/demod/README.md). Convert raw AFSK samples to bits.
+* [AFSK Modulation](docs/tuts/mod/README.md). Convert byte arrays to AFSK samples
+* [AX25/APRS Encoding and Decoding](docs/tuts/encdec/README.md). Step-by-step encoding/decoding APRS and AX25.
+* [144.39MHz 1/4 Wave Ground Plane Antenna Design](docs/tuts/ant/README.md).
 
 
 ## :horse_racing: **Start here!**

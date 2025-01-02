@@ -2,6 +2,13 @@
 import sys
 from json import loads as jsonloads
 
+# get the current year
+try:
+    from datetime import datetime
+    year = datetime.now().year
+except:
+    year = 2025
+
 def mod_parse_args(args):
     r = {
         'args' : {
@@ -12,18 +19,18 @@ def mod_parse_args(args):
             'options' : {},
         },
         'in' : {
-            # 'type' : 'aprs',
             'file'  : '-', #from stdin
         },
         'out' : {
-            # 'type' : 'raw',
             'file'  : '-', #to stdout
         },
     }
 
     if '-h' in args or '--help' in args or '-help' in args:
-        print('''APRS MOD
-(C) Stephane Smith (KI5TOF) 2024
+        print(f'''APRS MOD
+© Stéphane Smith (KI5TOF) {year}
+
+aprs_mod.py parses input AX25 APRS strings and outputs AFSK samples in signed 16 bit little endian format.
 
 Usage: 
 aprs_mod.py [options] (-t outfile) (-t infile)
@@ -37,11 +44,9 @@ OPTIONS:
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:
-intype       aprs strings
 infile       '-' (default)
 
 -t OUTPUT TYPE OPTIONS:
-outtype       raw 16 bit samples
 outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' play audio
 ''')
         return
@@ -97,8 +102,8 @@ def demod_parse_args(args):
     }
 
     if '-h' in args or '--help' in args:
-        print('''APRS DEMOD
-(C) Stephane Smith (KI5TOF) 2023
+        print(f'''APRS DEMOD
+© Stéphane Smith (KI5TOF) {year}
 
 Usage: 
 aprs_demod.py [options] (-t outfile) (-t infile)

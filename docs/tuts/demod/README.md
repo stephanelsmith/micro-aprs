@@ -17,7 +17,7 @@ Diving in...
 The block diagram for the correlator is as follows:
 
 <p align="center">
-  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/corr_block.png?raw=true" alt=""/>
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/tuts/demod/corr_block.png?raw=true" alt=""/>
 </p>
 
 $$ H(t) = sin(\omega t)  sin(\omega(t+d)) $$
@@ -35,7 +35,7 @@ The first term, the DC component, ie. $` \frac{1}{2} cos(\omega_{mark} d) `$ , i
 
 <p align="center">
   <br>
-  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/markcorr.gif?raw=true" alt=""/>
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/tuts/demod/markcorr.gif?raw=true" alt=""/>
 </p>
 
 ### Mark and Space Detection
@@ -48,7 +48,7 @@ where $` d_{optimal} `$ is chosen to _maximize_ $` MarkSpace(t) `$.  Below, we s
 
 <p align="center">
     <br>
-  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/markspacecorrdelay.gif?raw=true" alt=""/>
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/tuts/demod/markspacecorrdelay.gif?raw=true" alt=""/>
 </p>
 
 Armed with this knowledge we now know if we delay the AFSK input signal by $` d_{optimal} = 446 \micro s `$, and filter out the ripple terms, we are able to detect marks as values < 0 and spaces as values > 0.  Incredibly, the detection algorithm only cost us a delay element (if sampling at 22050 Hz, a delay or buffer depth of 10 samples) and some multiplications!
@@ -108,7 +108,7 @@ Same process for the low pass filter. Here, my initial filter design cutoff is 1
 After the low pass filtering of the correlated output, we have
 
 <p align="center">
-  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/corr_total.gif?raw=true" alt=""/>
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/tuts/demod/corr_total.gif?raw=true" alt=""/>
 </p>
 
 Incredibly, it turns out afsk demod comes down to:

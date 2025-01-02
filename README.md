@@ -21,13 +21,10 @@ In practice this means we:
 	* :+1::+1: Asyncio
 
 
-### **Micro-Aprs decodes 1000+ error-free frames on the [TNC CD Track 2](http://wa8lmf.net/TNCtest/).  That's **1010** :eyes: in a balanced mode at **1014** :fireworks: in a more computational intensive mode!**
-
-(TNC CD Track 2 is the universal test for APRS demod, [this performance is very good!](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf))
+### **Micro-Aprs decodes 1000+ error-free frames on the [TNC CD Track 2](http://wa8lmf.net/TNCtest/).  That's **1010** :eyes: in a balanced mode at **1020** :fireworks: in a more computational intensive mode!**  (TNC CD Track 2 is the universal test for APRS demod, [this performance is very good!](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf))
 
 
 ## :mortar_board: Tutorials
-
 As many who've gone down this path have mentioned, there's surprisingly little useful information out there covering these topics.  I hope these tutorial sections will provide you additional information on getting started!
 * [AFSK Demodulation](docs/demod/README.md). Convert raw AFSK samples to bits.
 * [AFSK Modulation](docs/mod/README.md). Convert byte arrays to AFSK samples
@@ -35,26 +32,27 @@ As many who've gone down this path have mentioned, there's surprisingly little u
 * [144.39MHz 1/4 Wave Ground Plane Antenna Design](docs/ant/README.md).
 
 
-## :radio: **Start here**
+## :horse_racing: **Start here!**
+Basic command line for encoding and APRS strings to AFSK audio samples and the reverse.
 * [Encode](docs/ports/mod/README.md) APRS strings to AFSK audio samples.
 * [Decode](docs/ports/demod/README.md) AFSK audio samples to APRS strings.
-* [Micropython](docs/ports/upy/README.md) fast and lean, portable to embedded.
-* [Pypy](docs/ports/pypy/README.md) faster than C python.
+* [Micropython](docs/ports/upy/README.md) Encode/decode, but with embedded system friendly (also great on big machines too!).
+* [Pypy](docs/ports/pypy/README.md), another supported options faster than C python.
 
-## :radio: CLI examples
-* [SDR (rtl_fm) live decode](docs/ports/sdr/README.md).
-* [SDR based rx only igate](docs/ports/sdrigate/README.md).
+## :desktop_computer: Application examples
+Applications using ```aprs_mod.py``` and ```aprs_demod.py```.
+* [SDR (rtl_fm) based live decode](docs/ports/sdr/README.md).
+* [SDR (rtl_fm) based RX only Igate](docs/ports/sdrigate/README.md).
 * [HT/Android APRS beacon](docs/ports/termux/README.md).
 
-## :radio: Embedded ports
+## :pager: Embedded ports and examples
+With Micropython, these examples show some examples for embedded systems.  I primarily target ESP32-S3 at the moment.
 * [ESP32-S3 - working around missing DAC](docs/ports/dac/README.md)
 * [TinyS3](docs/ports/tinys3/README.md), a quality and accessible esp32s3 board.
 * [LilyGo T-TWR Plus](docs/ports/lilygottwr/README.md), a commerically available esp32s3 board with SA868 Wireless Transceiver.
 
 
 ## :bulb: Future Work
-* Full integration on embedded system with MicroPython
-  * I2S embedded audio interfacing
 * Rx/Tx digipeating
 * Deploy as a :balloon: [HAB](https://amateur.sondehub.org/) payload!
 

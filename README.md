@@ -5,7 +5,7 @@ A python/micropython based library for encoding/decoding, modulating/demodulatin
 ![AFSK hello world](docs/afsk_hello.png?raw=true "AFSK hello")
 --->
 <p align="center">
-  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/demod/corr_total.gif?raw=true" alt=""/>
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/tuts/demod/corr_total.gif?raw=true" alt=""/>
 </p>
 
 The purpose of this library is to thread-the-needle of both enabling APRS/AX.25/AFSK from PC to microcontroller while maintaining portability and readability of python.  This library is optimized for embedded systems, especially [micropython supported targets and platforms ](https://github.com/micropython/micropython#supported-platforms--architectures) and small computers, not to mention Cpython and Pypy! 

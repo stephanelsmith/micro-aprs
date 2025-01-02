@@ -41,10 +41,6 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t null -t -
 ```
 ```
-# APRS MOD
-# RATE 22050
-# IN   -
-# OUT  null
 ===== MOD >>>>> KI5TOF>APRS:>hello world!
 --ax25--
 0000  7e 82 a0 a4 a6 40 40 60   01111110 10000010 10100000 10100100 10100110 01000000 01000000 01100000   ~----@@`
@@ -102,14 +98,6 @@ sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -t -
 ```
 ```
-# APRS MOD
-# RATE 22050
-# IN   -
-# OUT  -
-# APRS DEMOD
-# RATE 22050
-# IN   -
-# OUT  -
 [1] KI5TOF>APRS:>hello world!
 ```
 
@@ -119,14 +107,6 @@ With verbose output enabled on output
 cat test/aprs.txt | python aprs_mod.py | python aprs_demod.py -t -
 ```
 ```
-# APRS DEMOD
-# RATE 22050
-# IN   -
-# OUT  -
-# APRS MOD
-# RATE 22050
-# IN   -
-# OUT  -
 [1] KI5TOF>APRS:hello world!
 [2] KI5TOF>APRS,WIDE2-1,WIDE1-1:hello world1
 [3] KI5TOF>APRS,WIDE2-1,WIDE1-1:hello world2

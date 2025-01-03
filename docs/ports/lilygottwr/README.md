@@ -2,7 +2,7 @@
 
 The LilyGo T-TWR is a commerically available dev kit including ESP32S3 + [NiceRF SA868 Wireless Transceiver](https://www.nicerf.com/walkie-talkie-module/2w-embedded-walkie-talkie-module-sa868.html).  The T-TWR comes in a few flavors, the one I've chosen is the VHF (covering APRS 144.39MHz) normal edition. 
 <p align="center">
-  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/upy/lilygottwr/T-TWR_Plus_600x600.webp?raw=true" alt="" width="600"/>
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/ports/lilygottwr/T-TWR_Plus_600x600.webp?raw=true" alt="" width="600"/>
 </p>
 
 - LilyGo T-TWR

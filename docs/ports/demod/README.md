@@ -1,10 +1,10 @@
 
-# Decode AFSK audio samples to APRS strings
+# :loud_sound: Decode AFSK audio samples to APRS strings
 
 ```aprs_demod.py``` reads in raw 16 bit signed little endian integers and outputs AX25 APRS strings.
 
-
-### Basic usage
+### 🫰 Basic usage
+From the ```micro-aprs/src``` folder, try
 ```
 python aprs_demod.py -h
 ```
@@ -36,7 +36,7 @@ outtype       'aprs' strings
 outfile       '-' (default stdout)
 ```
 
-### Inline encode+decode pipeline with verbose output
+### 🛹 Inline encode+decode pipeline with verbose output
 ```
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -v -t -
 ```
@@ -85,7 +85,7 @@ sox -t wav ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python ap
 RS0ISS>CQ:>ARISS - International Space Station
 ```
 
-### Decode [TNC Test CD](http://wa8lmf.net/TNCtest/)
+### 💿 Decode [TNC Test CD](http://wa8lmf.net/TNCtest/)
 Download and convert TNC tests to .wav/.flac files
 ```
 wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip

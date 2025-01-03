@@ -39,10 +39,9 @@ Basic command line for encoding and APRS strings to AFSK audio samples and the r
 * [Micropython](docs/ports/upy/README.md) Encode/decode, but with embedded system friendly (also great on big machines too!).
 * [Pypy](docs/ports/pypy/README.md), another supported options faster than C python.
 
-## :desktop_computer: Application examples
+## :desktop_computer: Applications and examples
 Applications using ```aprs_mod.py``` and ```aprs_demod.py```.
-* [SDR (rtl_fm) based live decode](docs/ports/sdr/README.md).
-* [SDR (rtl_fm) based RX only Igate](docs/ports/sdrigate/README.md).
+* [SDR applications](docs/ports/sdr/README.md) via [rtl_fm](https://manpages.ubuntu.com/manpages/trusty/man1/rtl_fm.1.html) from [rtl-sdr project](https://osmocom.org/projects/rtl-sdr/wiki).
 * [HT/Android APRS beacon](docs/ports/termux/README.md).
 
 ## :pager: Embedded ports and examples

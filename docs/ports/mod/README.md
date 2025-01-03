@@ -1,13 +1,10 @@
 
-# Encoding AX25 APRS to AFSK :loud_sound:
+# :loud_sound: Encoding AX25 APRS to AFSK 
 
 ```aprs_mod.py``` parses input AX25 APRS strings and outputs AFSK samples in signed 16 bit little endian format.  The most common input and output interface is using pipes (few other options available as well).
 
-## :loud_sound: APRS to AFSK audio samples
-
-```aprs_mod.py``` provides conversion from APRS string(s) into raw 16 bit signed integer raw format with a default sampling rate 22050. 
-
-### Basic usage
+### 🫰 Basic usage
+From the ```micro-aprs/src``` folder, try
 ```
 python aprs_mod.py -h
 ```
@@ -35,7 +32,7 @@ infile       '-' (default)
 outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' play audio
 ```
 
-### Encode AX25 APRS string in verbose mode
+### 📝 Encode AX25 APRS string in verbose mode
 ```-v``` verbose mode is designed to show the intermediate steps (on stderr).  For this example, we suppress output (setting stdout to null).
 ```
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t null -t -
@@ -75,7 +72,7 @@ echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t null -t -
 00000001 00000001 00000001 00000001
 ```
 
-### Generate AFSK audio file
+### 〰️ Generate AFSK audio file
 Generate wave file via ```sox```.
 ```
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/test.wav
@@ -93,7 +90,7 @@ sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | multim
 sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 ```
 
-### Inline encode+decode pipeline
+### 🛹 Inline encode+decode pipeline
 ```
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -t -
 ```
@@ -101,7 +98,7 @@ echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -t 
 [1] KI5TOF>APRS:>hello world!
 ```
 
-### Multiple APRS message encode+decode pipeline
+### 🔩 Multiple APRS message encode+decode pipeline
 With verbose output enabled on output
 ```
 cat test/aprs.txt | python aprs_mod.py | python aprs_demod.py -t -

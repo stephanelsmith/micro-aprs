@@ -15,7 +15,7 @@ TinyS3 is available through [UnexpectedMaker's store](https://unexpectedmaker.co
 
 Finally, ESP32S3 is a great choice because the [LilyGo T-Twr port](../lilygottwr/README.md) also uses the esp32s3 (and also includes the radio!)
 
-## Building Micropython Firware for TinyS3
+## :hammer: Building Micropython Firware for TinyS3
 
 Clone the Espressif ESP-IDF repo
 ```
@@ -60,7 +60,7 @@ py -m esptool --chip esp32s3 --port COM11 write_flash -z 0 .\build-SS_TINYS3\fir
 Finally, click ```reset``` again to begin execution.
 
 
-## Trying the TinyS3 Port
+## :runner: Trying the TinyS3 Port
 
 
 Fire up a terminal

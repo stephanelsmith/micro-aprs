@@ -1,12 +1,12 @@
-# Micropython CLI
+# <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/ports/upy/micropython-icon.jpg?raw=true" alt="" width="25"> Micropython
 
-Running micropython can be run directly from the command line, interchangeable with all python and pypy examples.  For micropython, tight loops have been optimized using [viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter).
+Running micropython can be run directly from the command line, interchangeable with all python and pypy examples.  For micropython, tight loops have been optimized using [viper optimization](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter).  If you build the firmware, you can also benefit from [C level optimizations](https://docs.micropython.org/en/latest/develop/cmodules.html).
 
 Try any of the examples below!
 
-## Building Micropython Firware
+## :hammer: Building Micropython Firware (optional)
 
-I've also included [C level optimization](https://docs.micropython.org/en/latest/develop/cmodules.html) for tight loops which are accessible by building micropython.  [The process is actually quite painless](https://github.com/micropython/micropython/tree/master/ports/unix).  In short:
+[The process is actually quite painless](https://github.com/micropython/micropython/tree/master/ports/unix).  In short:
 
 ```
 git clone git@github.com:micropython/micropython.git
@@ -27,11 +27,11 @@ mkdir ~/bin
 ln -sf ~/micropython/ports/unix/build-standard/micropython ~/bin/.
 ```
 
-## Run examples
+## 🗜️ Examples
 
 From the ```micro-aprs/src``` folder, try an example
 
-* Decode [International Space Station flyby recording](https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav)
+### :artificial_satellite: Decode [International Space Station flyby recording](https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav)
 ```
 wget https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav
 sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
@@ -41,19 +41,11 @@ RS0ISS>CQ:>ARISS - International Space Station
 ```
 
 
-* Try piping APRS -> modulation -> demodulation
+### 🛹 Inline encode+decode pipeline (verbose mode)
 ```
 echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t -
 ```
 ```
-# APRS DEMOD
-# RATE 22050
-# IN   -
-# OUT  -# APRS MOD
-
-# RATE 22050
-# IN   -
-# OUT  -
 ===== MOD >>>>> KI5TOF>APRS:>hello world!
 --ax25--
 0000  7e 82 a0 a4 a6 40 40 60   01111110 10000010 10100000 10100100 10100110 01000000 01000000 01100000   ~----@@`
@@ -109,9 +101,11 @@ frame
 [1] KI5TOF>APRS:>hello world!
 ```
 
-* Try mixing micropython with python!
+### 🧦 Mix and match micropython with python!
 ```
 echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | python aprs_demod.py -v -t -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | micropython aprs_demod.py -v -t -
 ```
 
+### 🎯 Ports
+Checkout out the embedded examples dedicated to Micropython implementation on different parts/targets.

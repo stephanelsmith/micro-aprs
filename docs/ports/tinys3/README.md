@@ -10,7 +10,7 @@ I've chosen to use [TinyS3](https://unexpectedmaker.com/shop.html#!/TinyS3/p/577
 TinyS3 is available through [UnexpectedMaker's store](https://unexpectedmaker.com/) directy, Mouser Digkey, Sparkfun and others. He's got tons of other great boards to check out to!
 
 <p align="center">
-  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/upy/tinys3/pins_tinys3.jpg?raw=true" alt="" width="600"/>
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/ports/tinys3/pins_tinys3.jpg?raw=true" alt="" width="600"/>
 </p>
 
 Finally, ESP32S3 is a great choice because the [LilyGo T-Twr port](../lilygottwr/README.md) also uses the esp32s3 (and also includes the radio!)

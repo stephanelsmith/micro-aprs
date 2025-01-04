@@ -9,7 +9,7 @@
   * A 3.5 mm to 2.5 mm jumper.  My handy radio mic input is 2.5mm.
   * For my radio, I also needed to AC couple the the mic pin TIP like so. I couldn't find any suitable cables, so got the soldering iron out!  Not difficult!
 <p align="center">
-  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/termux/ioqNL.png?raw=true" alt=""/>
+  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/ports/termux/ioqNL.png?raw=true" alt=""/>
 </p>
 
 

@@ -14,7 +14,7 @@ We also implement a basic LPF, where $` R = 6.4K Ohm `$ and $` C = 4.7\mu F `$. 
 
 ### DMA-like output at fixed frequency
 
-Some micropython ports include a function ```write_timed``` which ["Initiates a burst of RAM to DAC using a DMA transfer"](https://docs.micropython.org/en/latest/library/pyb.DAC.html) We again do not have this function built-in functionality with the ESP32S3 port.  Fortunately, this functionality is easy to implement with good old fashion timers and interrupts as is done in the [```out_afsk```](https://github.com/stephanelsmith/micro-aprs/blob/66a3320c805cfefc5a061813a750ab156988ca0d/src/tinys3.py#L38) function.
+Some micropython ports include a function ```write_timed``` which ["Initiates a burst of RAM to DAC using a DMA transfer"](https://docs.micropython.org/en/latest/library/pyb.DAC.html) We again do not have this function built-in functionality with the ESP32S3 port.  Fortunately, this functionality is easy to implement with good old fashion timers and interrupts as is done in the [```out_afsk```](https://github.com/stephanelsmith/micro-aprs/blob/4d8d3656e38deeb139f631df4da73836a0c2befc/src/upy/afsk.py#L9) function.
 
 ### AFSK Output rate comparison
 AFSK sampling rates from 11k to 44k all functional for creating demodulatable signal.  One consideration I noticed was at 44.1kHz, the microcontroller was periodically having issues keeping up.  Recommendation going with 22kHz or even 11kHz depending on application and timing margin needed.

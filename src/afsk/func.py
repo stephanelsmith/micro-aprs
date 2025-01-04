@@ -8,9 +8,9 @@ from lib.compat import IS_UPY, HAS_C
 if IS_UPY:
     import micropython
     if HAS_C:
-        from cvec import isqrt
-        from cvec import sign
-        from cvec import uint_to_int
+        from cdsp import isqrt
+        from cdsp import sign
+        from cdsp import uint_to_int
 else:
     try:
         from math import isqrt
@@ -107,23 +107,6 @@ else:
                 run = 1
         return True if act > 10 else False # 10 - minimum number of run we need to declare signal detected
 
-def create_outlier_fixer():
-    # PYTHON
-    delay = 3
-    dat = array('i', (0 for x in range(delay)))
-    idx = 0
-    def inner(v:int)->int:
-        nonlocal idx,dat,delay
-        dat[idx] = v
-        o = dat[idx]
-        idx = (idx+1)%delay
-        if sign(dat[(idx)%delay]) == sign(dat[(idx+1)%delay]) and\
-           sign(dat[(idx)%delay]) != sign(dat[idx-1]):
-            return dat[idx-1] * -1
-        else:
-            return dat[idx-1]
-    return inner
-
 def create_nrzi():
     #process the bit stream bit-by-bit with closure
     if IS_UPY:
@@ -181,7 +164,7 @@ def create_corr(ts,):
         _dat = array('i', (0 for x in range(delay)))
         _c = array('i',[idx, delay])
 
-        if HAS_C and False:
+        if HAS_C:
             # C OPTIMIZED
             @micropython.viper
             def inner(v:int)->int:
@@ -228,9 +211,9 @@ def create_corr(ts,):
 
 def create_fir(coefs, scale):
     if IS_UPY:
-        if HAS_C and False:
+        if HAS_C:
             # C OPTIMIZED
-            from cvec import fir_core
+            from cdsp import fir_core
             ncoefs = len(coefs)
             coefs = array('i', (coefs[i] for i in range(ncoefs)))
             buf = array('i', (0 for x in range(ncoefs)))

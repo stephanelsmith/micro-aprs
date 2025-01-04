@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "cvec.h"
+#include "cdsp.h"
 
 // #include "extmod/moductypes.c" //why is there no .h file?
 typedef struct _mp_obj_uctypes_struct_t {
@@ -19,7 +19,7 @@ typedef struct _mp_obj_uctypes_struct_t {
 } mp_obj_uctypes_struct_t;
 
 /////////////////////////
-// from cvec import *
+// from cdsp import *
 // isqrt(100)
 // sign(-123)
 // sign(123)
@@ -154,7 +154,7 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(fir_core_obj, 5, 5, mp_fir_core);
 // All identifiers and strings are written as MP_QSTR_xxx and will be
 // optimized to word-sized integers by the build system (interned strings).
 static const mp_rom_map_elem_t example_module_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_cvec) },
+    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_cdsp) },
     { MP_ROM_QSTR(MP_QSTR_isqrt), MP_ROM_PTR(&isqrt_obj) },
     { MP_ROM_QSTR(MP_QSTR_sign), MP_ROM_PTR(&sign_obj) },
     { MP_ROM_QSTR(MP_QSTR_uint_to_int), MP_ROM_PTR(&uint_to_int_obj) },
@@ -163,11 +163,11 @@ static const mp_rom_map_elem_t example_module_globals_table[] = {
 static MP_DEFINE_CONST_DICT(example_module_globals, example_module_globals_table);
 
 // Define module object.
-const mp_obj_module_t cmodule_cvec = {
+const mp_obj_module_t cmodule_cdsp = {
     .base = { &mp_type_module },
     .globals = (mp_obj_dict_t *)&example_module_globals,
 };
 
 // Register the module to make it available in Python.
-MP_REGISTER_MODULE(MP_QSTR_cvec, cmodule_cvec);
+MP_REGISTER_MODULE(MP_QSTR_cdsp, cmodule_cdsp);
 

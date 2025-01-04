@@ -19,7 +19,7 @@ else:
 # if micropython, do we have c modules?
 if IS_UPY:
     try:
-        import cvec
+        import cdsp
         HAS_C = True
     except ImportError:
         HAS_C = False

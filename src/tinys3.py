@@ -2,13 +2,10 @@
 import sys
 import asyncio
 import gc
-from array import array
 
 from machine import Pin, PWM
-from machine import Timer
 
 from asyncio import Event
-from asyncio import ThreadSafeFlag
 from micropython import const
 
 from lib.compat import Queue
@@ -17,6 +14,8 @@ from afsk.mod import AFSKModulator
 from ax25.ax25 import AX25
 
 import lib.upydash as _
+
+from upy.afsk import out_afsk
 
 # pwm frequency
 _FPWM = const(500_000)
@@ -38,37 +37,6 @@ async def gc_coro():
         raise
     except Exception as err:
         sys.print_exception(err)
-
-async def out_afsk(arr, siz):
-
-    try:
-        tsf = ThreadSafeFlag()
-        pwm = PWM(Pin(_AFSK_OUT_PIN), freq=_FPWM, duty_u16=0) # resolution = 26.2536 - 1.4427 log(fpwm)
-        tim = Timer(1)
-
-        nl = array('H', [0,]) # viper nonlocals
-
-        @micropython.viper
-        def cb(tim):
-            nonlocal nl,pwm,arr,siz,tsf
-            _nl  = ptr16(nl)  # uint
-            _arr = ptr16(arr) # uint
-            i:int = _nl[0]
-            if i < int(siz):
-                pwm.duty_u16(_arr[i])
-                i += 1
-            if i == int(siz):
-                tsf.set()
-                i += 1 # > int size we are done
-            _nl[0] = i
-
-        tim.init(freq=_FOUT, mode=Timer.PERIODIC, callback=cb)
-        await tsf.wait()
-    except Exception as err:
-        sys.print_exception(err)
-    finally:
-        tim.deinit()
-        pwm.deinit()
 
 async def start():
 
@@ -96,14 +64,19 @@ async def start():
             arr,siz = await afsk_mod.flush()
 
         x = 0
-        while True:
-            try:
-                ptt.value(1)
-                await out_afsk(arr, siz)
-                print('loop {}'.format(x))
-                x += 1
-            finally:
-                ptt.value(0)
+
+        try:
+            pwm = PWM(Pin(_AFSK_OUT_PIN), freq=_FPWM, duty_u16=0) # resolution = 26.2536 - 1.4427 log(fpwm)
+            while True:
+                try:
+                    ptt.value(1)
+                    await out_afsk(pwm, arr, siz, _FOUT)
+                    print('loop {}'.format(x))
+                    x += 1
+                finally:
+                    ptt.value(0)
+        finally:
+            pwm.deinit()
 
     except Exception as err:
         sys.print_exception(err)

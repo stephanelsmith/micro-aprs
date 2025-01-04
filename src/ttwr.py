@@ -2,15 +2,12 @@
 import sys
 import asyncio
 import gc
-from array import array
 
 from machine import Pin, PWM
-from machine import Timer
 from machine import UART
 from machine import I2C
 
 from asyncio import Event
-from asyncio import ThreadSafeFlag
 from micropython import const
 
 from lib.compat import Queue
@@ -22,6 +19,8 @@ from lilygottwr.sa868.sa868 import SA868
 from lilygottwr.sa868.pwr import SA868Pwr
 import lilygottwr.sa868.defs as sa868_defs
 from lilygottwr.xpower import start as xpower_start
+
+from upy.afsk import out_afsk
 
 import lib.upydash as _
 
@@ -40,13 +39,9 @@ _MIC_CH_SEL  = const(17)     # mic channel select, 0->mic, 1->esp
 _I2C_SCA = 8
 _I2C_SCL = 9
 
-AFSK_LOCK = False
-
 async def gc_coro():
     try:
         while True:
-            if not AFSK_LOCK:
-                gc.collect()
             await asyncio.sleep(5)
     except asyncio.CancelledError:
         raise
@@ -78,40 +73,6 @@ async def sa868_tx_rx(sa868_uart, rx_q, msg):
         except asyncio.TimeoutError:
             await asyncio.sleep_ms(1000)
             continue
-
-async def out_afsk(pwm, arr, siz):
-    global AFSK_LOCK
-
-    try:
-        AFSK_LOCK = True
-        tsf = ThreadSafeFlag()
-        tim = Timer(1)
-
-        # viper nonlocals
-        nl = array('H', [0,])
-
-        @micropython.viper
-        def cb(tim):
-            nonlocal nl,pwm,arr,siz,tsf
-            _nl  = ptr16(nl)  # uint
-            _arr = ptr16(arr) # uint
-            i:int = _nl[0]
-            if i < int(siz):
-                pwm.duty_u16(_arr[i])
-                i += 1
-            if i == int(siz):
-                tsf.set()
-                i += 1 # > int size we are done
-            _nl[0] = i
-
-        tim.init(freq=_FOUT, mode=Timer.PERIODIC, callback=cb)
-        await tsf.wait()
-    except Exception as err:
-        sys.print_exception(err)
-    finally:
-        tim.deinit()
-        # pwm.deinit()
-        AFSK_LOCK = False
 
 
 async def start():
@@ -201,7 +162,7 @@ async def start():
                         print(':{}'.format(x))
                         ptt.value(0)
                         dbg15.value(1)
-                        await out_afsk(pwm, arr, siz)
+                        await out_afsk(pwm, arr, siz, _FOUT)
                     finally:
                         dbg15.value(0)
                         ptt.value(1)

@@ -47,7 +47,7 @@ Applications using ```aprs_mod.py``` and ```aprs_demod.py```.
 ## :pager: Embedded ports and examples
 With Micropython, these examples show some examples for embedded systems.  I primarily target ESP32-S3 at the moment.
 * [ESP32-S3 - working around missing DAC](docs/ports/dac/README.md)
-* [TinyS3](docs/ports/tinys3/README.md), a quality and accessible esp32s3 board.
+* [TinyS3](docs/ports/tinys3/README.md), ESP32S3 build isntructions on the TinyS3 (ESP32-S3).
 * [LilyGo T-TWR Plus](docs/ports/lilygottwr/README.md), a commerically available esp32s3 board with SA868 Wireless Transceiver.
 
 

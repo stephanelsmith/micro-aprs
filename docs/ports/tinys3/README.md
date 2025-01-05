@@ -37,10 +37,10 @@ ln -sf ~/micro-aprs/upy/boards/SS_TINYS3 boards/.
 
 Build micropython port with C modules
 ```
-make BOARD=SS_TINYS3 USER_C_MODULES=~/micro-aprs/c_modules/esp32s3.cmake
+make BOARD=SS_TINYS3 USER_C_MODULES=~/micro-aprs/upy/c_modules/esp32s3.cmake
 ```
 
-A vanilla TinyS3 board is already included in the Micropython project.  To build it, try
+OR, try the vanilla TinyS3 board (already included in the Micropython project.)
 ```
 make BOARD=UM_TINYS3
 ```
@@ -55,7 +55,7 @@ py -m esptool --chip esp32s3 --port COM11 write_flash -z 0 .\build-SS_TINYS3\fir
 ## :runner: Trying the TinyS3 Port
 Fire up a terminal and connect to the device (use ```py -m serial.tools.list_ports``` to find the COM port)
 ```
-py -m serial.tools.miniterm COM10
+py -m serial.tools.miniterm COM20
 ```
 
 Launch the "hello world" example by importing the tinys3 module.
@@ -65,7 +65,15 @@ import tinys3
 
 The output is on ```IO1```.
 
-TODO ADD IMAGE
+## Output AFSK waveforms
+
+### Output afsk waveform (@22.05kHz)
+#### Yellow line is raw output
+#### Blue line after a LPF filter, [as described in the DAC section](../dac/README.md).
+<img src="out0.jpg" width="600">
+
+#### Slightly more zoomed in view
+<img src="out1.jpg" width="600">
 
 ## :raised_hands: Acknowledgements
 - Images and information from [TinyS3 and the Unexpected Maker Store](https://esp32s3.com/tinys3.html).  Go buy some kit!

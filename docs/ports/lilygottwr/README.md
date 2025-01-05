@@ -20,7 +20,7 @@ The LilyGo T-TWR is a commerically available dev kit including ESP32S3 + [NiceRF
 ## :hammer: Building Micropython Firware
 For a step-by-step getting started, [please see the TinyS3 port](https://github.com/stephanelsmith/micro-aprs/tree/master/docs/ports/tinys3#hammer-building-micropython-firware-for-tinys3).
 ```
-make BOARD=SS_TTWR USER_C_MODULES=~/micro-aprs/c_modules/esp32s3.cmake
+make BOARD=SS_TTWR USER_C_MODULES=~/micro-aprs/upy/c_modules/esp32s3.cmake
 ```
 ```
 py -m esptool --chip esp32s3 --port COM9 write_flash -z 0 .\build-SS_TTWR\firmware.bin

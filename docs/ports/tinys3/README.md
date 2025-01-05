@@ -70,10 +70,10 @@ The output is on ```IO1```.
 ### Output afsk waveform (@22.05kHz)
 #### Yellow line is raw output
 #### Blue line after a LPF filter, [as described in the DAC section](../dac/README.md).
-<img src="out0.jpg" width="600">
+<img src="out1.jpg" width="600">
 
 #### Slightly more zoomed in view
-<img src="out1.jpg" width="600">
+<img src="out2.jpg" width="600">
 
 ## :raised_hands: Acknowledgements
 - Images and information from [TinyS3 and the Unexpected Maker Store](https://esp32s3.com/tinys3.html).  Go buy some kit!

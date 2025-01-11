@@ -26,7 +26,7 @@ make BOARD=SS_TTWR USER_C_MODULES=~/micro-aprs/upy/c_modules/esp32s3.cmake
 py -m esptool --chip esp32s3 --port COM9 write_flash -z 0 .\build-SS_TTWR\firmware.bin
 ```
 ```
-py -m serial.tools.miniterm COM8
+py -m serial.tools.miniterm COM21
 ```
 
 

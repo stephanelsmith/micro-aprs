@@ -28,8 +28,8 @@ import lib.upydash as _
 _FPWM = const(500_000)
 
 # afsk sample frequency
-# _FOUT = const(11_025)
-_FOUT = const(22_050)
+_FOUT = const(11_025)
+# _FOUT = const(22_050)
 # _FOUT = const(44_100)
 
 AFSK_OUT_PIN = sa868_defs.AUDIO_MIC

@@ -21,8 +21,8 @@ from upy.afsk import out_afsk
 _FPWM = const(500_000)
 
 # afsk sample frequency
-# _FOUT = const(11_025)
-_FOUT = const(22_050)
+_FOUT = const(11_025)
+# _FOUT = const(22_050)
 # _FOUT = const(44_100)
 
 _AFSK_OUT_PIN = const(1)

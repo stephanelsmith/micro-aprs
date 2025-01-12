@@ -8,7 +8,7 @@ These examples take advantage of input/output piping to feed audio samples into 
 
 * Live decode of APRS on 144.39MHz using rtl_fm:
 ```
-rtl_fm -f 144.390M -s 22050 -g 1 - | python aprs_demod.py -t -
+rtl_fm -f 144.390M -s 22050 -g 1 - | python aprs_demod.py -t u16 -
 ```
 
 ## :satellite: APRS Rx only IGate

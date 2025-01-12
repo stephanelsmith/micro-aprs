@@ -1,8 +1,7 @@
 
-import asyncio
-
 import sys
 import io
+import asyncio
 
 # python or micropython?
 if sys.implementation.name == 'micropython':
@@ -23,8 +22,15 @@ if IS_UPY:
         HAS_C = True
     except ImportError:
         HAS_C = False
+    
+    # https://github.com/micropython/micropython/issues/11805#issuecomment-1598282774
+    if sys.implementation._mpy >> 10 == 0:
+        HAS_VIPER = False
+    else:
+        HAS_VIPER = True
 else:
     HAS_C = False
+    HAS_VIPER = False
 
 if IS_UPY:
     #micropython

@@ -58,7 +58,7 @@ async def start():
         samples_q = Queue()
         bits_q = Queue()
         ax25_q = Queue()
-        await samples_q.put((arr,len(arr)))
+        await samples_q.put(arr)
 
         async with AFSKDemodulator(sampling_rate = _FOUT,
                                    samples_in_q  = samples_q,
@@ -73,9 +73,7 @@ async def start():
             async with AX25FromAFSK(bits_in_q      = bits_q,
                                     ax25_q         = ax25_q,
                                     verbose        = False):
-                print('wait samples')
                 await samples_q.join()
-                print('wait bits')
                 await bits_q.join()
         while not ax25_q.empty():
             await ax25_q.get()

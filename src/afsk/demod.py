@@ -25,7 +25,7 @@ from afsk.func import clamps16
 from lib.compat import print_exc
 
 class AFSKDemodulator():
-    def __init__(self, samples_in_q,
+    def __init__(self, samples_in_q, # array or tuple (array, size)
                        bits_out_q,
                        sampling_rate = 22050,
                        verbose       = False, # output intermediate steps to stderr
@@ -193,35 +193,55 @@ class AFSKDemodulator():
 
             while True:
                 #fetch next chunk of samples (array)
-                arr,arr_size = await samp_q.get()
-                #eprint(arr_size)
+                arr_siz = await samp_q.get()
+                if isinstance(arr_siz, tuple) and len(arr_siz)==2:
+                    # if we specified an array and a size...
+                    arr = arr_siz[0]
+                    siz = arr_siz[1]
+                else:
+                    # if we just have an array, use it
+                    arr = arr_siz
+                    siz = len(arr)
 
-                for i in range(arr_size):
-                    o = arr[i]
-                    # print(o)
-                    if self.debug_samples == 'in':
-                        s = struct.pack('<h',clamps16(o)) # little-endian signed output
-                        sys.stdout.buffer.write(s)
-                    o = bpf(o)
-                    if self.debug_samples == 'bpf':
-                        s = struct.pack('<h',clamps16(o)) # little-endian signed output
-                        sys.stdout.buffer.write(s)
-                    o = corr(o)
-                    if self.debug_samples == 'cor':
-                        s = struct.pack('<h',clamps16(o)) # little-endian signed output
-                        sys.stdout.buffer.write(s)
-                    o = lpf(o)
-                    if self.debug_samples == 'lpf':
-                        s = struct.pack('<h',clamps16(o)) # little-endian signed output
-                        sys.stdout.buffer.write(s)
-                    bs = sampler(o)
-                    if bs != 2: # _NONE
-                        b = unnrzi(bs)
-                        # eprint(b,end='')
-                        await bits_q.put(b) #bits_out_q
-
-                if self.debug_samples:
-                    sys.stdout.buffer.flush()
+                if not self.debug_samples:
+                    # no debug if statemaents in loop
+                    for i in range(siz):
+                        o = arr[i]
+                        o = bpf(o)
+                        o = corr(o)
+                        o = lpf(o)
+                        bs = sampler(o)
+                        if bs != 2: # _NONE
+                            b = unnrzi(bs)
+                            # eprint(b,end='')
+                            await bits_q.put(b) #bits_out_q
+                else:
+                    # loop where we allow for inner-loop output:w
+                    for i in range(siz):
+                        o = arr[i]
+                        # print(o)
+                        if self.debug_samples == 'in':
+                            s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                            sys.stdout.buffer.write(s)
+                        o = bpf(o)
+                        if self.debug_samples == 'bpf':
+                            s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                            sys.stdout.buffer.write(s)
+                        o = corr(o)
+                        if self.debug_samples == 'cor':
+                            s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                            sys.stdout.buffer.write(s)
+                        o = lpf(o)
+                        if self.debug_samples == 'lpf':
+                            s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                            sys.stdout.buffer.write(s)
+                        bs = sampler(o)
+                        if bs != 2: # _NONE
+                            b = unnrzi(bs)
+                            # eprint(b,end='')
+                            await bits_q.put(b) #bits_out_q
+                    if self.debug_samples:
+                        sys.stdout.buffer.flush()
 
                 samp_q.task_done() # done
         except Exception as err:

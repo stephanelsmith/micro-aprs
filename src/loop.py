@@ -22,9 +22,31 @@ _FOUT = 11_025
 # _FOUT = const(22_050)
 # _FOUT = const(44_100)
 
+async def consume_ax25(ax25_q, 
+                       is_quite = False, # suppress stdout
+                       ):
+    try:
+        count = 1
+        while True:
+            ax25 = await ax25_q.get()
+            if not is_quite:
+                try:
+                    sys.stdout.write('[{}] {}\n'.format(count, ax25))
+                except UnicodeDecodeError:
+                    sys.stdout.write('[{}] ERR\n'.format(count))
+                sys.stdout.flush()
+            count += 1
+            ax25_q.task_done()
+            await asyncio.sleep(0)
+    except asyncio.CancelledError:
+        raise
+    except Exception as err:
+        print_exc(err)
+
 
 async def start():
 
+    tasks = []
     try:
 
         async with AFSKModulator(sampling_rate = _FOUT,
@@ -48,17 +70,21 @@ async def start():
 
             # print(arr)
 
-    except Exception as err:
-        print_exc(err)
-
-    try:
         #AFSK Demodulation - convert analog samples to bits
         #samples_q consumer
         #bits_q producer
         samples_q = Queue()
         bits_q = Queue()
         ax25_q = Queue()
-        await samples_q.put(arr)
+
+        #create ax25 consumer
+        tasks.append(asyncio.create_task(consume_ax25(ax25_q   = ax25_q,
+                                                      is_quite = False,
+                                        )))
+
+        # add afask array to the samples_q for processing
+        for x in range(10):
+            await samples_q.put(arr)
 
         async with AFSKDemodulator(sampling_rate = _FOUT,
                                    samples_in_q  = samples_q,
@@ -75,15 +101,18 @@ async def start():
                                     verbose        = False):
                 await samples_q.join()
                 await bits_q.join()
-        while not ax25_q.empty():
-            await ax25_q.get()
-            ax25_q.task_done()
-            print(ax25)
+        
+        # wait until consumer ax25 completed
         await ax25_q.join()
+
     except asyncio.CancelledError:
         raise
     except Exception as err:
         print_exc(err)
+    finally:
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*[t for t in tasks if not t.done()], return_exceptions=True)
 
 def main():
     try:

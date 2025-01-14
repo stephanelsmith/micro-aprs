@@ -22,33 +22,8 @@ _FOUT = 11_025
 # _FOUT = const(22_050)
 # _FOUT = const(44_100)
 
-async def consume_ax25(ax25_q, 
-                       is_quite = False, # suppress stdout
-                       ):
+async def gen_samples(samples_q, ):
     try:
-        count = 1
-        while True:
-            ax25 = await ax25_q.get()
-            if not is_quite:
-                try:
-                    sys.stdout.write('[{}] {}\n'.format(count, ax25))
-                except UnicodeDecodeError:
-                    sys.stdout.write('[{}] ERR\n'.format(count))
-                sys.stdout.flush()
-            count += 1
-            ax25_q.task_done()
-            await asyncio.sleep(0)
-    except asyncio.CancelledError:
-        raise
-    except Exception as err:
-        print_exc(err)
-
-
-async def start():
-
-    tasks = []
-    try:
-
         async with AFSKModulator(sampling_rate = _FOUT,
                                  signed        = False,
                                  verbose       = False) as afsk_mod:
@@ -68,24 +43,20 @@ async def start():
             await afsk_mod.pad_zeros(ms = 10)
             arr,siz = await afsk_mod.flush()
 
-            # print(arr)
+            # add afask array to the samples_q for processing
+            while True:
+                await samples_q.put(arr)
+                await asyncio.sleep(1)
+    except asyncio.CancelledError:
+        raise
+    except KeyboardInterrupt:
+        return
+    except Exception as err:
+        print_exc(err)
 
-        #AFSK Demodulation - convert analog samples to bits
-        #samples_q consumer
-        #bits_q producer
-        samples_q = Queue()
+async def demod_core(samples_q, ax25_q):
+    try:
         bits_q = Queue()
-        ax25_q = Queue()
-
-        #create ax25 consumer
-        tasks.append(asyncio.create_task(consume_ax25(ax25_q   = ax25_q,
-                                                      is_quite = False,
-                                        )))
-
-        # add afask array to the samples_q for processing
-        for x in range(10):
-            await samples_q.put(arr)
-
         async with AFSKDemodulator(sampling_rate = _FOUT,
                                    samples_in_q  = samples_q,
                                    bits_out_q    = bits_q,
@@ -93,20 +64,64 @@ async def start():
                                    debug_samples = False,
                                    options       = {},
                                    ) as afsk_demod:
-            # AX25FromAFSK - convert bits to ax25 objects
-            #bits_q consumer
-            #ax25_q producer
             async with AX25FromAFSK(bits_in_q      = bits_q,
                                     ax25_q         = ax25_q,
                                     verbose        = False):
-                await samples_q.join()
-                await bits_q.join()
-        
+                await Event().wait()
+                # await samples_q.join()
+                # await bits_q.join()
+    except asyncio.CancelledError:
+        raise
+    except KeyboardInterrupt:
+        return
+    except Exception as err:
+        print_exc(err)
+
+async def consume_ax25(ax25_q, 
+                       is_quite = False, # suppress stdout
+                       ):
+    try:
+        count = 1
+        while True:
+            ax25 = await ax25_q.get()
+            if not is_quite:
+                try:
+                    sys.stdout.write('[{}] {}\n'.format(count, ax25))
+                except UnicodeDecodeError:
+                    sys.stdout.write('[{}] ERR\n'.format(count))
+                sys.stdout.flush()
+            count += 1
+            ax25_q.task_done()
+            await asyncio.sleep(0)
+    except asyncio.CancelledError:
+        raise
+    except KeyboardInterrupt:
+        return
+    except Exception as err:
+        print_exc(err)
+
+
+async def start():
+
+    tasks = []
+    try:
+        samples_q = Queue()
+        ax25_q = Queue()
+
+        #create ax25 consumer
+        tasks.append(asyncio.create_task(consume_ax25(ax25_q   = ax25_q,)))
+        tasks.append(asyncio.create_task(gen_samples(samples_q = samples_q,)))
+        tasks.append(asyncio.create_task(demod_core(samples_q = samples_q, 
+                                                    ax25_q    = ax25_q)))
         # wait until consumer ax25 completed
-        await ax25_q.join()
+        # await ax25_q.join()
+
+        await asyncio.gather(*tasks, return_exceptions=True)
 
     except asyncio.CancelledError:
         raise
+    except KeyboardInterrupt:
+        return
     except Exception as err:
         print_exc(err)
     finally:

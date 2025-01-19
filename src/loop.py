@@ -2,6 +2,7 @@
 import sys
 import asyncio
 import gc
+# import time
 
 from array import array
 from asyncio import Event
@@ -89,7 +90,7 @@ async def consume_ax25(ax25_q,
                     sys.stdout.write('[{}] {}\n'.format(count, ax25))
                 except UnicodeDecodeError:
                     sys.stdout.write('[{}] ERR\n'.format(count))
-                sys.stdout.flush()
+                # sys.stdout.flush()
             count += 1
             ax25_q.task_done()
             await asyncio.sleep(0)

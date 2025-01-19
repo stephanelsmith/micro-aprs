@@ -2,14 +2,14 @@
 from json import loads
 from json import dumps
 
-
 def memoize_loads(name, *args):
     j = {}
     # raise Exception('failed to memoize')
 
     try:
-        with open('memoize.json', 'r') as f:
-            j = loads(f.read())
+        # with open('memoize.json', 'r') as f:
+            # j = loads(f.read())
+        from lib.memoizedat import j
     except:
         return None
 
@@ -25,8 +25,9 @@ def memoize_dumps(name, res, *args):
     # return
 
     try:
-        with open('memoize.json', 'r') as f:
-            j = loads(f.read())
+        # with open('memoize.json', 'r') as f:
+            # j = loads(f.read())
+        from lib.memoizedat import j
     except:
         pass
 
@@ -40,7 +41,8 @@ def memoize_dumps(name, res, *args):
     })
 
     try:
-        with open('memoize.json', 'w') as f:
+        with open('lib/memoizedat.py', 'w') as f:
+            f.write('j=')
             f.write(dumps(j))
     except:
         # failed to memoize save

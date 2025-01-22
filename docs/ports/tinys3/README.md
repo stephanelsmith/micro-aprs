@@ -9,8 +9,11 @@ TinyS3 is available through [UnexpectedMaker's store](https://unexpectedmaker.co
 </p>
 
 ## :hammer: Building Micropython Firware for TinyS3
-
-Clone the Espressif ESP-IDF repo
+#### Install pre-reqs
+```
+apt install cmake python3-libusb1
+```
+#### Clone the Espressif ESP-IDF repo
 ```
 git clone --depth 1 --branch v5.2.2 https://github.com/espressif/esp-idf.git esp-idf-v5.2.2
 cd esp-idf-v5.2.2
@@ -20,7 +23,7 @@ source export.sh
 ```
 From here on, you will need to source ```export.sh``` to setup your environment.
 
-Now clone the Micropython repo
+#### Now clone the Micropython repo
 ```
 git clone git@github.com:micropython/micropython.git
 cd micropython
@@ -30,12 +33,12 @@ cd ports/esp32
 ```
 From here, the commands assume the current working directory is ```micropython/ports/esp32```.
 
-Add the board file from the aprs-micro folder into the micropython build folder
+#### Add the board file from the aprs-micro folder into the micropython build folder
 ```
 ln -sf ~/micro-aprs/upy/boards/SS_TINYS3 boards/.
 ```
 
-Build micropython port with C modules
+#### Build micropython port with C modules
 ```
 make BOARD=SS_TINYS3 USER_C_MODULES=~/micro-aprs/upy/c_modules/esp32s3.cmake
 ```
@@ -46,7 +49,8 @@ make BOARD=UM_TINYS3
 ```
 
 
-Flash the esp32 chip.  Before flashing the ESP32S3 needs to be in the bootloader.  This is done by holding the ```boot``` button and clicking ```reset```.  You can find the right comm port with ```py -m serial.tools.list_ports```.  You may need to ```py -m pip install pyserial``` first.
+#### Flash the esp32 chip.
+Before flashing the ESP32S3 needs to be in the bootloader.  This is done by holding the ```boot``` button and clicking ```reset```.  You can find the right comm port with ```py -m serial.tools.list_ports```.  You may need to ```py -m pip install pyserial``` first.
 ```
 py -m esptool --chip esp32s3 --port COM11 write_flash -z 0 .\build-SS_TINYS3\firmware.bin
 ```

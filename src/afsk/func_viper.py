@@ -58,6 +58,33 @@ def gen_bits_from_bytes(mv, stop_bit = None):
 
 if IS_UPY and HAS_VIPER:
     @micropython.viper
+    def create_squelch(siz,):
+        _buf = array('i', (0 for x in range(siz)))
+        idx = 0
+        _c = array('i',[idx,siz,])
+        def inner(v:int)->int:
+            nonlocal  _buf, _c
+
+            buf = ptr32(_buf)     # indexing ALWAYS return uint
+            c = ptr32(_c)
+            idx:int = c[0]
+            siz:int = c[1]
+
+            buf[idx] = v # ok, can assign negative number
+            o:int = 0
+            for i in range(siz):
+                o += buf[i]*buf[i]
+            o = isqrt(o//siz)
+
+            idx = (idx+1)%siz
+            c[0] = idx
+
+            return o
+
+        return inner
+
+if IS_UPY and HAS_VIPER:
+    @micropython.viper
     def afsk_detector(arr:ptr32, size:int)->bool:
         pol:int = 1 #polarity of the run we are currently tracking
         run:int = 0 #current run count (number of consecutive pos/neg samples)

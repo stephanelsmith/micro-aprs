@@ -1,21 +1,33 @@
 
 import sys
+from micropython import RingIO
+from micropython import const
 import asyncio
 from array import array
 from machine import Timer
 from asyncio import ThreadSafeFlag
-from micropython import RingIO
+
+from afsk.func_viper import create_power_meter
+
+_AFSK_IN_SQLCH_LEVEL = const(100)
 
 async def in_afsk(adc, rio, fin = 11_025):
     try:
         tsf = ThreadSafeFlag()
         tim = Timer(1)
+        pwrmtr = create_power_meter(siz = fin//1200*8)
+        sig = False
 
         def cb(tim):
-            nonlocal adc, rioa
-            rio.write(adc.read_u16().to_bytes(2))
-            tsf.set()
-
+            nonlocal adc, rio, sig
+            u = adc.read_u16()
+            s = u - 32768 # convert u16 to s16
+            o = pwrmtr(s)
+            if sig and o < _AFSK_IN_SQLCH_LEVEL:
+                tsf.set()
+            sig = o > _AFSK_IN_SQLCH_LEVEL
+            if sig:
+                rio.write(u.to_bytes(2))
         tim.init(freq=fin, mode=Timer.PERIODIC, callback=cb)
         await tsf.wait()
     except Exception as err:

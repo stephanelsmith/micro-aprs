@@ -8,34 +8,42 @@ from machine import Timer
 from asyncio import ThreadSafeFlag
 
 # from afsk.func_viper import create_power_meter
+from afsk.fir_options import fir_options
 from lib.memoize import memoize_loads
 
 _AFSK_IN_SQLCH_LEVEL = const(100)
+_FMARK  = 1200
+_FSPACE = 2200
 
-async def in_afsk(adc, rio, fin = 11_025):
+async def in_afsk(adc, rio, fs = 11_025):
     try:
         tsf = ThreadSafeFlag()
         tim = Timer(1)
-        pwrmtr = create_power_meter(siz = fin//1200*8)
-        sig = False
 
-        coefs,g = memoize_loads('bpf', 1200, 2200, fin,
-                                        bandpass_ncoefs,
-                                        bandpass_width, 
-                                        bandpass_amark, 
-                                        bandpass_aspace)
+        pwrmtr = create_power_meter(siz = fs//1200*8)
+        sig = False
+        
+        coefs,g = memoize_loads('bpf', 
+                                _FMARK, _FSPACE,
+                                fs, 91, # HARD CODED NCOEFS FOR 11_025
+                                fir_options['bandpass_width'], 
+                                fir_options['bandpass_amark'], 
+                                fir_options['bandpass_aspace'])
+        bpf = create_fir(coefs = coefs, scale = g)
 
         def cb(tim):
             nonlocal adc, rio, sig
-            u = adc.read_u16()
-            s = u - 32768 # convert u16 to s16
-            o = pwrmtr(s)
-            if sig and o < _AFSK_IN_SQLCH_LEVEL:
-                tsf.set()
-            sig = o > _AFSK_IN_SQLCH_LEVEL
-            if sig:
-                rio.write(u.to_bytes(2))
-        tim.init(freq=fin, mode=Timer.PERIODIC, callback=cb)
+            o = adc.read_u16()
+            o = o - 32768 # convert u16 to s16
+            o = bpf(o)
+            p = pwrmtr(o)
+            # if sig and o < _AFSK_IN_SQLCH_LEVEL:
+                # tsf.set()
+            # sig = o > _AFSK_IN_SQLCH_LEVEL
+            # if sig:
+            rio.write(o.to_bytes(2))
+            rio.write(p.to_bytes(2))
+        tim.init(freq=fs, mode=Timer.PERIODIC, callback=cb)
         await tsf.wait()
     except Exception as err:
         sys.print_exception(err)

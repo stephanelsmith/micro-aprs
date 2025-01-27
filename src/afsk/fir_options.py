@@ -46,4 +46,5 @@ fir_options = {
     'lpf_width'           : 250,
     'lpf_aboost'          : 3,
 }
+# bandpass_ncoefs 91
 

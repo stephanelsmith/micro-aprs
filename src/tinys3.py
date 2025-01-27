@@ -26,7 +26,6 @@ _FOUT = const(11_025)
 # _FOUT = const(44_100)
 
 _AFSK_OUT_PIN = const(1)
-_AFSK_PTT_PIN = const(9)
 
 async def gc_coro():
     try:
@@ -42,7 +41,6 @@ async def start():
 
     try:
         gc_task = asyncio.create_task(gc_coro())
-        ptt = Pin(_AFSK_PTT_PIN, mode = Pin.OUT, value = 0)
 
         async with AFSKModulator(sampling_rate = _FOUT,
                                  signed        = False,
@@ -68,13 +66,10 @@ async def start():
         try:
             pwm = PWM(Pin(_AFSK_OUT_PIN), freq=_FPWM, duty_u16=0) # resolution = 26.2536 - 1.4427 log(fpwm)
             while True:
-                try:
-                    ptt.value(1)
-                    await out_afsk(pwm, arr, siz, _FOUT)
-                    print('loop {}'.format(x))
-                    x += 1
-                finally:
-                    ptt.value(0)
+                print('loop {}'.format(x))
+                await out_afsk(pwm, arr, siz, _FOUT)
+                x += 1
+                await asyncio.sleep_ms(5000)
         finally:
             pwm.deinit()
 

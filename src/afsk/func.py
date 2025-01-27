@@ -27,11 +27,11 @@ if IS_UPY and HAS_C:
     from cdsp import utoi32
 elif IS_UPY and HAS_VIPER:
     @micropython.viper
-    def utoi32(u32:int)->int:
-        if u32 <= 0x7FFFFFFF:
-            return u32
+    def utoi32(u:int)->int:
+        if u <= int(0x7FFFFFFF):
+            return int(u)
         else:
-            return u32 - 0x100000000
+            return int(u) - int(0x100000000)
 else:
     def utoi32(u32:int)->int:
         if u32 <= 0x7FFFFFFF:
@@ -72,7 +72,6 @@ def gen_bits_from_bytes(mv, stop_bit = None):
         yield mv[idx//8]&(0x80>>(idx%8))
 
 if IS_UPY and HAS_VIPER and HAS_C:
-    @micropython.viper
     def create_power_meter(siz,):
         _buf = array('i', (0 for x in range(siz)))
         idx = 0

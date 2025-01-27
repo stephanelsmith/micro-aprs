@@ -7,7 +7,7 @@ from array import array
 from machine import Timer
 from asyncio import ThreadSafeFlag
 
-from afsk.func_viper import create_power_meter
+# from afsk.func_viper import create_power_meter
 from lib.memoize import memoize_loads
 
 _AFSK_IN_SQLCH_LEVEL = const(100)

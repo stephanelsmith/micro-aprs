@@ -35,11 +35,11 @@ static mp_obj_t mp_sign(mp_obj_t a_obj) {
 static MP_DEFINE_CONST_FUN_OBJ_1(sign_obj, mp_sign);
 
 // TO INT, perform a uint32 to int32 type cast
-static mp_obj_t mp_uint_to_int(mp_obj_t a_obj) {
+static mp_obj_t mp_utoi32(mp_obj_t a_obj) {
     uint32_t a = mp_obj_get_int(a_obj);
     return mp_obj_new_int((int32_t)a);
 }
-static MP_DEFINE_CONST_FUN_OBJ_1(uint_to_int_obj, mp_uint_to_int);
+static MP_DEFINE_CONST_FUN_OBJ_1(utoi32_obj, mp_utoi32);
 
 
 ////////////////////////////
@@ -157,7 +157,7 @@ static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_cdsp) },
     { MP_ROM_QSTR(MP_QSTR_isqrt), MP_ROM_PTR(&isqrt_obj) },
     { MP_ROM_QSTR(MP_QSTR_sign), MP_ROM_PTR(&sign_obj) },
-    { MP_ROM_QSTR(MP_QSTR_uint_to_int), MP_ROM_PTR(&uint_to_int_obj) },
+    { MP_ROM_QSTR(MP_QSTR_utoi32), MP_ROM_PTR(&utoi32_obj) },
     { MP_ROM_QSTR(MP_QSTR_fir_core), MP_ROM_PTR(&fir_core_obj) },
 };
 static MP_DEFINE_CONST_DICT(example_module_globals, example_module_globals_table);

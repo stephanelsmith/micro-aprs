@@ -8,7 +8,7 @@ Here we choose the PWM route simply because Micropython already has PWM support 
 
 ### Passive filter
 
-We also implement a basic LPF, where $` R = 6.4K Ohm `$ and $` C = 4.7\mu F `$.  That gives about a 5kHz cutoff covering $`f_{mark} = 1200Hz`$ and $`f_{space} = 2200Hz`$.
+We also implement a basic LPF, where $` R = 4.7K Ohm `$ and $` C = 4.7\mu F `$.  That gives about a 5kHz cutoff covering $`f_{mark} = 1200Hz`$ and $`f_{space} = 2200Hz`$.
 
 <img src="lpf.png?raw=true" alt="" width="600">
 

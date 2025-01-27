@@ -21,6 +21,7 @@ from afsk.func import bandpass_fir_design
 from afsk.func import create_sampler
 from afsk.func import create_fir
 from afsk.func import clamps16
+from afsk.fir_options import fir_options
 
 from lib.compat import print_exc
 
@@ -48,56 +49,7 @@ class AFSKDemodulator():
         self.tbaud = 1/self.fbaud
         
         do_memoize = True
-        # if options:
-            # do_memoize = False
-
-        # germany tuned
-        # options = dict({
-            # 'bandpass_ncoefsbaud' : 3,
-            # 'bandpass_width'      : 460,
-            # 'bandpass_amark'      : 7,
-            # 'bandpass_aspace'     : 24,
-            # 'lpf_ncoefsbaud'      : 4,
-            # 'lpf_f'               : 1000,
-            # 'lpf_width'           : 360,
-            # 'lpf_aboost'          : 3,
-        # }, **options)
-
-        # rtl_fm test tuning, working with ttwr
-        # options = dict({
-            # 'bandpass_ncoefsbaud' : 5,
-            # 'bandpass_width'      : 460,
-            # 'bandpass_amark'      : 6,
-            # 'bandpass_aspace'     : 6,
-            # 'lpf_ncoefsbaud'      : 5,
-            # 'lpf_f'               : 1000,
-            # 'lpf_width'           : 360,
-            # 'lpf_aboost'          : 3,
-        # }, **options)
-
-        # optimizer tuning for tnc test, 1020 decoded frames (but NOT ttwr!)
-        # options = dict({
-            # 'bandpass_ncoefsbaud' : 5,
-            # 'bandpass_width'      : 400,
-            # 'bandpass_amark'      : 1,
-            # 'bandpass_aspace'     : 3,
-            # 'lpf_ncoefsbaud'      : 5,
-            # 'lpf_f'               : 800,
-            # 'lpf_width'           : 250,
-            # 'lpf_aboost'          : 3,
-        # }, **options)
-
-        # co-optimize ttwr and tnc test, this is decode ttwr and decode 983 tnc frames
-        options = dict({
-            'bandpass_ncoefsbaud' : 5,
-            'bandpass_width'      : 400,
-            'bandpass_amark'      : 2,
-            'bandpass_aspace'     : 3,
-            'lpf_ncoefsbaud'      : 5,
-            'lpf_f'               : 800,
-            'lpf_width'           : 250,
-            'lpf_aboost'          : 3,
-        }, **options)
+        options = dict(fir_options,  **options)
         # eprint('# OPTIONS: {}'.format(options))
 
         nmark = int(self.tmark/self.ts)

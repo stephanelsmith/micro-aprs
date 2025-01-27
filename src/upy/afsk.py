@@ -8,6 +8,7 @@ from machine import Timer
 from asyncio import ThreadSafeFlag
 
 from afsk.func_viper import create_power_meter
+from lib.memoize import memoize_loads
 
 _AFSK_IN_SQLCH_LEVEL = const(100)
 
@@ -17,6 +18,12 @@ async def in_afsk(adc, rio, fin = 11_025):
         tim = Timer(1)
         pwrmtr = create_power_meter(siz = fin//1200*8)
         sig = False
+
+        coefs,g = memoize_loads('bpf', 1200, 2200, fin,
+                                        bandpass_ncoefs,
+                                        bandpass_width, 
+                                        bandpass_amark, 
+                                        bandpass_aspace)
 
         def cb(tim):
             nonlocal adc, rio, sig

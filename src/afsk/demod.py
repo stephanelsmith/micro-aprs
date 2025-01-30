@@ -32,7 +32,7 @@ _FBAUD  = 1200
 _TBAUD  = 0.0008333333333333334
 
 class AFSKDemodulator():
-    def __init__(self, samples_in_q, # array or tuple (array, size)
+    def __init__(self, in_q, # array or tuple (array, size)
                        bits_out_q,
                        sampling_rate = 11_025,
                        verbose       = False, # output intermediate steps to stderr
@@ -40,7 +40,7 @@ class AFSKDemodulator():
                        options       = {},
                        ):
 
-        self.samples_q  = samples_in_q
+        self.in_q  = in_q
         self.bits_q = bits_out_q
         self.verbose = verbose
         self.debug_samples = debug_samples
@@ -125,14 +125,16 @@ class AFSKDemodulator():
         self.tasks = []
 
     async def __aenter__(self):
-        self.tasks.append(asyncio.create_task(self.process_samples()))
+        self.tasks.append(asyncio.create_task(self.q_core()))
         return self
 
     async def __aexit__(self, *args):
-        _.for_each(self.tasks, lambda t: t.cancel())
+        # _.for_each(self.tasks, lambda t: t.cancel())
+        map(lambda t: t.cancel(), self.tasks)
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
-    async def process_samples(self):
+    # the demod core used when input is a Queue
+    async def q_core(self):
         try:
             # Process a chunk of samples
             corr     = self.corr
@@ -141,12 +143,12 @@ class AFSKDemodulator():
             sampler  = self.sampler
             unnrzi   = self.unnrzi
 
-            bits_q = self.bits_q
-            samp_q = self.samples_q
+            in_q = self.in_q     # input stream
+            bits_q = self.bits_q   # output stream
 
             while True:
                 #fetch next chunk of samples (array)
-                arr_siz = await samp_q.get()
+                arr_siz = await in_q.get()
                 if isinstance(arr_siz, tuple) and len(arr_siz)==2:
                     # if we specified an array and a size...
                     arr = arr_siz[0]
@@ -156,49 +158,76 @@ class AFSKDemodulator():
                     arr = arr_siz
                     siz = len(arr)
 
-                if not self.debug_samples:
-                    # no debug if statemaents in loop
-                    for i in range(siz):
-                        o = arr[i]
-                        o = bpf(o)
-                        o = corr(o)
-                        o = lpf(o)
-                        bs = sampler(o)
-                        if bs != 2: # _NONE
-                            b = unnrzi(bs)
-                            # eprint(b,end='')
-                            await bits_q.put(b) #bits_out_q
-                else:
-                    # loop where we allow for inner-loop output:w
-                    for i in range(siz):
-                        o = arr[i]
-                        # print(o)
-                        if self.debug_samples == 'in':
-                            s = struct.pack('<h',clamps16(o)) # little-endian signed output
-                            sys.stdout.buffer.write(s)
-                        o = bpf(o)
-                        if self.debug_samples == 'bpf':
-                            s = struct.pack('<h',clamps16(o)) # little-endian signed output
-                            sys.stdout.buffer.write(s)
-                        o = corr(o)
-                        if self.debug_samples == 'cor':
-                            s = struct.pack('<h',clamps16(o)) # little-endian signed output
-                            sys.stdout.buffer.write(s)
-                        o = lpf(o)
-                        if self.debug_samples == 'lpf':
-                            s = struct.pack('<h',clamps16(o)) # little-endian signed output
-                            sys.stdout.buffer.write(s)
-                        bs = sampler(o)
-                        if bs != 2: # _NONE
-                            b = unnrzi(bs)
-                            # eprint(b,end='')
-                            await bits_q.put(b) #bits_out_q
-                    if self.debug_samples:
-                        sys.stdout.buffer.flush()
+                for i in range(siz):
+                    o = arr[i]
+                    o = bpf(o)
+                    o = corr(o)
+                    o = lpf(o)
+                    bs = sampler(o)
+                    if bs != 2: # _NONE
+                        b = unnrzi(bs)
+                        # eprint(b,end='')
+                        await bits_q.put(b) #bits_out_q
 
-                samp_q.task_done() # done
+                in_q.task_done() # done
         except Exception as err:
             print_exc(err)
+
+    # for embedded micropython, we will use the RingIO, with fixed allocation
+    async def rio_core(self):
+        try:
+            # Process a chunk of samples
+            corr     = self.corr
+            lpf      = self.lpf
+            bpf      = self.bpf
+            sampler  = self.sampler
+            unnrzi   = self.unnrzi
+
+            stream = asyncio.StreamReader(self.rio)
+            bits_q = self.bits_q   # output stream
+
+            while True:
+                b = stream.readexactly(2)
+                # unsigned little endian
+                arr[idx] = (unpack('<H', b)[0] - 32768) 
+                o = arr[i]
+                o = bpf(o)
+                o = corr(o)
+                o = lpf(o)
+                bs = sampler(o)
+                if bs != 2: # _NONE
+                    b = unnrzi(bs)
+                    # eprint(b,end='')
+                    await bits_q.put(b) #bits_out_q
+        except Exception as err:
+            print_exc(err)
+
+                # # loop where we allow for inner-loop output
+                # for i in range(siz):
+                    # o = arr[i]
+                    # # print(o)
+                    # if self.debug_samples == 'in':
+                        # s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        # sys.stdout.buffer.write(s)
+                    # o = bpf(o)
+                    # if self.debug_samples == 'bpf':
+                        # s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        # sys.stdout.buffer.write(s)
+                    # o = corr(o)
+                    # if self.debug_samples == 'cor':
+                        # s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        # sys.stdout.buffer.write(s)
+                    # o = lpf(o)
+                    # if self.debug_samples == 'lpf':
+                        # s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        # sys.stdout.buffer.write(s)
+                    # bs = sampler(o)
+                    # if bs != 2: # _NONE
+                        # b = unnrzi(bs)
+                        # # eprint(b,end='')
+                        # await bits_q.put(b) #bits_out_q
+                # if self.debug_samples:
+                    # sys.stdout.buffer.flush()
 
     # def analyze(self,start_from = 100e-3):
         # o = self.o

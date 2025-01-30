@@ -28,11 +28,11 @@ from lib.compat import get_stdin_streamreader
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
 
-async def read_samples_from_pipe(samples_q,
+async def read_samples_from_pipe(in_q,
                                  type = 's16',
                                  ):
     unpack = struct.unpack
-    q_put = samples_q.put
+    q_put = in_q.put
 
     try:
         reader = await get_stdin_streamreader()
@@ -48,7 +48,7 @@ async def read_samples_from_pipe(samples_q,
                 break #eof break
             if type == 'u16':
                 # unsigned little endian
-                arr[idx] = (unpack('<H', a)[0] - 32768)//6
+                arr[idx] = (unpack('<H', a)[0] - 32768) #//6
             else:
                 # signed little endian (default)
                 arr[idx] = unpack('<h', a)[0]
@@ -68,7 +68,7 @@ async def read_samples_from_pipe(samples_q,
     except asyncio.CancelledError:
         raise
 
-async def read_samples_from_rtl_fm(samples_q, 
+async def read_samples_from_rtl_fm(in_q, 
                                    ):
     try:
         stderr_task = None
@@ -113,11 +113,11 @@ async def read_samples_from_rtl_fm(samples_q,
                     idx += 1
                     if idx%defs.SAMPLES_SIZE == 0:
                         if afsk_detector(arr,idx): #afsk signal detector
-                            await samples_q.put((arr, idx))
+                            await in_q.put((arr, idx))
                             await asyncio.sleep(0)
                             arr = array('i',range(defs.SAMPLES_SIZE))
                         idx = 0
-                await samples_q.put((arr, idx))
+                await in_q.put((arr, idx))
                 await asyncio.sleep(0)
             finally:
                 eprint('killing rtl_fm process')
@@ -132,7 +132,7 @@ async def read_samples_from_rtl_fm(samples_q,
         if stderr_task:
             stderr_task.cancel()
 
-async def read_samples_from_file(samples_q, 
+async def read_samples_from_file(in_q, 
                                 file,
                                 ):
     try:
@@ -156,11 +156,11 @@ async def read_samples_from_file(samples_q,
                 idx += 1
                 if idx%defs.SAMPLES_SIZE == 0:
                     if afsk_detector(arr,idx): #afsk signal detector
-                        await samples_q.put((arr, idx))
+                        await in_q.put((arr, idx))
                         await asyncio.sleep(0)
                         arr = array('i',range(defs.SAMPLES_SIZE))
                     idx = 0
-            await samples_q.put((arr, idx))
+            await in_q.put((arr, idx))
             await asyncio.sleep(0)
     except Exception as err:
         print_exc(err)
@@ -188,16 +188,16 @@ async def consume_ax25(ax25_q,
     except Exception as err:
         print_exc(err)
 
-async def demod_core(samples_q,
+async def demod_core(in_q,
                      bits_q,
                      ax25_q,
                      args):
     try:
         #AFSK Demodulation - convert analog samples to bits
-        #samples_q consumer
+        #in_q consumer
         #bits_q producer
         async with AFSKDemodulator(sampling_rate = args['args']['rate'],
-                                   samples_in_q  = samples_q,
+                                   in_q          = in_q,
                                    bits_out_q    = bits_q,
                                    verbose       = args['args']['verbose'],
                                    debug_samples = args['args']['debug_samples'],
@@ -211,7 +211,7 @@ async def demod_core(samples_q,
                                     verbose        = args['args']['verbose']) as bits2ax25:
 
                 #flush afsk_demod filters
-                await samples_q.put((array('i',(0 for x in range(afsk_demod.flush_size))),afsk_demod.flush_size))
+                await in_q.put((array('i',(0 for x in range(afsk_demod.flush_size))),afsk_demod.flush_size))
                 
                 # just wait
                 await Event().wait()
@@ -228,7 +228,7 @@ async def main():
     eprint('# IN   {}'.format(args['in']['file']))
     eprint('# OUT  {}'.format(args['out']['file']))
 
-    samples_q = Queue()
+    in_q = Queue()
     bits_q = Queue()
     ax25_q = Queue()
 
@@ -239,7 +239,7 @@ async def main():
         tasks.append(asyncio.create_task(consume_ax25(ax25_q   = ax25_q,
                                                       is_quite = args['args']['debug_samples']), # no output when debugging samples
                                         ))
-        tasks.append(asyncio.create_task(demod_core(samples_q,
+        tasks.append(asyncio.create_task(demod_core(in_q,
                                                     bits_q,
                                                     ax25_q,
                                                     args)))
@@ -247,19 +247,19 @@ async def main():
 
         #from .raw file
         if args['in']['file'] == '-':
-            await read_samples_from_pipe(samples_q,
+            await read_samples_from_pipe(in_q,
                                          type = args['in']['type'],
                                          )
         elif args['in']['file'] == 'rtl_fm':
-            await read_samples_from_rtl_fm(samples_q)
+            await read_samples_from_rtl_fm(in_q)
         elif args['in']['file']:
-            await read_samples_from_file(samples_q = samples_q,
+            await read_samples_from_file(in_q = in_q,
                                         file          = args['in']['file'],
                                         )
         else:
             raise Exception('unsupported input {}'.format(args['in']['file']))
 
-        await samples_q.join()
+        await in_q.join()
         await bits_q.join()
         await ax25_q.join()
 

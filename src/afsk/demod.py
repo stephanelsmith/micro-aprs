@@ -5,14 +5,13 @@ import asyncio
 from array import array
 import math
 import lib.upydash as _
+from asyncio import Event
 
-# import matplotlib.pyplot as plt
-
-# from lib.utils import frange
 import lib.defs as defs
 from lib.utils import eprint
 from lib.memoize import memoize_loads
 from lib.memoize import memoize_dumps
+from lib.compat import Queue
 
 from afsk.func import create_unnrzi
 from afsk.func import create_corr
@@ -32,18 +31,21 @@ _FBAUD  = 1200
 _TBAUD  = 0.0008333333333333334
 
 class AFSKDemodulator():
-    def __init__(self, in_q, # array or tuple (array, size)
+    def __init__(self, in_q, # array or tuple (array, size) OR a stream (with 'readexactly' method)
                        bits_out_q,
                        sampling_rate = 11_025,
                        verbose       = False, # output intermediate steps to stderr
-                       debug_samples = False, # output intermediate samples to stderr
+                       stream_type   = 's16', # if in_q is a stream, u16 or s16?
                        options       = {},
                        ):
+                       # debug_samples = False, # output intermediate samples to stderr
 
         self.in_q  = in_q
         self.bits_q = bits_out_q
         self.verbose = verbose
-        self.debug_samples = debug_samples
+        self.stream_type = stream_type
+        # self.debug_samples = debug_samples
+        self.stream_done = Event()
 
         self.fs = sampling_rate
         self.ts = 1/self.fs
@@ -125,7 +127,12 @@ class AFSKDemodulator():
         self.tasks = []
 
     async def __aenter__(self):
-        self.tasks.append(asyncio.create_task(self.q_core()))
+        if isinstance(self.in_q, Queue):
+            self.tasks.append(asyncio.create_task(self.q_core()))
+        elif hasattr(self.in_q, 'readexactly'):
+            self.tasks.append(asyncio.create_task(self.stream_core()))
+        else:
+            raise Exception('unknown in_q format')
         return self
 
     async def __aexit__(self, *args):
@@ -133,7 +140,12 @@ class AFSKDemodulator():
         map(lambda t: t.cancel(), self.tasks)
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
-    # the demod core used when input is a Queue
+    async def join(self):
+        if isinstance(self.in_q, Queue):
+            await self.in_q.join()
+        else:
+            await self.stream_done.wait()
+
     async def q_core(self):
         try:
             # Process a chunk of samples
@@ -173,8 +185,8 @@ class AFSKDemodulator():
         except Exception as err:
             print_exc(err)
 
-    # for embedded micropython, we will use the RingIO, with fixed allocation
-    async def rio_core(self):
+    # directly access from a stream with readexactly method
+    async def stream_core(self):
         try:
             # Process a chunk of samples
             corr     = self.corr
@@ -183,14 +195,23 @@ class AFSKDemodulator():
             sampler  = self.sampler
             unnrzi   = self.unnrzi
 
-            stream = asyncio.StreamReader(self.rio)
             bits_q = self.bits_q   # output stream
+            signed = True if self.stream_type=='s16' else False
+            readexactly = self.in_q.readexactly
 
             while True:
-                b = stream.readexactly(2)
-                # unsigned little endian
-                arr[idx] = (unpack('<H', b)[0] - 32768) 
-                o = arr[i]
+                try:
+                    b = await readexactly(2)
+                except EOFError:
+                    break
+                if signed:
+                    # signed little endian (default)
+                    # o = unpack('<h', o)[0]
+                    o = int.from_bytes(b, byteorder='little', signed=True)
+                else:
+                    # unsigned little endian
+                    # o = unpack('<H', o)[0] - 32768
+                    o = int.from_bytes(b, byteorder='little', signed=False) - 32768
                 o = bpf(o)
                 o = corr(o)
                 o = lpf(o)
@@ -201,7 +222,13 @@ class AFSKDemodulator():
                     await bits_q.put(b) #bits_out_q
         except Exception as err:
             print_exc(err)
+        finally:
+            self.stream_done.set()
 
+
+##############################
+######### OLD STUFF ##########
+##############################
                 # # loop where we allow for inner-loop output
                 # for i in range(siz):
                     # o = arr[i]

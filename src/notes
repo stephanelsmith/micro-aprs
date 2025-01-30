@@ -36,8 +36,6 @@ cat test/aprs.txt | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t
 gen_packets -r 22050 -o test/test.wav
 sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 
-#ISS TESTs
-wget https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav
 #TNC TESTs
 wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip
 sudo apt-get install bchunk
@@ -55,7 +53,8 @@ sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python
 sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d cor -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_2cor.wav
 sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d lpf -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_3lpf.wav
 
-#ISS
+#ISS TESTs
+wget https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav
 sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
 python aprs_demod.py -t test/ISSpkt.raw

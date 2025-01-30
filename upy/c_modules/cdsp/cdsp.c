@@ -42,6 +42,24 @@ static mp_obj_t mp_utoi32(mp_obj_t a_obj) {
 static MP_DEFINE_CONST_FUN_OBJ_1(utoi32_obj, mp_utoi32);
 
 
+// 2 BYTES (encoded as U16 or S16) to integer (unsigned shifted)
+static mp_obj_t mp_bs16toi(mp_obj_t buf_obj) {
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer(buf_obj, &bufinfo, MP_BUFFER_READ);
+    int16_t *bufin = bufinfo.buf;
+    return mp_obj_new_int(*bufin);
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(bs16toi_obj, mp_bs16toi);
+
+static mp_obj_t mp_bu16toi(mp_obj_t buf_obj) {
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer(buf_obj, &bufinfo, MP_BUFFER_READ);
+    uint16_t *bufin = bufinfo.buf;
+    return mp_obj_new_int((*bufin) - 32768);
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(bu16toi_obj, mp_bu16toi);
+
+
 ////////////////////////////
 // CLZ (count leading zeros)
 ////////////////////////////
@@ -157,8 +175,10 @@ static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_cdsp) },
     { MP_ROM_QSTR(MP_QSTR_isqrt), MP_ROM_PTR(&isqrt_obj) },
     { MP_ROM_QSTR(MP_QSTR_sign), MP_ROM_PTR(&sign_obj) },
-    { MP_ROM_QSTR(MP_QSTR_utoi32), MP_ROM_PTR(&utoi32_obj) },
     { MP_ROM_QSTR(MP_QSTR_fir_core), MP_ROM_PTR(&fir_core_obj) },
+    { MP_ROM_QSTR(MP_QSTR_utoi32), MP_ROM_PTR(&utoi32_obj) },
+    { MP_ROM_QSTR(MP_QSTR_bs16toi), MP_ROM_PTR(&bs16toi_obj) },
+    { MP_ROM_QSTR(MP_QSTR_bu16toi), MP_ROM_PTR(&bu16toi_obj) },
 };
 static MP_DEFINE_CONST_DICT(example_module_globals, example_module_globals_table);
 

@@ -1,6 +1,7 @@
 
 import math
 from array import array
+import struct
 
 from lib.utils import eprint
 from lib.compat import IS_UPY, HAS_C, HAS_VIPER
@@ -38,6 +39,27 @@ else:
             return u32
         else:
             return u32 - 0x100000000
+
+# 2 bytes input (formated as either u16 or s16), conversion to integer (unsigned shifted)
+if IS_UPY and HAS_C:
+    from cdsp import bu16toi
+elif IS_UPY:
+    def bu16toi(b:bytes)->int:
+        # s = 32768 if shift else 0
+        return struct.unpack('<H', b)[0] - 32768
+        # return int.from_bytes(b, 'little') - s
+else:
+    def bu16toi(b:bytes|bytearray)->int:
+        # s = 32768 if shift else 0
+        return int.from_bytes(b, 'little', False) - 32768
+if IS_UPY and HAS_C:
+    from cdsp import bs16toi
+elif IS_UPY:
+    def bs16toi(b:bytes)->int:
+        return struct.unpack('<h', b)[0]
+else:
+    def bs16toi(b:bytes|bytearray)->int:
+        return int.from_bytes(b, 'little', signed=True)
 
 if IS_UPY and HAS_VIPER:
     @micropython.viper

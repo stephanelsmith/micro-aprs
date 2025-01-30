@@ -21,6 +21,7 @@ from afsk.func import create_sampler
 from afsk.func import create_fir
 from afsk.func import clamps16
 from afsk.fir_options import fir_options
+from afsk.func import bu16toi, bs16toi
 
 from lib.compat import print_exc
 
@@ -196,22 +197,18 @@ class AFSKDemodulator():
             unnrzi   = self.unnrzi
 
             bits_q = self.bits_q   # output stream
-            signed = True if self.stream_type=='s16' else False
+
             readexactly = self.in_q.readexactly
+
+            # bytes to integer converter
+            btoi = bs16toi if self.stream_type=='s16' else bu16toi
 
             while True:
                 try:
                     b = await readexactly(2)
                 except EOFError:
                     break
-                if signed:
-                    # signed little endian (default)
-                    # o = unpack('<h', o)[0]
-                    o = int.from_bytes(b, byteorder='little', signed=True)
-                else:
-                    # unsigned little endian
-                    # o = unpack('<H', o)[0] - 32768
-                    o = int.from_bytes(b, byteorder='little', signed=False) - 32768
+                o = btoi(b) # convert bytes to integer
                 o = bpf(o)
                 o = corr(o)
                 o = lpf(o)

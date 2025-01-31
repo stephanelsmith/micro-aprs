@@ -19,6 +19,7 @@ from afsk.func import lpf_fir_design
 from afsk.func import bandpass_fir_design
 from afsk.func import create_sampler
 from afsk.func import create_fir
+from afsk.func import create_power_meter
 from afsk.func import clamps16
 from afsk.fir_options import fir_options
 from afsk.func import bu16toi, bs16toi
@@ -87,7 +88,7 @@ class AFSKDemodulator():
 
         self.corr = create_corr(ts    = self.ts,)
 
-        nmark = int(_TMARK/self.ts)
+        # nmark = int(_TMARK/self.ts)
         lpf_ncoefsbaud = options['lpf_ncoefsbaud']
         lpf_ncoefs = int(nmark*lpf_ncoefsbaud) if int(nmark*lpf_ncoefsbaud)%2==1 else int(nmark*lpf_ncoefsbaud)+1
         lpf_width = options['lpf_width']
@@ -121,6 +122,8 @@ class AFSKDemodulator():
         self.sampler = create_sampler(fbaud = _FBAUD,
                                       fs    = self.fs)
         self.unnrzi = create_unnrzi()
+
+        self.pwrmtr = create_power_meter(siz = nmark*2)
 
         #how much we need to flush internal filters to process all sampled data
         self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(_TBAUD/self.ts))
@@ -193,8 +196,11 @@ class AFSKDemodulator():
             corr     = self.corr
             lpf      = self.lpf
             bpf      = self.bpf
+
             sampler  = self.sampler
             unnrzi   = self.unnrzi
+
+            pwrmtr   = self.pwrmtr
 
             bits_q = self.bits_q   # output stream
 
@@ -209,6 +215,10 @@ class AFSKDemodulator():
                 except EOFError:
                     break
                 o = btoi(b) # convert bytes to integer
+                p = pwrmtr(o)
+                if p < 1000:
+                    continue
+                # eprint(p,o)
                 o = bpf(o)
                 o = corr(o)
                 o = lpf(o)

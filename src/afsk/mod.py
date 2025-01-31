@@ -83,8 +83,7 @@ class AFSKModulator():
         pass
 
     async def pad_zeros(self, ms=1, bias=None):
-        zpad_ms = 1
-        siz = int(zpad_ms/1000/self.ts)
+        siz = int(ms/1000/self.ts)
         v = 0
         if not self.signed:
             v = 0x7FFF

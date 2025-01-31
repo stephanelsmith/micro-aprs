@@ -79,6 +79,8 @@ async def afsk_mod(aprs_q,
 
                 #AFSK
                 afsk,stop_bit = ax25.to_afsk()
+
+                await afsk_mod.pad_zeros(10)
                 
 				#pre-message flags
 				#we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
@@ -100,6 +102,8 @@ async def afsk_mod(aprs_q,
                     await afsk_mod.send_flags(4)
                 else:
                     await afsk_mod.send_flags(4)
+
+                await afsk_mod.pad_zeros(10)
 
                 # flush the output array and size and put on afsk_q
                 arr,s = await afsk_mod.flush()

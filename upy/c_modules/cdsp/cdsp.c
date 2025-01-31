@@ -151,9 +151,9 @@ static mp_obj_t mp_fir_core(size_t n_args, const mp_obj_t *args) {
 
     buf[idx] = v;
     for(int32_t i=0; i<ncoefs; i++){
-        int32_t buf_i = idx-i>=0 ? idx-i : ncoefs+idx-i; // emulate python mod for negative numbers
+        int32_t k = idx-i>=0 ? idx-i : ncoefs+idx-i; // emulate python mod for negative numbers
         // do 64bit operation to prevent overflow during accumulation
-        o += ((int64_t)coefs[i] * (int64_t)buf[buf_i]) / (int64_t)scale;
+        o += ((int64_t)coefs[i] * (int64_t)buf[k]) / (int64_t)scale;
     }
     idx = (idx+1)%ncoefs;
 
@@ -164,6 +164,35 @@ static mp_obj_t mp_fir_core(size_t n_args, const mp_obj_t *args) {
     return ret;
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(fir_core_obj, 5, 5, mp_fir_core);
+
+// POWER METER 
+// ARGS:  buf, v, idx
+// OUT : tuple(idx, o)
+static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t idx_obj) {
+    mp_obj_array_t *buf_array = MP_OBJ_TO_PTR(buf_obj);
+    int32_t v = mp_obj_get_int(v_obj);
+    int32_t idx = mp_obj_get_int(idx_obj);
+
+    int32_t o = 0;
+    int32_t siz = buf_array->len;
+    int32_t *buf = buf_array->items;
+
+    buf[idx] = v;
+    for(int32_t i=0; i<siz; i++){
+        int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers
+        o += ((int64_t)buf[k]) *  ((int64_t)buf[k]);
+    }
+    o = isqrt32(o);
+    idx = (idx+1)%siz;
+
+    mp_obj_t ret = mp_obj_new_tuple(2, NULL);
+    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);
+    tuple->items[0] = mp_obj_new_int(idx);
+    tuple->items[1] = mp_obj_new_int(o);
+    return ret;
+}
+static MP_DEFINE_CONST_FUN_OBJ_3(power_meter_core_obj, mp_power_meter_core);
+
 
 
 // Define all properties of the module.
@@ -176,6 +205,7 @@ static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_isqrt), MP_ROM_PTR(&isqrt_obj) },
     { MP_ROM_QSTR(MP_QSTR_sign), MP_ROM_PTR(&sign_obj) },
     { MP_ROM_QSTR(MP_QSTR_fir_core), MP_ROM_PTR(&fir_core_obj) },
+    { MP_ROM_QSTR(MP_QSTR_power_meter_core), MP_ROM_PTR(&power_meter_core_obj) },
     { MP_ROM_QSTR(MP_QSTR_utoi32), MP_ROM_PTR(&utoi32_obj) },
     { MP_ROM_QSTR(MP_QSTR_bs16toi), MP_ROM_PTR(&bs16toi_obj) },
     { MP_ROM_QSTR(MP_QSTR_bu16toi), MP_ROM_PTR(&bu16toi_obj) },

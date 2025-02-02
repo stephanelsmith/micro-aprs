@@ -36,7 +36,7 @@ As many who've gone down this path have mentioned, there's surprisingly little u
 Basic command line for encoding and APRS strings to AFSK audio samples and the reverse.
 * [Encode](docs/ports/mod/README.md) APRS strings to AFSK audio samples.
 * [Decode](docs/ports/demod/README.md) AFSK audio samples to APRS strings.
-* [Micropython](docs/ports/upy/README.md) Encode/decode, but with embedded system friendly (also great on big machines too!).
+* [Micropython](docs/ports/upy/README.md) Build instructions, encode/decode, but with embedded system friendly (also great on big machines too!).
 * [Pypy](docs/ports/pypy/README.md), another supported options faster than C python.
 
 ## :desktop_computer: Applications and examples

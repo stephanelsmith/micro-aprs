@@ -202,6 +202,7 @@ class AFSKDemodulator():
             bits_q = self.bits_q   # output stream
 
             readexactly = self.in_q.readexactly
+            sql = self.squelch
 
             # bytes to integer converter
             btoi = bs16toi if self.stream_type=='s16' else bu16toi
@@ -213,8 +214,8 @@ class AFSKDemodulator():
                     break
                 o = btoi(b) # convert bytes to integer
                 p = pwrmtr(o)
-                # if p < 1000:
-                    # continue
+                if p < sql:
+                    continue
                 # eprint(p,o)
                 o = bpf(o)
                 o = corr(o)

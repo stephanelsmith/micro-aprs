@@ -121,13 +121,13 @@ async def main():
     testdefs = {
             'bandpass_ncoefsbaud' : [5],
             'bandpass_width'      : [400],
-            'bandpass_amark'      : range(1,10,2),
-            'bandpass_aspace'     : range(1,10,2),
+            'bandpass_amark'      : [2],
+            'bandpass_aspace'     : [3],
             'lpf_ncoefsbaud'      : [5],
             'lpf_f'               : [800],
             'lpf_width'           : [250],
-            'lpf_aboost'          : range(1,10,2),
-            'squelch'             : range(0,5000,500),
+            'lpf_aboost'          : [3],
+            'squelch'             : [1000],
     }
     # raw_file = 'test/ISSpkt.raw'
     raw_file = 'test/tnc_test02.raw'

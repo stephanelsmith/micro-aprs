@@ -49,7 +49,7 @@ elif IS_UPY:
         return struct.unpack('<H', b)[0] - 32768
         # return int.from_bytes(b, 'little') - s
 else:
-    def bu16toi(b:bytes|bytearray)->int:
+    def bu16toi(b)->int:
         # s = 32768 if shift else 0
         return int.from_bytes(b, 'little', False) - 32768
 if IS_UPY and HAS_C:
@@ -58,7 +58,7 @@ elif IS_UPY:
     def bs16toi(b:bytes)->int:
         return struct.unpack('<h', b)[0]
 else:
-    def bs16toi(b:bytes|bytearray)->int:
+    def bs16toi(b)->int:
         return int.from_bytes(b, 'little', signed=True)
 
 if IS_UPY and HAS_VIPER:

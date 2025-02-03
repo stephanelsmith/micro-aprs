@@ -175,7 +175,7 @@ async def consume_ax25(ax25_q,
             if not is_quite:
                 try:
                     sys.stdout.write('[{}] {}\n'.format(count, ax25))
-                except UnicodeDecodeError:
+                except: #UnicodeDecodeError:
                     sys.stdout.write('[{}] ERR\n'.format(count))
                 sys.stdout.flush()
             count += 1

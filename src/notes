@@ -37,6 +37,7 @@ gen_packets -r 22050 -o test/test.wav
 sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 
 #TNC TESTs
+cd test
 wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip
 sudo apt-get install bchunk
 unzip TNC_Test_CD_Ver-1.1.zip
@@ -45,6 +46,10 @@ bchunk -w TNC_Test_Ver-1.1.bin TNC_Test_Ver-1.1.cue tnc_test
 #convert wav->raw
 sox -t wav tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 tnc_test02.raw
 find -name "*wav" | xargs basename -s .wav | xargs -i sox -t wav {}.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 {}.raw
+
+sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
+sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | pypy3 aprs_demod.py -t -
+pypy3 aprs_demod.py -t test/tnc_test02.raw
 
 # DEBUG DEMOD SAMPLES BY STAGE
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -v -t -
@@ -61,11 +66,6 @@ python aprs_demod.py -t test/ISSpkt.raw
 micropython aprs_demod.py -t test/ISSpkt.raw
 :!clear && python % -t test/ISSpkt.raw
 
-#TNC
-sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
-sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | pypy3 aprs_demod.py -t -
-sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - > test/tnc_test02.raw
-pypy3 aprs_demod.py -t test/tnc_test02.raw
 
 #RTL-SDR
 # install udev

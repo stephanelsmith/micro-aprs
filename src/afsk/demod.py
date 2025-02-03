@@ -54,20 +54,18 @@ class AFSKDemodulator():
         
         do_memoize = True
         options = dict(fir_options,  **options)
-        # eprint('# OPTIONS: {}'.format(options))
-
         nmark = int(_TMARK/self.ts)
+
         bandpass_ncoefsbaud = options['bandpass_ncoefsbaud']
         bandpass_ncoefs = int(nmark*bandpass_ncoefsbaud) if int(nmark*bandpass_ncoefsbaud)%2==1 else int(nmark*bandpass_ncoefsbaud)+1
-        # eprint('bandpass_ncoefs', bandpass_ncoefs)
         bandpass_width = options['bandpass_width']
         bandpass_amark = options['bandpass_amark']
         bandpass_aspace = options['bandpass_aspace']
         coefs_g = memoize_loads('bpf', _FMARK, _FSPACE, self.fs, 
-                                        bandpass_ncoefs,
-                                        bandpass_width, 
-                                        bandpass_amark, 
-                                        bandpass_aspace)
+                                       bandpass_ncoefs,
+                                       bandpass_width, 
+                                       bandpass_amark, 
+                                       bandpass_aspace)
         if coefs_g:
             coefs,g = coefs_g
         else: 
@@ -94,7 +92,6 @@ class AFSKDemodulator():
         lpf_width = options['lpf_width']
         lpf_aboost = options['lpf_aboost']
         lpf_f = options['lpf_f']
-
         if do_memoize:
             coefs_g = memoize_loads('lpf', lpf_f, self.fs, 
                                            lpf_ncoefs, 
@@ -116,14 +113,14 @@ class AFSKDemodulator():
                                             lpf_ncoefs, 
                                             lpf_width, 
                                             lpf_aboost)
-        # eprint(coefs)
-        # eprint(g)
         self.lpf = create_fir(coefs = coefs, scale = g)
+
         self.sampler = create_sampler(fbaud = _FBAUD,
                                       fs    = self.fs)
         self.unnrzi = create_unnrzi()
 
         self.pwrmtr = create_power_meter(siz = nmark*2)
+        self.squelch = options['squelch']
 
         #how much we need to flush internal filters to process all sampled data
         self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(_TBAUD/self.ts))
@@ -216,8 +213,8 @@ class AFSKDemodulator():
                     break
                 o = btoi(b) # convert bytes to integer
                 p = pwrmtr(o)
-                if p < 1000:
-                    continue
+                # if p < 1000:
+                    # continue
                 # eprint(p,o)
                 o = bpf(o)
                 o = corr(o)

@@ -18,7 +18,6 @@ from afsk.func import afsk_detector
 import lib.upydash as _
 from lib.parse_args import demod_parse_args
 from lib.utils import eprint
-import lib.defs as defs
 
 #micropython/python compatibility
 from lib.compat import IS_UPY
@@ -27,6 +26,7 @@ from lib.compat import get_stdin_streamreader
 
 AX25_FLAG      = 0x7e
 AX25_ADDR_LEN  = 7
+SAMPLES_SIZE   = 20000
 
 # async def read_samples_from_pipe(in_q,
                                  # type = 's16',
@@ -38,7 +38,7 @@ AX25_ADDR_LEN  = 7
         # reader = await get_stdin_streamreader()
         # readexactly = reader.readexactly
 
-        # arr = array('i',range(defs.SAMPLES_SIZE))
+        # arr = array('i',range(SAMPLES_SIZE))
         # idx = 0
 
         # while True:
@@ -54,11 +54,11 @@ AX25_ADDR_LEN  = 7
                 # arr[idx] = unpack('<h', a)[0]
             # # eprint(arr[idx])
             # idx += 1
-            # if idx%defs.SAMPLES_SIZE == 0:
+            # if idx%SAMPLES_SIZE == 0:
                 # if afsk_detector(arr,idx): #afsk signal detector
                     # await q_put((arr, idx))
                     # # await asyncio.sleep(0)
-                    # arr = array('i',range(defs.SAMPLES_SIZE))
+                    # arr = array('i',range(SAMPLES_SIZE))
                 # idx = 0
         # #if afsk_detector(arr,idx): # alway process tail
         # await q_put((arr, idx))
@@ -97,7 +97,7 @@ async def read_samples_from_rtl_fm(in_q,
             # stderr task
             stderr_task = asyncio.create_task(proc_stderr(proc.stderr))
 
-            arr = array('i',range(defs.SAMPLES_SIZE))
+            arr = array('i',range(SAMPLES_SIZE))
             idx = 0
             while True:
                 try:
@@ -109,11 +109,11 @@ async def read_samples_from_rtl_fm(in_q,
                 # arr[idx] = unpack('<H', a)[0] - 32768
                 arr[idx] = int.from_bytes(a,'little',signed=False) - 32768
                 idx += 1
-                if idx%defs.SAMPLES_SIZE == 0:
+                if idx%SAMPLES_SIZE == 0:
                     if afsk_detector(arr,idx): #afsk signal detector
                         await in_q.put((arr, idx))
                         await asyncio.sleep(0)
-                        arr = array('i',range(defs.SAMPLES_SIZE))
+                        arr = array('i',range(SAMPLES_SIZE))
                     idx = 0
             await in_q.put((arr, idx))
             await asyncio.sleep(0)
@@ -136,7 +136,7 @@ async def read_samples_from_file(in_q,
     try:
         # if file[-4:] != '.raw':
             # raise Exception('uknown file type', file)
-        arr = array('i',range(defs.SAMPLES_SIZE))
+        arr = array('i',range(SAMPLES_SIZE))
         idx = 0
 
         with open(file, 'rb') as f:
@@ -152,11 +152,11 @@ async def read_samples_from_file(in_q,
                 arr[idx] = struct.unpack('<h', a)[0]
                 # arr[idx] = int.from_bytes(a,'little',signed=True)
                 idx += 1
-                if idx%defs.SAMPLES_SIZE == 0:
+                if idx%SAMPLES_SIZE == 0:
                     if afsk_detector(arr,idx): #afsk signal detector
                         await in_q.put((arr, idx))
                         await asyncio.sleep(0)
-                        arr = array('i',range(defs.SAMPLES_SIZE))
+                        arr = array('i',range(SAMPLES_SIZE))
                     idx = 0
             await in_q.put((arr, idx))
             await asyncio.sleep(0)

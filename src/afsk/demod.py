@@ -7,7 +7,6 @@ import math
 import lib.upydash as _
 from asyncio import Event
 
-import lib.defs as defs
 from lib.utils import eprint
 from lib.memoize import memoize_loads
 from lib.memoize import memoize_dumps

@@ -49,6 +49,7 @@ find -name "*wav" | xargs basename -s .wav | xargs -i sox -t wav {}.wav -t raw -
 
 sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | pypy3 aprs_demod.py -t -
+sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
 pypy3 aprs_demod.py -t test/tnc_test02.raw
 
 # DEBUG DEMOD SAMPLES BY STAGE

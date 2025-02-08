@@ -17,7 +17,7 @@ from lib.compat import print_exc
 from lib.compat import get_stdin_streamreader
 
 from afsk.ingress import read_samples_from_rtl_fm
-from afsk.ingress import read_samples_from_file
+# from afsk.ingress import read_samples_from_file
 
 async def consume_ax25(ax25_q, 
                        is_quite = False, # suppress stdout
@@ -40,17 +40,19 @@ async def consume_ax25(ax25_q,
     except Exception as err:
         print_exc(err)
 
-async def demod_core(in_q,
+async def demod_core(in_rx,
                      bits_q,
                      ax25_q,
-                     args):
+                     args,
+                     ):
     try:
         #AFSK Demodulation - convert analog samples to bits
-        #in_q consumer
+        #in_rx consumer
         #bits_q producer
         async with AFSKDemodulator(sampling_rate = args['args']['rate'],
-                                   in_q          = in_q,
+                                   in_rx         = in_rx,
                                    bits_out_q    = bits_q,
+                                   stream_type   = args['in']['type'],
                                    verbose       = args['args']['verbose'],
                                    options       = args['args']['options'],
                                    ) as afsk_demod:
@@ -58,12 +60,12 @@ async def demod_core(in_q,
             # AX25FromAFSK - convert bits to ax25 objects
             #bits_q consumer
             #ax25_q producer
-            async with AX25FromAFSK(bits_in_q      = bits_q,
-                                    ax25_q         = ax25_q,
-                                    verbose        = args['args']['verbose']) as bits2ax25:
+            async with AX25FromAFSK(bits_in_q   = bits_q,
+                                    ax25_q      = ax25_q,
+                                    verbose     = args['args']['verbose']) as bits2ax25:
 
                 #flush afsk_demod filters
-                # await in_q.put((array('i',(0 for x in range(afsk_demod.flush_size))),afsk_demod.flush_size))
+                # await in_rx.put((array('i',(0 for x in range(afsk_demod.flush_size))),afsk_demod.flush_size))
                 
                 await afsk_demod.join()
     except asyncio.CancelledError:
@@ -72,12 +74,12 @@ async def demod_core(in_q,
         print_exc(err)
 
 async def main():
-    # print('***',sys.argv)
     args = demod_parse_args(sys.argv)
     eprint('# APRS DEMOD')
     eprint('# RATE {}'.format(args['args']['rate']))
-    eprint('# IN   {}'.format(args['in']['file']))
-    eprint('# OUT  {}'.format(args['out']['file']))
+    eprint('# IN   {} ({})'.format(args['in']['file'], args['in']['type']))
+    eprint('# OUT  {} (ax25)'.format(args['out']['file']))
+    # eprint(sys.argv)
 
     bits_q = Queue()
     ax25_q = Queue()
@@ -93,23 +95,20 @@ async def main():
 
         #from .raw file
         if args['in']['file'] == '-':
-            in_q = await get_stdin_streamreader()
-            # await read_samples_from_pipe(in_q,
+            in_rx = await get_stdin_streamreader()
+            # await read_samples_from_pipe(in_rx,
                                          # type = args['in']['type'],
                                          # )
-        elif args['in']['file'] == 'rtl_fm':
-            in_q = Queue()
-            await read_samples_from_rtl_fm(in_q)
         elif args['in']['file']:
-            in_q = Queue()
-            await read_samples_from_file(in_q = in_q,
-                                        file          = args['in']['file'],
-                                        )
+            in_rx = open(args['in']['file'], 'rb')
+        elif args['in']['file'] == 'rtl_fm':
+            in_rx = Queue()
+            await read_samples_from_rtl_fm(in_rx)
         else:
             raise Exception('unsupported input {}'.format(args['in']['file']))
 
         # DEMOD CORE
-        await demod_core(in_q, bits_q, ax25_q, args)
+        await demod_core(in_rx, bits_q, ax25_q, args)
                             
         await bits_q.join()
         await ax25_q.join()

@@ -52,20 +52,13 @@ sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | 
 sox -t wav test/tnc_test02.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
 pypy3 aprs_demod.py -t test/tnc_test02.raw
 
-# DEBUG DEMOD SAMPLES BY STAGE
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -v -t -
-sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -v -t -
-sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d bpf -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_1bpf.wav
-sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d cor -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_2cor.wav
-sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d lpf -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_3lpf.wav
-
 #ISS TESTs
 wget https://inst.eecs.berkeley.edu/~ee123/sp14/lab3/ISSpkt.wav
+sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - > test/ISSpkt.raw
 sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
 python aprs_demod.py -t test/ISSpkt.raw
 micropython aprs_demod.py -t test/ISSpkt.raw
-:!clear && python % -t test/ISSpkt.raw
 
 
 #RTL-SDR
@@ -94,4 +87,11 @@ rtl_fm -f 144.390M -s 22050 -g 10 - | pypy3 aprs_demod.py -t - | python aprs_is.
 # python -m pip install pyaudio
 python termux_beacon.py | python aprs_mod.py -vox -t play -t -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -vox -t play -t -
+
+# DEBUG DEMOD SAMPLES BY STAGE
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -v -t -
+sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -v -t -
+sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d bpf -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_1bpf.wav
+sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d cor -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_2cor.wav
+sox -t wav test/ttwr.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -d lpf -t - | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/ttwr_3lpf.wav
 

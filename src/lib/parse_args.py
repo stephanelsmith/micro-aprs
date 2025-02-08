@@ -156,13 +156,13 @@ outfile       '-' (default stdout)
     if len(spl) == 2:
         try:
             _out = spl.pop(0)
-            # r['out']['type'] = _out[0]
+            r['out']['type'] = _out[0]
             r['out']['file'] = _out[-1]
         except IndexError:
             pass
     try:
         _in = spl.pop(0)
-        r['in']['type'] = _in[0]
+        # r['in']['type'] = _in[0]
         r['in']['file'] = _in[-1]
     except IndexError:
         pass

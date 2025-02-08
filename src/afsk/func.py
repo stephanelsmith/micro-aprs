@@ -51,7 +51,7 @@ elif IS_UPY:
 else:
     def bu16toi(b)->int:
         # s = 32768 if shift else 0
-        return int.from_bytes(b, 'little', False) - 32768
+        return int.from_bytes(b, 'little', signed=False) - 32768
 if IS_UPY and HAS_C:
     from cdsp import bs16toi
 elif IS_UPY:

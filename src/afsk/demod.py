@@ -32,16 +32,16 @@ _FBAUD  = 1200
 _TBAUD  = 0.0008333333333333334
 
 class AFSKDemodulator():
-    def __init__(self, in_q, # array or tuple (array, size) OR a stream (with 'readexactly' method)
+    def __init__(self, in_rx, # array or tuple (array, size) OR a stream (with 'readexactly' method)
                        bits_out_q,
                        sampling_rate = 11_025,
                        verbose       = False, # output intermediate steps to stderr
-                       stream_type   = 's16', # if in_q is a stream, u16 or s16?
+                       stream_type   = 's16', # if in_rx is a stream, u16 or s16?
                        options       = {},
                        ):
                        # debug_samples = False, # output intermediate samples to stderr
 
-        self.in_q  = in_q
+        self.in_rx  = in_rx
         self.bits_q = bits_out_q
         self.verbose = verbose
         self.stream_type = stream_type
@@ -127,12 +127,12 @@ class AFSKDemodulator():
         self.tasks = []
 
     async def __aenter__(self):
-        if isinstance(self.in_q, Queue):
+        if isinstance(self.in_rx, Queue):
             self.tasks.append(asyncio.create_task(self.q_core()))
-        elif hasattr(self.in_q, 'readexactly'):
+        elif hasattr(self.in_rx, 'readexactly') or hasattr(self.in_rx, 'read'):
             self.tasks.append(asyncio.create_task(self.stream_core()))
         else:
-            raise Exception('unknown in_q format')
+            raise Exception('unknown in_rx format')
         return self
 
     async def __aexit__(self, *args):
@@ -141,49 +141,10 @@ class AFSKDemodulator():
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
     async def join(self):
-        if isinstance(self.in_q, Queue):
-            await self.in_q.join()
+        if isinstance(self.in_rx, Queue):
+            await self.in_rx.join()
         else:
             await self.stream_done.wait()
-
-    async def q_core(self):
-        try:
-            # Process a chunk of samples
-            corr     = self.corr
-            lpf      = self.lpf
-            bpf      = self.bpf
-            sampler  = self.sampler
-            unnrzi   = self.unnrzi
-
-            in_q = self.in_q     # input stream
-            bits_q = self.bits_q   # output stream
-
-            while True:
-                #fetch next chunk of samples (array)
-                arr_siz = await in_q.get()
-                if isinstance(arr_siz, tuple) and len(arr_siz)==2:
-                    # if we specified an array and a size...
-                    arr = arr_siz[0]
-                    siz = arr_siz[1]
-                else:
-                    # if we just have an array, use it
-                    arr = arr_siz
-                    siz = len(arr)
-
-                for i in range(siz):
-                    o = arr[i]
-                    o = bpf(o)
-                    o = corr(o)
-                    o = lpf(o)
-                    bs = sampler(o)
-                    if bs != 2: # _NONE
-                        b = unnrzi(bs)
-                        # eprint(b,end='')
-                        await bits_q.put(b) #bits_out_q
-
-                in_q.task_done() # done
-        except Exception as err:
-            print_exc(err)
 
     # directly access from a stream with readexactly method
     async def stream_core(self):
@@ -199,8 +160,19 @@ class AFSKDemodulator():
             pwrmtr   = self.pwrmtr
 
             bits_q = self.bits_q   # output stream
+            is_sync = False
 
-            readexactly = self.in_q.readexactly
+            if hasattr(self.in_rx, 'readexactly'):
+                # probably stdin stream
+                readexactly = self.in_rx.readexactly
+                is_sync = False
+            elif hasattr(self.in_rx, 'read'):
+                # probably a file
+                readexactly = self.in_rx.read
+                is_sync = True
+            else:
+                raise Exception('unknown stream')
+
             sql = self.squelch
 
             # bytes to integer converter
@@ -208,15 +180,21 @@ class AFSKDemodulator():
 
             while True:
                 try:
-                    b = await readexactly(2)
+                    if is_sync:
+                        b = readexactly(2)
+                        await asyncio.sleep(0)
+                    else:
+                        b = await readexactly(2)
                 except EOFError:
                     break
+                if not b:
+                    break
                 o = btoi(b) # convert bytes to integer
+                o = bpf(o)
                 p = pwrmtr(o)
                 if p < sql:
                     continue
                 # eprint(p,o)
-                o = bpf(o)
                 o = corr(o)
                 o = lpf(o)
                 bs = sampler(o)
@@ -228,6 +206,50 @@ class AFSKDemodulator():
             print_exc(err)
         finally:
             self.stream_done.set()
+
+
+    async def q_core(self):
+        try:
+            # Process a chunk of samples
+            corr     = self.corr
+            lpf      = self.lpf
+            bpf      = self.bpf
+            sampler  = self.sampler
+            unnrzi   = self.unnrzi
+            pwrmtr   = self.pwrmtr
+
+            in_rx = self.in_rx     # input stream
+            bits_q = self.bits_q   # output stream
+
+            while True:
+                #fetch next chunk of samples (array)
+                arr_siz = await in_rx.get()
+                if isinstance(arr_siz, tuple) and len(arr_siz)==2:
+                    # if we specified an array and a size...
+                    arr = arr_siz[0]
+                    siz = arr_siz[1]
+                else:
+                    # if we just have an array, use it
+                    arr = arr_siz
+                    siz = len(arr)
+
+                for i in range(siz):
+                    o = arr[i]
+                    o = bpf(o)
+                    p = pwrmtr(o)
+                    if p < sql:
+                        continue
+                    o = corr(o)
+                    o = lpf(o)
+                    bs = sampler(o)
+                    if bs != 2: # _NONE
+                        b = unnrzi(bs)
+                        # eprint(b,end='')
+                        await bits_q.put(b) #bits_out_q
+
+                in_rx.task_done() # done
+        except Exception as err:
+            print_exc(err)
 
 
 ##############################

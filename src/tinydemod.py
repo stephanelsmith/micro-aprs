@@ -2,6 +2,7 @@
 import sys
 import asyncio
 import gc
+from micropython import RingIO
 # import time
 
 from array import array
@@ -18,42 +19,13 @@ from afsk.func import afsk_detector
 import lib.upydash as _
 from lib.compat import print_exc
 
+from upy.afsk import in_afsk
+
 # afsk sample frequency
 _FOUT = 11_025
 # _FOUT = const(22_050)
 # _FOUT = const(44_100)
 
-async def gen_samples(in_rx, ):
-    try:
-        async with AFSKModulator(sampling_rate = _FOUT,
-                                 signed        = False,
-                                 verbose       = False) as afsk_mod:
-            aprs = b'KI5TOF>APRS:>hello world!'
-            ax25 = AX25(aprs    = aprs,
-                        verbose = False,)
-            #AFSK
-            afsk,stop_bit = ax25.to_afsk()
-            # print(afsk)
-
-            await afsk_mod.pad_zeros(ms = 10)
-            await afsk_mod.send_flags(10)
-            await afsk_mod.to_samples(afsk     = afsk, 
-                                      stop_bit = stop_bit,
-                                      )
-            await afsk_mod.send_flags(2)
-            await afsk_mod.pad_zeros(ms = 10)
-            arr,siz = await afsk_mod.flush()
-
-            # add afask array to the in_rx for processing
-            while True:
-                await in_rx.put(arr)
-                await asyncio.sleep(1)
-    except asyncio.CancelledError:
-        raise
-    except KeyboardInterrupt:
-        return
-    except Exception as err:
-        print_exc(err)
 
 async def demod_core(in_rx, ax25_q):
     try:
@@ -111,7 +83,6 @@ async def start():
 
         #create ax25 consumer
         tasks.append(asyncio.create_task(consume_ax25(ax25_q   = ax25_q,)))
-        tasks.append(asyncio.create_task(gen_samples(in_rx = in_rx,)))
         tasks.append(asyncio.create_task(demod_core(in_rx = in_rx, 
                                                     ax25_q    = ax25_q)))
         # wait until consumer ax25 completed
@@ -140,3 +111,4 @@ def main():
     finally:
         asyncio.new_event_loop()  # Clear retained state
 main()
+

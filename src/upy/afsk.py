@@ -5,6 +5,7 @@ import asyncio
 from array import array
 from machine import Timer
 from asyncio import ThreadSafeFlag
+from cdsp import i16tobs
 
 # from afsk.func_viper import create_power_meter
 from afsk.fir_options import fir_options
@@ -22,7 +23,8 @@ async def in_afsk(adc, rio, fs = 11_025):
         def cb(tim):
             nonlocal adc, rio
             o = adc.read_u16()
-            rio.write(o.to_bytes(2))
+            # rio.write(o.to_bytes(2, 'little'))
+            rio.write(i16tobs(o))
 
         tim.init(freq=fs, mode=Timer.PERIODIC, callback=cb)
         await tsf.wait()
@@ -31,9 +33,9 @@ async def in_afsk(adc, rio, fs = 11_025):
     finally:
         tim.deinit()
 
-async def out_afsk(pwm, 
-                   arr, 
-                   siz, 
+async def out_afsk(pwm,
+                   arr,
+                   siz,
                    fout = 11_025,
                    ):
     try:

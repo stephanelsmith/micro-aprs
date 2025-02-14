@@ -6,6 +6,7 @@ import gc
 
 from array import array
 from asyncio import Event
+from micropythong import RingIO
 
 from lib.compat import Queue
 
@@ -14,6 +15,9 @@ from ax25.ax25 import AX25
 from afsk.demod import AFSKDemodulator
 from ax25.from_afsk import AX25FromAFSK
 from afsk.func import afsk_detector
+from upy.afsk import in_afsk
+from upy.afsk import out_afsk
+from cdsp import i16tobs
 
 import lib.upydash as _
 from lib.compat import print_exc
@@ -23,7 +27,7 @@ _FOUT = 11_025
 # _FOUT = const(22_050)
 # _FOUT = const(44_100)
 
-async def gen_samples(in_rx, ):
+async def gen_samples(rio, ):
     try:
         async with AFSKModulator(sampling_rate = _FOUT,
                                  signed        = False,
@@ -46,7 +50,10 @@ async def gen_samples(in_rx, ):
 
             # add afask array to the in_rx for processing
             while True:
-                await in_rx.put(arr)
+                for i in range(siz):
+                    # await in_rx.put(arr)
+                    rio.write(i16tobs(arr[i]))
+                return
                 await asyncio.sleep(1)
     except asyncio.CancelledError:
         raise
@@ -106,12 +113,13 @@ async def start():
 
     tasks = []
     try:
-        in_rx = Queue()
+        # in_rx = Queue()
+        in_rx = RingIO()
         ax25_q = Queue()
 
         #create ax25 consumer
         tasks.append(asyncio.create_task(consume_ax25(ax25_q   = ax25_q,)))
-        tasks.append(asyncio.create_task(gen_samples(in_rx = in_rx,)))
+        tasks.append(asyncio.create_task(gen_samples(rio = in_rx,)))
         tasks.append(asyncio.create_task(demod_core(in_rx = in_rx, 
                                                     ax25_q    = ax25_q)))
         # wait until consumer ax25 completed

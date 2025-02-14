@@ -35,14 +35,16 @@ static mp_obj_t mp_sign(mp_obj_t a_obj) {
 static MP_DEFINE_CONST_FUN_OBJ_1(sign_obj, mp_sign);
 
 // TO INT, perform a uint32 to int32 type cast
+// we need this in viper modules since all arrays are always uint
 static mp_obj_t mp_utoi32(mp_obj_t a_obj) {
     uint32_t a = mp_obj_get_int(a_obj);
     return mp_obj_new_int((int32_t)a);
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(utoi32_obj, mp_utoi32);
 
-
 // 2 BYTES (encoded as U16 or S16) to integer (unsigned shifted)
+// struct.unpack('<h', b)[0]
+// int.from_bytes(b, 'little', signed=True)
 static mp_obj_t mp_bs16toi(mp_obj_t buf_obj) {
     mp_buffer_info_t bufinfo;
     mp_get_buffer(buf_obj, &bufinfo, MP_BUFFER_READ);
@@ -51,6 +53,8 @@ static mp_obj_t mp_bs16toi(mp_obj_t buf_obj) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(bs16toi_obj, mp_bs16toi);
 
+// struct.unpack('<H', a)[0] - 32768
+// int.from_bytes(a,'little',signed=False) - 32768
 static mp_obj_t mp_bu16toi(mp_obj_t buf_obj) {
     mp_buffer_info_t bufinfo;
     mp_get_buffer(buf_obj, &bufinfo, MP_BUFFER_READ);
@@ -59,6 +63,15 @@ static mp_obj_t mp_bu16toi(mp_obj_t buf_obj) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(bu16toi_obj, mp_bu16toi);
 
+// INT to BYTEARRAY(size=2)
+// same as int(123).to_bytes(2, 'little')
+static mp_obj_t mp_i16tobs(mp_obj_t a_obj) {
+    uint32_t u32 = mp_obj_get_int(a_obj);
+    uint16_t u16 = (uint16_t)u32;
+    mp_obj_t mp_bufout = mp_obj_new_bytearray(sizeof(u16), &u16);
+    return mp_bufout;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(i16tobs_obj, mp_i16tobs);
 
 ////////////////////////////
 // CLZ (count leading zeros)
@@ -209,6 +222,7 @@ static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_utoi32), MP_ROM_PTR(&utoi32_obj) },
     { MP_ROM_QSTR(MP_QSTR_bs16toi), MP_ROM_PTR(&bs16toi_obj) },
     { MP_ROM_QSTR(MP_QSTR_bu16toi), MP_ROM_PTR(&bu16toi_obj) },
+    { MP_ROM_QSTR(MP_QSTR_i16tobs), MP_ROM_PTR(&i16tobs_obj) },
 };
 static MP_DEFINE_CONST_DICT(example_module_globals, example_module_globals_table);
 

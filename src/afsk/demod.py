@@ -164,11 +164,11 @@ class AFSKDemodulator():
 
             if hasattr(self.in_rx, 'readexactly'):
                 # probably stdin stream
-                readexactly = self.in_rx.readexactly
+                read = self.in_rx.readexactly
                 is_sync = False
             elif hasattr(self.in_rx, 'read'):
                 # probably a file
-                readexactly = self.in_rx.read
+                read = self.in_rx.read
                 is_sync = True
             else:
                 raise Exception('unknown stream')
@@ -181,10 +181,10 @@ class AFSKDemodulator():
             while True:
                 try:
                     if is_sync:
-                        b = readexactly(2)
+                        b = read(2)
                         await asyncio.sleep(0)
                     else:
-                        b = await readexactly(2)
+                        b = await read(2)
                 except EOFError:
                     break
                 if not b:

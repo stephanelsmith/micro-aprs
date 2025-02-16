@@ -6,7 +6,7 @@ import gc
 
 from array import array
 from asyncio import Event
-from micropythong import RingIO
+from micropython import RingIO
 
 from lib.compat import Queue
 
@@ -67,9 +67,9 @@ async def demod_core(in_rx, ax25_q):
         bits_q = Queue()
         async with AFSKDemodulator(sampling_rate = _FOUT,
                                    in_rx         = in_rx,
+                                   stream_type   = 'u16',
                                    bits_out_q    = bits_q,
                                    verbose       = False,
-                                   debug_samples = False,
                                    options       = {},
                                    ) as afsk_demod:
             async with AX25FromAFSK(bits_in_q      = bits_q,
@@ -114,7 +114,7 @@ async def start():
     tasks = []
     try:
         # in_rx = Queue()
-        in_rx = RingIO()
+        in_rx = RingIO(1024*2*5)
         ax25_q = Queue()
 
         #create ax25 consumer

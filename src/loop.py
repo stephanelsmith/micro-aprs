@@ -50,11 +50,13 @@ async def gen_samples(rio, ):
 
             # add afask array to the in_rx for processing
             while True:
+                print('GO')
                 for i in range(siz):
                     # await in_rx.put(arr)
                     rio.write(i16tobs(arr[i]))
-                return
-                await asyncio.sleep(1)
+                    await asyncio.sleep(0)
+                print('DONE')
+                # return
     except asyncio.CancelledError:
         raise
     except KeyboardInterrupt:
@@ -69,8 +71,9 @@ async def demod_core(in_rx, ax25_q):
                                    in_rx         = in_rx,
                                    stream_type   = 'u16',
                                    bits_out_q    = bits_q,
-                                   verbose       = False,
+                                   is_embedded   = True,
                                    options       = {},
+                                   verbose       = False,
                                    ) as afsk_demod:
             async with AX25FromAFSK(bits_in_q      = bits_q,
                                     ax25_q         = ax25_q,
@@ -114,7 +117,7 @@ async def start():
     tasks = []
     try:
         # in_rx = Queue()
-        in_rx = RingIO(1024*2*5)
+        in_rx = RingIO(1024*2*1000)
         ax25_q = Queue()
 
         #create ax25 consumer

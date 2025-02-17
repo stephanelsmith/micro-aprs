@@ -11,6 +11,7 @@ from lib.utils import eprint
 from lib.memoize import memoize_loads
 from lib.memoize import memoize_dumps
 from lib.compat import Queue
+from lib.compat import IS_UPY
 
 from afsk.func import create_unnrzi
 from afsk.func import create_corr
@@ -37,6 +38,7 @@ class AFSKDemodulator():
                        sampling_rate = 11_025,
                        verbose       = False, # output intermediate steps to stderr
                        stream_type   = 's16', # if in_rx is a stream, u16 or s16?
+                       is_embedded   = False,
                        options       = {},
                        ):
                        # debug_samples = False, # output intermediate samples to stderr
@@ -45,6 +47,7 @@ class AFSKDemodulator():
         self.bits_q = bits_out_q
         self.verbose = verbose
         self.stream_type = stream_type
+        self.is_embedded = is_embedded
         # self.debug_samples = debug_samples
         self.stream_done = Event()
 
@@ -147,6 +150,7 @@ class AFSKDemodulator():
             await self.stream_done.wait()
 
     # directly access from a stream with readexactly method
+    # @micropython.native
     async def stream_core(self):
         try:
             # Process a chunk of samples
@@ -160,14 +164,17 @@ class AFSKDemodulator():
             pwrmtr   = self.pwrmtr
 
             bits_q = self.bits_q   # output stream
+
+            asleep = asyncio.sleep
+            isembed = self.is_embedded
             is_sync = False
 
             if hasattr(self.in_rx, 'readexactly'):
-                # probably stdin stream
+                # already a stream
                 read = self.in_rx.readexactly
                 is_sync = False
             elif hasattr(self.in_rx, 'read'):
-                # probably a file
+                # probably a file or RingIO
                 read = self.in_rx.read
                 is_sync = True
             else:
@@ -178,21 +185,35 @@ class AFSKDemodulator():
             # bytes to integer converter
             btoi = bs16toi if self.stream_type=='s16' else bu16toi
 
+
             while True:
+
                 try:
+                    # actually read 2 bytes from stream
                     if is_sync:
                         b = read(2)
-                        await asyncio.sleep(0)
+                        # if not isembed:
+                            # # normally return asyncio except for embedded where this slows things down too much
+                        await asleep(0)
                     else:
                         b = await read(2)
                 except EOFError:
+                    # always exit on eof
                     break
+                # did we read anything?
                 if not b:
+                    await asleep(0)
+                    if isembed:
+                        # embedded loop forever
+                        continue
                     break
+
+                # process
                 o = btoi(b) # convert bytes to integer
                 o = bpf(o)
                 p = pwrmtr(o)
                 if p < sql:
+                    # skip if we are below squelch level
                     continue
                 # eprint(p,o)
                 o = corr(o)
@@ -206,6 +227,7 @@ class AFSKDemodulator():
             print_exc(err)
         finally:
             self.stream_done.set()
+            # print('STREAM DONE')
 
 
     async def q_core(self):

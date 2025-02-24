@@ -130,10 +130,12 @@ class AFSKDemodulator():
         self.tasks = []
 
     async def __aenter__(self):
+        if not self.in_rx:
+            return self
         if isinstance(self.in_rx, Queue):
-            self.tasks.append(asyncio.create_task(self.q_core()))
+            self.tasks.append(asyncio.create_task(self.q_core(in_rx = self.in_rx)))
         elif hasattr(self.in_rx, 'readexactly') or hasattr(self.in_rx, 'read'):
-            self.tasks.append(asyncio.create_task(self.stream_core()))
+            self.tasks.append(asyncio.create_task(self.stream_core(in_rx = self.in_rx)))
         else:
             raise Exception('unknown in_rx format')
         return self
@@ -144,6 +146,8 @@ class AFSKDemodulator():
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
     async def join(self):
+        if not self.in_rx:
+            return
         if isinstance(self.in_rx, Queue):
             await self.in_rx.join()
         else:
@@ -151,7 +155,7 @@ class AFSKDemodulator():
 
     # directly access from a stream with readexactly method
     # @micropython.native
-    async def stream_core(self):
+    async def stream_core(self, in_rx):
         try:
             # Process a chunk of samples
             corr     = self.corr
@@ -166,19 +170,25 @@ class AFSKDemodulator():
             bits_q = self.bits_q   # output stream
 
             asleep = asyncio.sleep
-            isembed = self.is_embedded
-            is_sync = False
 
-            if hasattr(self.in_rx, 'readexactly'):
+            is_sync = False
+            is_readinto = False
+
+            in_rx = in_rx or self.in_rx
+
+            # if hasattr(in_rx, 'readinto'):
+                # bi = bytearray(2)
+                # is_readinto = True
+                # read = in_rx.readinto
+            if hasattr(in_rx, 'readexactly'):
                 # already a stream
-                read = self.in_rx.readexactly
+                read = in_rx.readexactly
                 is_sync = False
-            elif hasattr(self.in_rx, 'read'):
-                # probably a file or RingIO
-                read = self.in_rx.read
+            elif hasattr(in_rx, 'read'):
+                read = in_rx.read
                 is_sync = True
             else:
-                raise Exception('unknown stream')
+                raise Exception('unknown stream {}'.format(in_rx))
 
             sql = self.squelch
 
@@ -187,29 +197,26 @@ class AFSKDemodulator():
 
 
             while True:
-
                 try:
                     # actually read 2 bytes from stream
-                    if is_sync:
-                        b = read(2)
-                        # if not isembed:
-                            # # normally return asyncio except for embedded where this slows things down too much
+                    if is_readinto:
+                        n = read(bi) # read 2 bytes into bytearray
+                        if not n:
+                            return
+                    elif is_sync:
+                        bi = read(2)
                         await asleep(0)
                     else:
-                        b = await read(2)
+                        bi = await read(2)
                 except EOFError:
                     # always exit on eof
                     break
                 # did we read anything?
-                if not b:
-                    await asleep(0)
-                    if isembed:
-                        # embedded loop forever
-                        continue
+                if not bi:
                     break
 
                 # process
-                o = btoi(b) # convert bytes to integer
+                o = btoi(bi) # convert bytes to integer
                 o = bpf(o)
                 p = pwrmtr(o)
                 if p < sql:
@@ -220,9 +227,9 @@ class AFSKDemodulator():
                 o = lpf(o)
                 bs = sampler(o)
                 if bs != 2: # _NONE
-                    b = unnrzi(bs)
+                    bx = unnrzi(bs)
                     # eprint(b,end='')
-                    await bits_q.put(b) #bits_out_q
+                    await bits_q.put(bx) #bits_out_q
         except Exception as err:
             print_exc(err)
         finally:
@@ -230,7 +237,7 @@ class AFSKDemodulator():
             # print('STREAM DONE')
 
 
-    async def q_core(self):
+    async def q_core(self, in_rx):
         try:
             # Process a chunk of samples
             corr     = self.corr
@@ -240,8 +247,8 @@ class AFSKDemodulator():
             unnrzi   = self.unnrzi
             pwrmtr   = self.pwrmtr
 
-            in_rx = self.in_rx     # input stream
             bits_q = self.bits_q   # output stream
+            in_rx = in_rx or self.in_rx
 
             while True:
                 #fetch next chunk of samples (array)

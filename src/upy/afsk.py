@@ -7,14 +7,6 @@ from machine import Timer
 from asyncio import ThreadSafeFlag
 from cdsp import i16tobs
 
-# from afsk.func_viper import create_power_meter
-from afsk.fir_options import fir_options
-from lib.memoize import memoize_loads
-
-_AFSK_IN_SQLCH_LEVEL = const(100)
-_FMARK  = 1200
-_FSPACE = 2200
-
 async def in_afsk(adc, rio, fs = 11_025):
     try:
         tsf = ThreadSafeFlag()
@@ -23,7 +15,6 @@ async def in_afsk(adc, rio, fs = 11_025):
         def cb(tim):
             nonlocal adc, rio
             o = adc.read_u16()
-            # rio.write(o.to_bytes(2, 'little'))
             rio.write(i16tobs(o))
 
         tim.init(freq=fs, mode=Timer.PERIODIC, callback=cb)

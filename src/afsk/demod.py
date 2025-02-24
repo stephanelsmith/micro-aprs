@@ -215,7 +215,7 @@ class AFSKDemodulator():
                 if p < sql:
                     # skip if we are below squelch level
                     continue
-                # eprint(p,o)
+                # eprint(o)
                 o = corr(o)
                 o = lpf(o)
                 bs = sampler(o)

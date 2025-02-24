@@ -26,6 +26,7 @@ sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | microp
 #mod + demod
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | python aprs_demod.py -v -t -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -r 11025 -v | python aprs_demod.py -r 11025 -v -t -
+echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -r 5512 -v | python aprs_demod.py -r 5512 -v -t -
 echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | python aprs_demod.py -v -t -
 echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v | micropython aprs_demod.py -v -t -
 echo "KI5TOF>APRS:>hello world!" | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t -

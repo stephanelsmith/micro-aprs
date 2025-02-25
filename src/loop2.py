@@ -70,29 +70,46 @@ async def gen_adc( ):
     except Exception as err:
         print_exc(err)
 
-# an in_afsk the works like the embedded port version
-async def in_afsk(adc, rio, demod, fs = 11_025):
-
-    # highjack bpf and pwrmtr from demo
+@micropython.native
+def in_afsk(adc, rio, demod):
     bpf = demod.bpf
     pwrmtr = demod.pwrmtr
-
     isin = False
-    try:
-        while True:
-            b = adc.read(2)
-            if not b:
-                return
-            o = bu16toi(b)
-            o = bpf(o)
-            p = pwrmtr(o)
-            if p > 100  and not isin:
-                isin = True
-            elif p < 100 and isin:
-                return
-            rio.write(b)
-    except Exception as err:
-        sys.print_exception(err)
+    read = adc.read
+    write = rio.write
+    while True:
+        b = read(2)
+        if not b:
+            return
+        o = bu16toi(b)
+        o = bpf(o)
+        p = pwrmtr(o)
+        if p > 100  and not isin:
+            isin = True
+        elif p < 100 and isin:
+            return
+        write(b)
+
+@micropython.viper
+def in_afsk_vip(adc, rio, demod):
+    bpf = demod.bpf
+    pwrmtr = demod.pwrmtr
+    sql:int = int(demod.squelch)
+    isin:int = int(0)
+    read = adc.read
+    write = rio.write
+    while True:
+        b = read(2)
+        if not b:
+            return 
+        o:int = int(bu16toi(b))
+        o:int = int(bpf(o))
+        p:int = int(pwrmtr(o))
+        if p > sql  and not isin:
+            isin = 1
+        elif p < sql and isin:
+            return 
+        write(b)
 
 async def start():
 
@@ -118,8 +135,8 @@ async def start():
                                     ax25_q         = ax25_q,
                                     verbose        = False):
                 while True:
-                    # read from adc
-                    await in_afsk(adc = adc, rio = rio, demod = demod)
+                    # synchronous read from ADC
+                    in_afsk_vip(adc, rio, demod)
                     # print('READ: {}'.format(rio.any()))
 
                     if rio.any() == 0:

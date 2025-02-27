@@ -195,7 +195,6 @@ class AFSKDemodulator():
             # bytes to integer converter
             btoi = bs16toi if self.stream_type=='s16' else bu16toi
 
-
             while True:
                 try:
                     # actually read 2 bytes from stream
@@ -205,7 +204,7 @@ class AFSKDemodulator():
                             return
                     elif is_sync:
                         bi = read(2)
-                        await asleep(0)
+                        await asleep(0) #### STALL POINT NEED TO REMOVE
                     else:
                         bi = await read(2)
                 except EOFError:

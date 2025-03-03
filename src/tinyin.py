@@ -17,7 +17,6 @@ from ax25.ax25 import AX25
 from afsk.demod import AFSKDemodulator
 from ax25.from_afsk import AX25FromAFSK
 from afsk.func import afsk_detector
-from upy.afsk import in_afsk
 from upy.afsk import out_afsk
 from cdsp import i16tobs
 
@@ -31,68 +30,65 @@ _FOUT = 11_025
 
 _AFSK_IN_PIN = const(2)
 
-async def demod_core(in_rx, ax25_q):
-    try:
-        bits_q = Queue()
-        async with AFSKDemodulator(sampling_rate = _FOUT,
-                                   in_rx         = in_rx,
-                                   stream_type   = 'u16',
-                                   bits_out_q    = bits_q,
-                                   is_embedded   = True,
-                                   options       = {},
-                                   verbose       = False,
-                                   ) as afsk_demod:
-            async with AX25FromAFSK(bits_in_q      = bits_q,
-                                    ax25_q         = ax25_q,
-                                    verbose        = False):
-                await Event().wait()
-                # await in_rx.join()
-                # await bits_q.join()
-    except asyncio.CancelledError:
-        raise
-    except KeyboardInterrupt:
-        return
-    except Exception as err:
-        print_exc(err)
-
-async def consume_ax25(ax25_q, 
-                       is_quite = False, # suppress stdout
-                       ):
-    try:
-        count = 1
-        while True:
-            ax25 = await ax25_q.get()
-            if not is_quite:
-                try:
-                    sys.stdout.write('[{}] {}\n'.format(count, ax25))
-                except UnicodeDecodeError:
-                    sys.stdout.write('[{}] ERR\n'.format(count))
-                # sys.stdout.flush()
-            count += 1
-            ax25_q.task_done()
-            await asyncio.sleep(0)
-    except asyncio.CancelledError:
-        raise
-    except KeyboardInterrupt:
-        return
-    except Exception as err:
-        print_exc(err)
-
+@micropython.viper
+def in_afsk(adc, rio, demod):
+    bpf = demod.bpf
+    pwrmtr = demod.pwrmtr
+    sql:int = int(demod.squelch)
+    isin:int = int(0)
+    # read = adc.read
+    read = adc.read_u16
+    write = rio.write
+    while True:
+        o:int = int(read())
+        o:int = int(bpf(o))
+        p:int = int(pwrmtr(o))
+        # print(o,p)
+        if p > sql  and not isin:
+            isin = 1
+        elif p < sql and isin:
+            return 
+        write(i16tobs(o))
 
 async def start():
 
     tasks = []
     try:
-        # in_rx = Queue()
-        in_rx = RingIO(1024*2*1000)
         ax25_q = Queue()
+        rio = RingIO(500000)
+
         adc = ADC(Pin(_AFSK_IN_PIN, Pin.IN))
 
-        #create ax25 consumer
-        tasks.append(asyncio.create_task(consume_ax25(ax25_q   = ax25_q,)))
-        tasks.append(asyncio.create_task(in_afsk(adc = adc, rio = in_rx,)))
-        tasks.append(asyncio.create_task(demod_core(in_rx = in_rx, 
-                                                    ax25_q    = ax25_q)))
+        bits_q = Queue()
+        async with AFSKDemodulator(sampling_rate = _FOUT,
+                                   in_rx         = None,   # don't launch core task
+                                   stream_type   = 'u16',
+                                   bits_out_q    = bits_q,
+                                   is_embedded   = True,
+                                   options       = {},
+                                   verbose       = False,
+                                   ) as demod:
+            async with AX25FromAFSK(bits_in_q      = bits_q,
+                                    ax25_q         = ax25_q,
+                                    verbose        = False):
+                while True:
+                    # synchronous read from ADC
+                    in_afsk(adc, rio, demod)
+                    print('READ: {}'.format(rio.any()))
+
+                    if rio.any() == 0:
+                        break
+
+                    # process results
+                    await demod.stream_core(in_rx = rio)
+
+                    # process ax25
+                    while not ax25_q.empty():
+                        ax25 = await ax25_q.get()
+                        print(ax25)
+
+                    # clean up
+                    gc.collect()
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -106,6 +102,7 @@ async def start():
         for task in tasks:
             task.cancel()
         await asyncio.gather(*[t for t in tasks if not t.done()], return_exceptions=True)
+
 
 def main():
     try:

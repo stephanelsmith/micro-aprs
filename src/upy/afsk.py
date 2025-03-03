@@ -7,22 +7,22 @@ from machine import Timer
 from asyncio import ThreadSafeFlag
 from cdsp import i16tobs
 
-async def in_afsk(adc, rio, fs = 11_025):
-    try:
-        tsf = ThreadSafeFlag()
-        tim = Timer(1)
+# async def in_afsk(adc, rio, fs = 11_025):
+    # try:
+        # tsf = ThreadSafeFlag()
+        # tim = Timer(1)
 
-        def cb(tim):
-            nonlocal adc, rio
-            o = adc.read_u16()
-            rio.write(i16tobs(o))
+        # def cb(tim):
+            # nonlocal adc, rio
+            # o = adc.read_u16()
+            # rio.write(i16tobs(o))
 
-        tim.init(freq=fs, mode=Timer.PERIODIC, callback=cb)
-        await tsf.wait()
-    except Exception as err:
-        sys.print_exception(err)
-    finally:
-        tim.deinit()
+        # tim.init(freq=fs, mode=Timer.PERIODIC, callback=cb)
+        # await tsf.wait()
+    # except Exception as err:
+        # sys.print_exception(err)
+    # finally:
+        # tim.deinit()
 
 async def out_afsk(pwm,
                    arr,

@@ -96,10 +96,11 @@ def gen_bits_from_bytes(mv, stop_bit = None):
 if IS_UPY and HAS_C:
     def create_power_meter(siz,):
         from cdsp import power_meter_core
-        buf = array('i', (0 for x in range(siz)))
+        # buf = array('i', (0 for x in range(siz)))
+        buf = array('i', (0 for x in range(100)))
         idx = 0
         def inner(v:int)->int:
-            nonlocal buf, idx
+            nonlocal buf, idx, siz
             idx, o = power_meter_core(buf, v, idx) 
             # eprint(o)
             return o

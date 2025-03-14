@@ -136,25 +136,29 @@ async def start():
                                     verbose        = False):
                 while True:
                     # synchronous read from ADC
-                    print('Start')
+                    # print('Start')
                     in_afsk_vip(adc, rio, demod)
-                    print('READ: {}'.format(rio.any()))
+                    # print('READ: {}'.format(rio.any()))
 
                     if rio.any() == 0:
                         break
 
                     # process results
-                    print('core')
+                    # print('core')
                     await demod.stream_core(in_rx = rio)
+                    
+                    # process all bits in queue
+                    await bits_q.join()
 
                     # process ax25
-                    print('ax25')
+                    # effectively ax25_q.join()
+                    # print('ax25')
                     while not ax25_q.empty():
                         ax25 = await ax25_q.get()
                         print(ax25)
 
                     # clean up
-                    print('gc')
+                    # print('gc')
                     gc.collect()
 
         await asyncio.gather(*tasks, return_exceptions=True)

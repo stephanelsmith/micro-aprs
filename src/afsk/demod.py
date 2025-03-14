@@ -172,15 +172,22 @@ class AFSKDemodulator():
             asleep = asyncio.sleep
 
             is_sync = False
-            is_readinto = False
+            readinto = None
+            read = None
 
             in_rx = in_rx or self.in_rx
+            
+            clsname = type(in_rx).__name__
 
-            # if hasattr(in_rx, 'readinto'):
-                # bi = bytearray(2)
-                # is_readinto = True
-                # read = in_rx.readinto
-            if hasattr(in_rx, 'readexactly'):
+            if hasattr(in_rx, 'readinto') and clsname == 'RingIO':
+                bi = bytearray(2) # fixed allocation
+                readinto = in_rx.readinto
+                is_sync = True
+            if hasattr(in_rx, 'readinto') and clsname == 'Stream':
+                bi = bytearray(2) # fixed allocation
+                readinto = in_rx.readinto
+                is_sync = False
+            elif hasattr(in_rx, 'readexactly'):
                 # already a stream
                 read = in_rx.readexactly
                 is_sync = False
@@ -197,21 +204,25 @@ class AFSKDemodulator():
 
             while True:
                 try:
-                    # actually read 2 bytes from stream
-                    if is_readinto:
-                        n = read(bi) # read 2 bytes into bytearray
+                    # read two bytes from stream
+                    if readinto:
+                        if is_sync:
+                            n = readinto(bi) # read 2 bytes into bytearray
+                        else:
+                            n = await readinto(bi)
                         if not n:
-                            return
-                    elif is_sync:
-                        bi = read(2)
-                        await asleep(0) #### STALL POINT NEED TO REMOVE
-                    else:
-                        bi = await read(2)
+                            break
+                    elif read:
+                        if is_sync:
+                            bi = read(2)
+                        else:
+                            bi = await read(2)
+                        # did we read anything?
+                        if not bi:
+                            break
+
                 except EOFError:
                     # always exit on eof
-                    break
-                # did we read anything?
-                if not bi:
                     break
 
                 # process

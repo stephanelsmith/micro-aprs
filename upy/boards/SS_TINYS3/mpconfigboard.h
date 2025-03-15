@@ -1,19 +1,9 @@
 #define MICROPY_HW_BOARD_NAME               "SSTINYS3"
 #define MICROPY_HW_MCU_NAME                 "ESP32-S3-FN8"
-#define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT "SSTINYS3"
 
-// turn-off unused
-// https://github.com/orgs/micropython/discussions/14473
-#define MICROPY_HW_ENABLE_SDCARD            (0)
-#define MICROPY_PY_MACHINE_DAC              (0)
-#define MICROPY_PY_ESPNOW                   (0)
-#define MICROPY_PY_NETWORK_LAN              (0)
-//#define MICROPY_PY_WEBREPL                  (0)
-#define MICROPY_ENABLE_COMPILER (1)
+#define MICROPY_HW_I2C0_SCL                 (9)
+#define MICROPY_HW_I2C0_SDA                 (8)
 
-// enable encryption
-#define MICROPY_PY_SSL (1)
-#define MICROPY_SSL_MBEDTLS (1)
-#define MICROPY_PY_CRYPTOLIB (1)
-#define MICROPY_PY_HASHLIB (1)
-
+#define MICROPY_HW_SPI1_MOSI                (35)
+#define MICROPY_HW_SPI1_MISO                (37)
+#define MICROPY_HW_SPI1_SCK                 (36)

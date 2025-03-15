@@ -40,7 +40,7 @@ ln -sf ~/micro-aprs/upy/boards/SS_TINYS3 boards/.
 
 #### Build micropython port with C modules
 ```
-make BOARD=SS_TINYS3 USER_C_MODULES=~/micro-aprs/upy/c_modules/esp32s3.cmake
+make BOARD=SS_TINYS3 USER_C_MODULES=~/micro-aprs/upy/c_modules/esp32.cmake
 ```
 
 OR, try the vanilla TinyS3 board (already included in the Micropython project.)

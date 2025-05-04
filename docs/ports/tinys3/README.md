@@ -13,20 +13,22 @@ TinyS3 is available through [UnexpectedMaker's store](https://unexpectedmaker.co
 ```
 apt install cmake python3-libusb1
 ```
+### ESP-IDF v5.4
 #### Clone the Espressif ESP-IDF repo
 ```
-git clone --depth 1 --branch v5.2.2 https://github.com/espressif/esp-idf.git esp-idf-v5.2.2
-cd esp-idf-v5.2.2
+git clone --depth 1 --branch v5.4 https://github.com/espressif/esp-idf.git esp-idf-v5.4
+cd esp-idf-v5.4
 git submodule update --init --recursive
 ./install.sh
 source export.sh
 ```
 From here on, you will need to source ```export.sh``` to setup your environment.
 
-#### Now clone the Micropython repo
+#### Now clone the (intbioncs) Micropython repo
 ```
-git clone git@github.com:micropython/micropython.git
-cd micropython
+git clone git@github.com:intbionics/micropython.git micropython_espidf5.4
+cd micropython_espidf5.4
+git checkout ib_espidf-v5.4
 git submodule update --init --recursive
 make -C mpy-cross
 cd ports/esp32

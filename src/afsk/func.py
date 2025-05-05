@@ -90,37 +90,38 @@ def frange(start, stop, step, rnd=None):
 def gen_bits_from_bytes(mv, stop_bit = None):
     if stop_bit == None:
         stop_bit = len(mv)*8
-    for idx in range(stop_bit):
-        yield mv[idx//8]&(0x80>>(idx%8))
+    for i in range(stop_bit):
+        yield mv[i//8]&(0x80>>(i%8))
 
 if IS_UPY and HAS_C:
     def create_power_meter(siz,):
         from cdsp import power_meter_core
-        # buf = array('i', (0 for x in range(siz)))
-        buf = array('i', (0 for x in range(100)))
-        idx = 0
+        arr = array('i', (0 for x in range(siz)))
+        i = 0
         def inner(v:int)->int:
-            nonlocal buf, idx, siz
-            idx, o = power_meter_core(buf, v, idx) 
+            nonlocal arr, i, siz
+            o = power_meter_core(arr, v, i) 
+            i = (i+1)%siz
+            # i, o = power_meter_core(arr, v, i) 
             # eprint(o)
             return o
         return inner
 elif IS_UPY and HAS_VIPER:
     def create_power_meter(siz,):
-        _buf = array('i', (0 for x in range(siz)))
+        _arr = array('i', (0 for x in range(siz)))
         i = 0
         _c = array('i',[i,siz,])
         @micropython.viper
         def inner(v:int)->int:
-            nonlocal  _buf, _c
-            buf = ptr32(_buf)     # indexing ALWAYS return uint
+            nonlocal  _arr, _c
+            arr = ptr32(_arr)     # indexing ALWAYS return uint
             c = ptr32(_c)
             i:int = c[0]
             siz:int = c[1]
-            buf[i] = v # ok, can assign negative number
+            arr[i] = v # ok, can assign negative number
             o:int = 0
             for k in range(siz):
-                b:int = int(utoi32(buf[k])) # cast to int32
+                b:int = int(utoi32(arr[k])) # cast to int32
                 o += b*b
             o = int(isqrt(o//siz))
             i = (i+1)%siz

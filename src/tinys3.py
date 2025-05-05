@@ -3,7 +3,7 @@ import sys
 import asyncio
 import gc
 
-from machine import Pin, PWM
+from machine import Pin, PWM, Timer
 
 from asyncio import Event
 from micropython import const

@@ -42,7 +42,7 @@ cReadi16 = {
 }
 
 async def in_afsk(adc, rio, demod, do):
-    # bpf = demod.bpf
+    bpf = demod.bpf
     pwrmtr = demod.pwrmtr
     # pwrmtr = create_power_meter(siz = 10)
 
@@ -68,27 +68,9 @@ async def in_afsk(adc, rio, demod, do):
             o:int = int(read()) # read from adc
             stu.i16 = o
             write(buf)
-
             do.toggle() # debug
-
-            p = pwrmtr(o)
-
-            # # unpack closure params
-            # arr = ptr32(_arr)     # indexing ALWAYS return uint
-            # c = ptr32(_c)
-            # i:int = c[0]
-            # siz:int = c[1]
-
-            # arr[i] = o
-
-            # p:int = 0
-            # for k in range(siz):
-                # b:int = int(utoi32(arr[k])) # cast to int32
-                # p += b*b
-            # p = int(isqrt(p//siz))
-
-            # c[0] = (i+1)%siz
-
+            o:int = int(bpf(o))
+            p:int = int(pwrmtr(o))
         tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
         await tsf.wait()
 

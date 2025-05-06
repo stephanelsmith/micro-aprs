@@ -168,13 +168,16 @@ static mp_obj_t mp_fir_core(size_t n_args, const mp_obj_t *args) {
         // do 64bit operation to prevent overflow during accumulation
         o += ((int64_t)coefs[i] * (int64_t)buf[k]) / (int64_t)scale;
     }
-    idx = (idx+1)%ncoefs;
 
-    mp_obj_t ret = mp_obj_new_tuple(2, NULL);
-    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);
-    tuple->items[0] = mp_obj_new_int(idx);
-    tuple->items[1] = mp_obj_new_int(o);
-    return ret;
+    return mp_obj_new_int(o);
+
+    // // THIS IS SLOW! Allocating tuple is a performance hit
+    // idx = (idx+1)%ncoefs; // skip not returning index
+    // mp_obj_t ret = mp_obj_new_tuple(2, NULL);
+    // mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);
+    // tuple->items[0] = mp_obj_new_int(idx);
+    // tuple->items[1] = mp_obj_new_int(o);
+    // return ret;
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(fir_core_obj, 5, 5, mp_fir_core);
 
@@ -196,16 +199,16 @@ static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t i
         o += ((int64_t)arr[k]) *  ((int64_t)arr[k]);
     }
     o = isqrt32(o);
-    // idx = (idx+1)%siz;
 
     return mp_obj_new_int(o);
     
-    // THIS IS SLOW! Allocating tuple is a performance hit
-    /*mp_obj_t ret = mp_obj_new_tuple(2, NULL);*/
-    /*mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);*/
-    /*tuple->items[0] = mp_obj_new_int(idx);*/
-    /*tuple->items[1] = mp_obj_new_int(o);*/
-    /*return ret;*/
+    // // THIS IS SLOW! Allocating tuple is a performance hit
+    // idx = (idx+1)%siz; // skip not returning index
+    // mp_obj_t ret = mp_obj_new_tuple(2, NULL);
+    // mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);
+    // tuple->items[0] = mp_obj_new_int(idx);
+    // tuple->items[1] = mp_obj_new_int(o);
+    // return ret;
 }
 static MP_DEFINE_CONST_FUN_OBJ_3(power_meter_core_obj, mp_power_meter_core);
 

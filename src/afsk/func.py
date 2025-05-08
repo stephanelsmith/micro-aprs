@@ -97,7 +97,6 @@ def gen_bits_from_bytes(mv, stop_bit = None):
 if IS_UPY and HAS_C:
     def create_power_meter(siz:int,):
         from cdsp import power_meter_core
-        siz:int = 100
         buf = array('i', (0 for x in range(siz)))
         i:int = 0
         @micropython.viper

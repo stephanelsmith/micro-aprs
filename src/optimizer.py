@@ -127,7 +127,7 @@ async def main():
             'lpf_f'               : [800],
             'lpf_width'           : [250],
             'lpf_aboost'          : [3],
-            'squelch'             : range(50,200,20),
+            'squelch'             : range(10,500,20),
     }
     # raw_file = 'test/ISSpkt.raw'
     raw_file = 'test/tnc_test02.raw'

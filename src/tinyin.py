@@ -42,14 +42,13 @@ cReadi16 = {
 }
 
 async def in_afsk(adc, rio, demod, do):
-    bpf = demod.bpf
-    pwrmtr = demod.pwrmtr
-    # pwrmtr = create_power_meter(siz = 10)
+    # bpf = demod.bpf
+    # pwrmtr = demod.pwrmtr
+    pwrmtr = create_power_meter(siz = 20)
 
     read = adc.read_u16
     write = rio.write
     stdout = sys.stdout.write
-
 
     # pre-allocate read/write buffer
     buf = bytearray(uctypes.sizeof(cReadi16))
@@ -60,8 +59,8 @@ async def in_afsk(adc, rio, demod, do):
     tog = do.toggle
 
     # closure params saved as array
-    _c = array('i',[0,10,])
-    _arr = array('i', (0 for x in range(10)))
+    # _c = array('i',[0,10,])
+    # _arr = array('i', (0 for x in range(10)))
 
     try:
         @micropython.viper
@@ -70,9 +69,8 @@ async def in_afsk(adc, rio, demod, do):
             stu.i16 = _o
             write(buf)
             tog() # debug
-            # _o:int = int(bpf(_o))
-            # _p:int = int(pwrmtr(_o))
-            _p:int = int(pwrmtr(bpf(_o)))
+            # _p:int = int(pwrmtr(bpf(_o)))
+            _p:int = int(pwrmtr(_o))
 
         tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
         await tsf.wait()

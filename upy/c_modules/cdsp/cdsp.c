@@ -195,7 +195,7 @@ static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t i
     buf[idx] = v;
     for(int32_t i=0; i<siz; i++){
         int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers
-        o += ((int64_t)buf[k]) *  ((int64_t)buf[k]);
+        o += ((int32_t)buf[k]) *  ((int32_t)buf[k]);
     }
     o = isqrt32(o);
 

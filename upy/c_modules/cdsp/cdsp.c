@@ -168,11 +168,10 @@ static mp_obj_t mp_fir_core(size_t n_args, const mp_obj_t *args) {
         // do 64bit operation to prevent overflow during accumulation
         o += ((int64_t)coefs[i] * (int64_t)buf[k]) / (int64_t)scale;
     }
-
     return mp_obj_new_int(o);
 
-    // // THIS IS SLOW! Allocating tuple is a performance hit
-    // idx = (idx+1)%ncoefs; // skip not returning index
+    // PASSING A TUPLE IS SLOW, WE'LL CALC IDX IN PARENT
+    // idx = (idx+1)%ncoefs;
     // mp_obj_t ret = mp_obj_new_tuple(2, NULL);
     // mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);
     // tuple->items[0] = mp_obj_new_int(idx);
@@ -182,7 +181,7 @@ static mp_obj_t mp_fir_core(size_t n_args, const mp_obj_t *args) {
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(fir_core_obj, 5, 5, mp_fir_core);
 
 // POWER METER 
-// ARGS:  arr, v, idx
+// ARGS:  buf, v, idx
 // OUT : tuple(idx, o)
 static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t idx_obj) {
     mp_obj_array_t *buf_array = MP_OBJ_TO_PTR(buf_obj);
@@ -191,19 +190,19 @@ static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t i
 
     int32_t o = 0;
     int32_t siz = buf_array->len;
-    int32_t *arr = buf_array->items;
+    int32_t *buf = buf_array->items;
 
-    arr[idx] = v;
+    buf[idx] = v;
     for(int32_t i=0; i<siz; i++){
         int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers
-        o += ((int64_t)arr[k]) *  ((int64_t)arr[k]);
+        o += ((int64_t)buf[k]) *  ((int64_t)buf[k]);
     }
     o = isqrt32(o);
 
     return mp_obj_new_int(o);
-    
-    // // THIS IS SLOW! Allocating tuple is a performance hit
-    // idx = (idx+1)%siz; // skip not returning index
+
+    // PASSING A TUPLE IS SLOW, WE'LL CALC IDX IN PARENT
+    // idx = (idx+1)%siz;
     // mp_obj_t ret = mp_obj_new_tuple(2, NULL);
     // mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);
     // tuple->items[0] = mp_obj_new_int(idx);
@@ -211,6 +210,55 @@ static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t i
     // return ret;
 }
 static MP_DEFINE_CONST_FUN_OBJ_3(power_meter_core_obj, mp_power_meter_core);
+
+/*// POWER METER */
+/*// ARGS:  buf, siz, v, idx*/
+/*// OUT : tuple(idx, o)*/
+/*//static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t siz_obj, mp_obj_t v_obj, mp_obj_t idx_obj) {*/
+/*static mp_obj_t mp_power_meter_core(size_t n_args, const mp_obj_t *args) {*/
+    /*[>mp_obj_array_t *buf_array = MP_OBJ_TO_PTR(buf_obj);<]*/
+    /*[>int32_t v = mp_obj_get_int(v_obj);<]*/
+    /*[>int32_t siz = mp_obj_get_int(siz_obj);<]*/
+    /*[>int32_t idx = mp_obj_get_int(idx_obj);<]*/
+    /*(void)n_args; // always 5 args: coefs, buf, v, idx, scale*/
+    /*mp_obj_array_t *buf_array = MP_OBJ_TO_PTR(args[0]);*/
+    /*int32_t siz = mp_obj_get_int(args[1]);*/
+    /*int32_t v = mp_obj_get_int(args[2]);*/
+    /*int32_t idx = mp_obj_get_int(args[3]);*/
+
+    /*int32_t o = 0;*/
+    /*int32_t bufsiz = buf_array->len;*/
+    /*int32_t *buf = buf_array->items;*/
+
+    /*buf[idx] = v;*/
+      
+    /*// get average*/
+    /*int64_t avg = 0;*/
+    /*for(int64_t i=0; i<bufsiz; i++){*/
+        /*avg += buf[i];*/
+    /*}*/
+    /*avg /= bufsiz;*/
+    /*avg = 0;*/
+    /*//avg = 337;*/
+
+    /*//*/
+    /*for(int32_t i=0; i<siz; i++){*/
+        /*int32_t k = idx-i>=0 ? idx-i : bufsiz+idx-i; // emulate python mod for negative numbers*/
+        /*int64_t x = (int64_t)buf[k] - avg;*/
+        /*o += x*x;*/
+    /*}*/
+    /*o = isqrt32(o);*/
+    /*idx = (idx+1)%siz;*/
+
+    /*mp_obj_t ret = mp_obj_new_tuple(2, NULL);*/
+    /*mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);*/
+    /*tuple->items[0] = mp_obj_new_int(idx);*/
+    /*tuple->items[1] = mp_obj_new_int(o);*/
+    /*return ret;*/
+/*}*/
+/*[>static MP_DEFINE_CONST_FUN_OBJ_4(power_meter_core_obj, mp_power_meter_core);<]*/
+/*MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(power_meter_core_obj, 4, 4, mp_power_meter_core);*/
+
 
 
 

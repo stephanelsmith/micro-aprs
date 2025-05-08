@@ -57,6 +57,7 @@ async def in_afsk(adc, rio, demod, do):
 
     tsf = ThreadSafeFlag()
     tim = Timer(1)
+    tog = do.toggle
 
     # closure params saved as array
     _c = array('i',[0,10,])
@@ -65,12 +66,14 @@ async def in_afsk(adc, rio, demod, do):
     try:
         @micropython.viper
         def cb(tim):
-            o:int = int(read()) # read from adc
-            stu.i16 = o
+            _o:int = int(read()) # read from adc
+            stu.i16 = _o
             write(buf)
-            do.toggle() # debug
-            o:int = int(bpf(o))
-            p:int = int(pwrmtr(o))
+            tog() # debug
+            # _o:int = int(bpf(_o))
+            # _p:int = int(pwrmtr(_o))
+            _p:int = int(pwrmtr(bpf(_o)))
+
         tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
         await tsf.wait()
 
@@ -78,30 +81,6 @@ async def in_afsk(adc, rio, demod, do):
         sys.print_exception(err)
     finally:
         tim.deinit()
-
-
-        # while True:
-            # o:int = int(read())
-            # # o:int = int(bpf(o))
-            # # p:int = int(pwrmtr(o))
-            # # stdout(str(o))
-            # # stdout(' ')
-            # # stdout(str(p))
-            # # stdout(' | ')
-            # # cnt += 1
-            # # if cnt >= 11_025:
-                # # diff = time.ticks_diff(time.ticks_us(),t_us)
-                # # print(diff, 11_025.0/diff)
-                # # cnt = 0
-                # # t_us = time.ticks_us()
-            # tog()
-
-            # # if p > sql  and not isin:
-                # # isin = 1
-            # # elif p < sql and isin:
-                # # # return 
-                # # pass
-            # # write(i16tobs(o))
 
 
 async def start():

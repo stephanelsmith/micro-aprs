@@ -53,7 +53,7 @@ async def gen_adc( ):
 
             arr,siz = await afsk_mod.flush()
 
-            # add afask array to the in_rx for processing
+            # add afsk array to the in_rx for processing
             while True:
                 await asyncio.sleep_ms(0)
                 for i in range(siz):
@@ -70,44 +70,43 @@ async def gen_adc( ):
     except Exception as err:
         print_exc(err)
 
-@micropython.native
-def in_afsk(adc, rio, demod):
-    bpf = demod.bpf
-    pwrmtr = demod.pwrmtr
-    isin = False
-    read = adc.read
-    write = rio.write
-    while True:
-        b = read(2)
-        if not b:
-            return
-        o = bu16toi(b)
-        o = bpf(o)
-        p = pwrmtr(o)
-        if p > 100  and not isin:
-            isin = True
-        elif p < 100 and isin:
-            return
-        write(b)
+# @micropython.native
+# def in_afsk(adc, rio, demod):
+    # bpf = demod.bpf
+    # pwrmtr = demod.pwrmtr
+    # isin = False
+    # read = adc.read
+    # write = rio.write
+    # while True:
+        # b = read(2)
+        # if not b:
+            # return
+        # o = bu16toi(b)
+        # o = bpf(o)
+        # p = pwrmtr(o)
+        # if p > 100  and not isin:
+            # isin = True
+        # elif p < 100 and isin:
+            # return
+        # write(b)
 
 @micropython.viper
 def in_afsk_vip(adc, rio, demod):
     bpf = demod.bpf
     pwrmtr = demod.pwrmtr
-    sql:int = int(demod.squelch)
-    isin:int = int(0)
+    _sql:int = int(demod.squelch)
+    _isin:int = int(0)
     read = adc.read
     write = rio.write
     while True:
         b = read(2)
         if not b:
             return 
-        o:int = int(bu16toi(b))
-        o:int = int(bpf(o))
-        p:int = int(pwrmtr(o))
-        if p > sql  and not isin:
-            isin = 1
-        elif p < sql and isin:
+        _o:int = int(bu16toi(b))
+        _p:int = int(pwrmtr(bpf(_o)))
+        if _p > _sql  and not _isin:
+            _isin = 1
+        elif _p < _sql and _isin:
             return 
         write(b)
 

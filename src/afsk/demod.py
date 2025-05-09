@@ -121,7 +121,7 @@ class AFSKDemodulator():
                                       fs    = self.fs)
         self.unnrzi = create_unnrzi()
 
-        self.pwrmtr = create_power_meter(siz = 100)#nmark*2)
+        self.pwrmtr = create_power_meter(siz = 20)#nmark*2)
         self.squelch = options['squelch']
 
         #how much we need to flush internal filters to process all sampled data

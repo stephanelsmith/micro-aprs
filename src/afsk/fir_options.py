@@ -46,7 +46,8 @@ fir_options = {
     'lpf_width'           : 250,
     'lpf_aboost'          : 3,
     # 'squelch'             : 300,
-    'squelch'             : 400,
+    # 'squelch'             : 400,
+    'squelch'             : 200,
 }
 # bandpass_ncoefs 91
 

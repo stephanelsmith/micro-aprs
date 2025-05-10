@@ -290,9 +290,17 @@ elif IS_UPY and HAS_VIPER:
             _i:int = int(i)
             _siz:int = int(siz)
             _buf[_i] = v # ok, can assign negative number
+
+            # find dc point
+            _a:int = 0
+            for j in range(_siz):
+                _a += int(utoi32(_buf[j]))
+            _a = _a//_siz
+
             _o:int = 0
             for j in range(_siz):
                 _b:int = int(utoi32(_buf[j])) # cast to int32
+                _b -= _a
                 _o += _b*_b
             _o = int(isqrt(_o//_siz))
             _i = (_i+1)%_siz
@@ -306,9 +314,17 @@ else:
         def inner(v:int)->int:
             nonlocal i
             buf[i] = v
+
+            # find dc point
+            a = 0
+            for k in range(siz):
+                a += buf[k]
+            a //= siz
+
             o = 0
             for k in range(siz):
-                o += buf[k]*buf[k]
+                b = buf[k]-a
+                o += b*b
             o = isqrt(o//siz)
             i = (i+1)%siz
             return o

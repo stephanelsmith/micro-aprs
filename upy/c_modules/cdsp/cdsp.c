@@ -188,14 +188,22 @@ static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t i
     int32_t v = mp_obj_get_int(v_obj);
     int32_t idx = mp_obj_get_int(idx_obj);
 
+    int32_t a = 0;
     int32_t o = 0;
     int32_t siz = buf_array->len;
     int32_t *buf = buf_array->items;
 
     buf[idx] = v;
+
+    // get dc point
+    for(int32_t i=0; i<siz; i++){
+        a += buf[i];
+    }
+    a /= siz;
+
     for(int32_t i=0; i<siz; i++){
         int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers
-        o += ((int32_t)buf[k]) *  ((int32_t)buf[k]);
+        o += (buf[k]-a) * (buf[k]-a);
     }
     o = isqrt32(o);
 

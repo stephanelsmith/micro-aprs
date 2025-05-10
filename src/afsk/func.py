@@ -15,6 +15,10 @@ if IS_UPY:
     if HAS_C:
         from cdsp import isqrt
         from cdsp import sign
+    else:
+        from math import sqrt
+        def isqrt(x):
+            return int(sqrt(x))
 else:
     try:
         from math import isqrt
@@ -94,56 +98,6 @@ def gen_bits_from_bytes(mv, stop_bit = None):
     for idx in range(stop_bit):
         yield mv[idx//8]&(0x80>>(idx%8))
 
-if IS_UPY and HAS_C:
-    def create_power_meter(siz:int,):
-        from cdsp import power_meter_core
-        buf = array('i', (0 for x in range(siz)))
-        i:int = 0
-        @micropython.viper
-        def inner(v:int)->int:
-            nonlocal buf, i, siz
-            # i, o = power_meter_core(buf, v, i) 
-            _o:int = int(power_meter_core(buf, v, i))
-            _i:int = (int(i)+1)%int(siz)
-            i = (_i<<1)|1 # INTEGER TO OBJECT HACK
-            return _o
-        return inner
-elif IS_UPY and HAS_VIPER:
-    def create_power_meter(siz,):
-        _buf = array('i', (0 for x in range(siz)))
-        i = 0
-        _c = array('i',[i,siz,])
-        @micropython.viper
-        def inner(v:int)->int:
-            nonlocal  _buf, _c
-            buf = ptr32(_buf)     # indexing ALWAYS return uint
-            c = ptr32(_c)
-            i:int = c[0]
-            siz:int = c[1]
-            buf[i] = v # ok, can assign negative number
-            o:int = 0
-            for k in range(siz):
-                b:int = int(utoi32(buf[k])) # cast to int32
-                o += b*b
-            o = int(isqrt(o//siz))
-            i = (i+1)%siz
-            c[0] = i
-            return o
-        return inner
-else:
-    def create_power_meter(siz,):
-        buf = array('i', (0 for x in range(siz)))
-        i = 0
-        def inner(v:int)->int:
-            nonlocal  buf,siz,i
-            buf[i] = v
-            o = 0
-            for k in range(siz):
-                o += buf[k]*buf[k]
-            o = isqrt(o//siz)
-            i = (i+1)%siz
-            return o
-        return inner
 
 if IS_UPY and HAS_VIPER:
     @micropython.viper
@@ -202,17 +156,17 @@ else:
 if IS_UPY and HAS_VIPER:
     def create_nrzi():
         #process the bit stream bit-by-bit with closure
-        c = 0
-        nl = array('B', [c])
+        c:int = 0
+        # nl = array('B', [c])
         @micropython.viper
         def inner(b:int) -> int:
-            nonlocal nl
-            _nl = ptr8(nl)
-            c:int      = _nl[0]
+            nonlocal c
+            # _nl = ptr8(nl)
+            _c:int      = int(c)
             if b == 0:
-                c = 1 if c == 0 else 0
-            _nl[0] = c
-            return c
+                _c = 1 if _c == 0 else 0
+            c = (_c<<1)|1 # INTEGER TO OBJECT HACK
+            return _c
         return inner
 else:
     def create_nrzi():
@@ -227,18 +181,21 @@ else:
 if IS_UPY and HAS_VIPER:
     def create_unnrzi():
         #process the bit stream bit-by-bit with closure
-        c = 1
-        nl = array('B', [c])
+        c:int = 1
+        # nl = array('B', [c])
         @micropython.viper
         def inner(b:int) -> int:
-            nonlocal nl
-            _nl = ptr8(nl)
-            c:int      = _nl[0]
-            r:int      = 0
-            if b == c:
-                r = 1
-            _nl[0] = b # c = b
-            return r
+            nonlocal c
+            # _nl = ptr8(nl)
+            # c:int      = _nl[0]
+            _c:int = int(c)
+            _r:int = 0
+            if b == _c:
+                _r = 1
+            # _nl[0] = b # c = b
+            _c = b
+            c = (_c<<1)|1 # INTEGER TO OBJECT HACK
+            return _r
         return inner
 else:
     def create_unnrzi():
@@ -255,59 +212,105 @@ else:
 CORRELATOR_DELAY = 446e-6
 if IS_UPY and HAS_C:
     def create_corr(ts,):
-        delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
-        idx = 0
-        _dat = array('i', (0 for x in range(delay)))
-        _c = array('i',[idx, delay])
+        delay:int = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
+        i:int = 0
+        dat = array('i', (0 for x in range(delay)))
         # C OPTIMIZED
         @micropython.viper
         def inner(v:int)->int:
-            nonlocal _dat, _c
-            dat = ptr32(_dat) # indexing ALWAYS return UINT
-            c = ptr32(_c)
-            idx:int = c[0]
-            delay:int = c[1]
+            nonlocal i
+            _dat = ptr32(dat) # indexing ALWAYS return UINT
+            _i:int = int(i)
+            _delay:int = int(delay)
             # o = v*dat[idx] # !!!! DOES NOT work, dat[idx] is always uint32
-            d:int = int(utoi32(dat[idx])) # cast to int32
-            o:int = int(isqrt(abs(v*d))) * int(sign(v)) * int(sign(d))
-            dat[idx] = v
-            c[0] = (idx+1)%delay # c[0] = idx
-            return o
+            _d:int = int(utoi32(_dat[_i])) # cast to int32
+            _o:int = int(isqrt(abs(v*_d))) * int(sign(v)) * int(sign(_d))
+            _dat[_i] = v
+            _i = (_i+1)%_delay # c[0] = idx
+            i = (_i<<1)|1 # INTEGER TO OBJECT HACK
+            return _o
         return inner
 elif IS_UPY and HAS_VIPER:
     # VIPER OPTIMIZED
     def create_corr(ts,):
-        delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
-        idx = 0
-        _dat = array('i', (0 for x in range(delay)))
-        _c = array('i',[idx, delay])
+        delay:int = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
+        i:int = 0
+        dat = array('i', (0 for x in range(delay)))
         @micropython.viper
         def inner(v:int)->int:
-            nonlocal _dat, _c
-            dat = ptr32(_dat) # indexing ALWAYS return UINT
-            c = ptr32(_c)
-            idx:int = c[0]
-            delay:int = c[1]
+            nonlocal i
+            _dat = ptr32(dat) # indexing ALWAYS return UINT
+            _i:int = int(i)
+            _delay:int = int(delay)
             v >>= 2 # shift to prevent overflow, do this as we don't have a isqrt viper yet TODO!
             # o = v*dat[idx]       # !!!! DOES NOT work, dat[idx] is always uint32
-            d:int = int(_dat[idx]) # get int value from array
-            o:int = v*d 
-            dat[idx] = v
-            c[0] = (idx+1)%delay # c[0] = idx
-            return o
+            _d:int = int(_dat[_i]) # get int value from array
+            _o:int = v*_d 
+            _dat[_i] = v
+            _i = (_i+1)%_delay
+            i = (_i<<1)|1 # INTEGER TO OBJECT HACK`
+            return _o
         return inner
 else:
     # PYTHON
     def create_corr(ts,):
         delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
         dat = array('i', (0 for x in range(delay)))
-        idx = 0
+        i = 0
         def inner(v:int)->int:
-            nonlocal idx,dat,delay
-            # o = v*dat[idx]
-            o = isqrt(abs(v*dat[idx])) * sign(v) * sign(dat[idx])
-            dat[idx] = v
-            idx = (idx+1)%delay
+            nonlocal i
+            # o = v*dat[i]
+            o = isqrt(abs(v*dat[i])) * sign(v) * sign(dat[i])
+            dat[i] = v
+            i = (i+1)%delay
+            return o
+        return inner
+
+if IS_UPY and HAS_C:
+    def create_power_meter(siz:int,):
+        from cdsp import power_meter_core
+        buf = array('i', (0 for x in range(siz)))
+        i:int = 0
+        @micropython.viper
+        def inner(v:int)->int:
+            nonlocal i
+            _o:int = int(power_meter_core(buf, v, i))
+            _i:int = (int(i)+1)%int(siz)
+            i = (_i<<1)|1 # INTEGER TO OBJECT HACK
+            return _o
+        return inner
+elif IS_UPY and HAS_VIPER:
+    def create_power_meter(siz,):
+        buf = array('i', (0 for x in range(siz)))
+        i:int = 0
+        @micropython.viper
+        def inner(v:int)->int:
+            nonlocal i
+            _buf = ptr32(buf)     # indexing ALWAYS return uint
+            _i:int = int(i)
+            _siz:int = int(siz)
+            _buf[_i] = v # ok, can assign negative number
+            _o:int = 0
+            for j in range(_siz):
+                _b:int = int(utoi32(_buf[j])) # cast to int32
+                _o += _b*_b
+            _o = int(isqrt(_o//_siz))
+            _i = (_i+1)%_siz
+            i = (_i<<1)|1 # INTEGER TO OBJECT HACK
+            return _o
+        return inner
+else:
+    def create_power_meter(siz,):
+        buf = array('i', (0 for x in range(siz)))
+        i = 0
+        def inner(v:int)->int:
+            nonlocal i
+            buf[i] = v
+            o = 0
+            for k in range(siz):
+                o += buf[k]*buf[k]
+            o = isqrt(o//siz)
+            i = (i+1)%siz
             return o
         return inner
 
@@ -321,7 +324,7 @@ if IS_UPY and HAS_C:
         scale:int = scale or 1
         @micropython.viper
         def inner(v:int)->int:
-            nonlocal ncoefs, coefs, buf, i, scale
+            nonlocal i
             # i, o = fir_core(coefs, buf, v, i, scale) # CALL C
             _o:int = int(fir_core(coefs, buf, v, i, scale)) # CALL C
             _i:int = (int(i)+1)%int(ncoefs)
@@ -330,35 +333,32 @@ if IS_UPY and HAS_C:
         return inner
 elif IS_UPY and HAS_VIPER:
     def create_fir(coefs, scale):
-        ncoefs = len(coefs)
-        _coefs = array('i', (coefs[i] for i in range(ncoefs)))
-        _buf = array('i', (0 for x in range(ncoefs)))
-        idx = 0
+        ncoefs:int = len(coefs)
+        coefs = array('i', (coefs[i] for i in range(ncoefs)))
+        buf = array('i', (0 for x in range(ncoefs)))
+        i:int = 0
         scale = scale or 1
-        _c = array('i',[idx, scale, ncoefs])
         @micropython.viper
         def inner(v:int)->int:
-            nonlocal _coefs, _buf, _c
+            nonlocal i
 
-            buf = ptr32(_buf)     # indexing ALWAYS return uint
-            coefs = ptr32(_coefs) # indexing ALWAYS return uint
-            c = ptr32(_c)
-            idx:int = c[0]
-            scale:int = c[1]
-            ncoefs:int = c[2]
+            _buf = ptr32(buf)     # indexing ALWAYS return uint
+            _coefs = ptr32(coefs) # indexing ALWAYS return uint
+            _i:int = int(i)
+            _scale:int = int(scale)
+            _ncoefs:int = int(ncoefs)
 
-            buf[idx] = v # ok, can assign negative number
-            o:int = 0
-            for i in range(ncoefs):
+            _buf[_i] = v # ok, can assign negative number
+            _o:int = 0
+            for j in range(_ncoefs):
                 # cast to negatives
                 # index directy from the array.array
-                x:int = int(_buf[(idx-i)%ncoefs])
-                y:int = int(_coefs[i])
-                o += (x * y) // scale
-            idx = (idx+1)%ncoefs
-            c[0] = idx
-            # eprint(o)
-            return o
+                _x:int = int(buf[(_i-j)%_ncoefs])
+                _y:int = int(coefs[j])
+                _o += (_x * _y) // _scale
+            _i = (_i+1)%_ncoefs
+            i = (_i<<1)|1 # INTEGER TO OBJECT HACK
+            return _o
         return inner
 else:
     def create_fir(coefs, scale):

@@ -14,7 +14,6 @@ from afsk.mod import AFSKModulator
 from ax25.ax25 import AX25
 from afsk.demod import AFSKDemodulator
 from ax25.from_afsk import AX25FromAFSK
-from afsk.func import afsk_detector
 from cdsp import i16tobs
 from afsk.func import bu16toi, bs16toi
 

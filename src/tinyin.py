@@ -41,8 +41,6 @@ cReadi16 = {
 }
 
 async def in_afsk(adc, rio, demod, do):
-    # bpf = demod.bpf
-    # pwrmtr = demod.pwrmtr
     pwrmtr = create_power_meter(siz = 20)
 
     read = adc.read_u16
@@ -57,6 +55,8 @@ async def in_afsk(adc, rio, demod, do):
     tim = Timer(1)
     tog = do.toggle
 
+    isin:int = 0
+
     # closure params saved as array
     # _c = array('i',[0,10,])
     # _arr = array('i', (0 for x in range(10)))
@@ -68,9 +68,11 @@ async def in_afsk(adc, rio, demod, do):
             stu.i16 = _o
             write(buf)
             tog() # debug
-            # _p:int = int(pwrmtr(bpf(_o)))
             _p:int = int(pwrmtr(_o))
-
+            if _p >= 300:
+                isin = 3 # HACK OBJECT VALUE = 1 ... (1<<1)|1
+            elif int(isin):
+                tsf.set()
         tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
         await tsf.wait()
 
@@ -85,7 +87,7 @@ async def start():
     tasks = []
     try:
         ax25_q = Queue()
-        rio = RingIO(500000)
+        rio = RingIO(100000)
 
         adc = ADC(Pin(_AFSK_IN_PIN, Pin.IN))
         do = Pin(_DEBUG_OUT_PIN, Pin.OUT)
@@ -109,14 +111,18 @@ async def start():
 
                     if rio.any() == 0:
                         break
+                    print(1)
 
                     # process results
                     await demod.stream_core(in_rx = rio)
+                    print(2)
 
                     # process ax25
                     while not ax25_q.empty():
+                        print(3)
                         ax25 = await ax25_q.get()
                         print(ax25)
+                    print(4)
 
                     # clean up
                     gc.collect()

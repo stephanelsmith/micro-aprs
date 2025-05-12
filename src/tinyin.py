@@ -24,6 +24,7 @@ from afsk.func import create_power_meter
 
 from cdsp import i16tobs
 from cdsp import utoi32
+from cdsp import utoi16
 from cdsp import isqrt
 
 import lib.upydash as _
@@ -37,15 +38,15 @@ _AFSK_IN_PIN = const(2)
 _DEBUG_OUT_PIN = const(6)
 
 cReadi16 = {
-    'i16'    : 0  | uctypes.INT16,
+    'u16'    : 0  | uctypes.UINT16,
 }
 
 async def in_afsk(adc, rio, demod, do):
-    pwrmtr = create_power_meter(siz = 20)
+    pwrmtr = create_power_meter(siz = 40)
 
     read = adc.read_u16
     write = rio.write
-    stdout = sys.stdout.write
+    # stdout = sys.stdout.write
 
     # pre-allocate read/write buffer
     buf = bytearray(uctypes.sizeof(cReadi16))
@@ -64,15 +65,20 @@ async def in_afsk(adc, rio, demod, do):
     try:
         @micropython.viper
         def cb(tim):
+            nonlocal isin
             _o:int = int(read()) # read from adc
-            stu.i16 = _o
+            stu.u16 = _o
             write(buf)
             tog() # debug
+            _o -= 32768 # u16 adc value convert to s16
             _p:int = int(pwrmtr(_o))
-            if _p >= 300:
+            # print(_o,_p)
+            _isin:int = int(isin)
+            if _p >= 10000 and _isin == 0:
                 isin = 3 # HACK OBJECT VALUE = 1 ... (1<<1)|1
-            elif int(isin):
+            if _p < 10000 and _isin == 1:
                 tsf.set()
+                tim.deinit()
         tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
         await tsf.wait()
 
@@ -89,7 +95,7 @@ async def start():
         ax25_q = Queue()
         rio = RingIO(100000)
 
-        adc = ADC(Pin(_AFSK_IN_PIN, Pin.IN))
+        adc = ADC(Pin(_AFSK_IN_PIN, Pin.IN), atten=ADC.ATTN_11DB)
         do = Pin(_DEBUG_OUT_PIN, Pin.OUT)
 
         bits_q = Queue()
@@ -106,6 +112,7 @@ async def start():
                                     verbose        = False):
                 while True:
                     # synchronous read from ADC
+                    print(0)
                     await in_afsk(adc, rio, demod, do)
                     print('READ: {}'.format(rio.any()))
 

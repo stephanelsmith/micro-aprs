@@ -42,6 +42,14 @@ static mp_obj_t mp_utoi32(mp_obj_t a_obj) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(utoi32_obj, mp_utoi32);
 
+// TO INT, perform a uint16 to int16 type cast
+// we need this in viper modules since all arrays are always uint
+static mp_obj_t mp_utoi16(mp_obj_t a_obj) {
+    uint16_t a = mp_obj_get_int(a_obj);
+    return mp_obj_new_int((int16_t)a);
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(utoi16_obj, mp_utoi16);
+
 // 2 BYTES (encoded as U16 or S16) to integer (unsigned shifted)
 // struct.unpack('<h', b)[0]
 // int.from_bytes(b, 'little', signed=True)
@@ -188,7 +196,7 @@ static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t i
     int32_t v = mp_obj_get_int(v_obj);
     int32_t idx = mp_obj_get_int(idx_obj);
 
-    int32_t a = 0;
+    int64_t a = 0;
     int32_t o = 0;
     int32_t siz = buf_array->len;
     int32_t *buf = buf_array->items;
@@ -283,6 +291,7 @@ static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_fir_core), MP_ROM_PTR(&fir_core_obj) },
     { MP_ROM_QSTR(MP_QSTR_power_meter_core), MP_ROM_PTR(&power_meter_core_obj) },
     { MP_ROM_QSTR(MP_QSTR_utoi32), MP_ROM_PTR(&utoi32_obj) },
+    { MP_ROM_QSTR(MP_QSTR_utoi16), MP_ROM_PTR(&utoi16_obj) },
     { MP_ROM_QSTR(MP_QSTR_bs16toi), MP_ROM_PTR(&bs16toi_obj) },
     { MP_ROM_QSTR(MP_QSTR_bu16toi), MP_ROM_PTR(&bu16toi_obj) },
     { MP_ROM_QSTR(MP_QSTR_i16tobs), MP_ROM_PTR(&i16tobs_obj) },

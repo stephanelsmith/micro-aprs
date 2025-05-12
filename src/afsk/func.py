@@ -31,6 +31,7 @@ else:
 
 if IS_UPY and HAS_C:
     from cdsp import utoi32
+    from cdsp import utoi16
 elif IS_UPY and HAS_VIPER:
     @micropython.viper
     def utoi32(u:int)->int:

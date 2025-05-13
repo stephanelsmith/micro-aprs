@@ -1,4 +1,4 @@
-# Micro APRS MODEM
+# A Python Micro APRS MODEM (TNC)
 
 A python/micropython based library for encoding/decoding, modulating/demodulating APRS/AX.25 packets in AFSK audio.  
 <!---

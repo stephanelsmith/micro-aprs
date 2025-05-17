@@ -208,6 +208,25 @@ static mp_obj_t test_struct(mp_obj_t a_obj) {
 static MP_DEFINE_CONST_FUN_OBJ_1(test_struct_obj, test_struct);
 
 
+static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
+
+    // GET AND PRINT CLASS ATTRIBUTE (INT)
+    // qstr attr_name = qstr_from_str("test");
+    // mp_obj_t attr_val = mp_load_attr(ctx_obj, attr_name);
+    // mp_int_t test_val = mp_obj_get_int(attr_val);
+    // mp_printf(MP_PYTHON_PRINTER, "test = %d\n", test_val);
+
+    // GET AND CALL CLASS METHOD
+    // mp_obj_t do_pin = mp_load_attr(ctx_obj, qstr_from_str("do"));
+    // mp_obj_t toggle_method = mp_load_attr(do_pin, qstr_from_str("toggle"));
+    mp_obj_t toggle_method = mp_load_attr(ctx_obj, MP_QSTR_tog);
+    mp_call_function_0(toggle_method);
+
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(tim_cb_obj, mp_tim_cb);
+
+
 
 // Define all properties of the module.
 // Table entries are key/value pairs of the attribute name (a string)

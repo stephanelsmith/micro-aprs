@@ -41,6 +41,19 @@ cReadi16 = {
     'u16'    : 0  | uctypes.UINT16,
 }
 
+from cdsp import tim_cb
+
+class TimerCallback:
+    def __init__(self, adc, do, tsf, rio):
+        self.test = 42
+        self.tog = do.toggle  # debug toggler
+        self.tsf_set = tsf.set
+        self.read = adc.read_u16
+        self.write = rio.write
+
+    def __call__(self, timer):
+        tim_cb(self)
+
 async def in_afsk(adc, rio, demod, do):
     pwrmtr = create_power_meter(siz = 40)
 
@@ -53,32 +66,33 @@ async def in_afsk(adc, rio, demod, do):
     stu = uctypes.struct(uctypes.addressof(buf),  cReadi16, uctypes.LITTLE_ENDIAN)
 
     tsf = ThreadSafeFlag()
-    tim = Timer(1)
-    tog = do.toggle
+    # tog = do.toggle
 
     isin:int = 0
 
-    # closure params saved as array
-    # _c = array('i',[0,10,])
-    # _arr = array('i', (0 for x in range(10)))
-
+    tim = Timer(1)
+    cb = TimerCallback(adc = adc,
+                       do  = do,
+                       tsf = tsf,
+                       rio = rio)
+    
     try:
-        @micropython.viper
-        def cb(tim):
-            nonlocal isin
-            _o:int = int(read()) # read from adc
-            stu.u16 = _o
-            write(buf)
-            tog() # debug
-            _o -= 32768 # u16 adc value convert to s16
-            _p:int = int(pwrmtr(_o))
-            # print(_o,_p)
-            _isin:int = int(isin)
-            if _p >= 10000 and _isin == 0:
-                isin = 3 # HACK OBJECT VALUE = 1 ... (1<<1)|1
-            if _p < 10000 and _isin == 1:
-                tsf.set()
-                tim.deinit()
+        # @micropython.viper
+        # def cb(tim):
+            # nonlocal isin
+            # _o:int = int(read()) # read from adc
+            # stu.u16 = _o
+            # write(buf)
+            # tog() # debug
+            # _o -= 32768 # u16 adc value convert to s16
+            # _p:int = int(pwrmtr(_o))
+            # # print(_o,_p)
+            # _isin:int = int(isin)
+            # if _p >= 10000 and _isin == 0:
+                # isin = 3 # HACK OBJECT VALUE = 1 ... (1<<1)|1
+            # if _p < 10000 and _isin == 1:
+                # tsf.set()
+                # tim.deinit()
         tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
         await tsf.wait()
 

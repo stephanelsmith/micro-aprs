@@ -277,6 +277,24 @@ static MP_DEFINE_CONST_FUN_OBJ_3(power_meter_core_obj, mp_power_meter_core);
 
 
 
+static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
+
+    // GET AND PRINT CLASS ATTRIBUTE (INT)
+    // qstr attr_name = qstr_from_str("test");
+    // mp_obj_t attr_val = mp_load_attr(ctx_obj, attr_name);
+    // mp_int_t test_val = mp_obj_get_int(attr_val);
+    // mp_printf(MP_PYTHON_PRINTER, "test = %d\n", test_val);
+
+    // GET AND CALL CLASS METHOD
+    // mp_obj_t do_pin = mp_load_attr(ctx_obj, qstr_from_str("do"));
+    // mp_obj_t toggle_method = mp_load_attr(do_pin, qstr_from_str("toggle"));
+    mp_obj_t toggle_method = mp_load_attr(ctx_obj, MP_QSTR_tog);
+    mp_call_function_0(toggle_method);
+
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(tim_cb_obj, mp_tim_cb);
+
 
 
 // Define all properties of the module.
@@ -290,6 +308,7 @@ static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_sign), MP_ROM_PTR(&sign_obj) },
     { MP_ROM_QSTR(MP_QSTR_fir_core), MP_ROM_PTR(&fir_core_obj) },
     { MP_ROM_QSTR(MP_QSTR_power_meter_core), MP_ROM_PTR(&power_meter_core_obj) },
+    { MP_ROM_QSTR(MP_QSTR_tim_cb), MP_ROM_PTR(&tim_cb_obj) },
     { MP_ROM_QSTR(MP_QSTR_utoi32), MP_ROM_PTR(&utoi32_obj) },
     { MP_ROM_QSTR(MP_QSTR_utoi16), MP_ROM_PTR(&utoi16_obj) },
     { MP_ROM_QSTR(MP_QSTR_bs16toi), MP_ROM_PTR(&bs16toi_obj) },

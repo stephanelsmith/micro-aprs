@@ -197,7 +197,7 @@ static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t i
     int32_t idx = mp_obj_get_int(idx_obj);
 
     int64_t a = 0;
-    int32_t o = 0;
+    int32_t p = 0;
     int32_t siz = buf_array->len;
     int32_t *buf = buf_array->items;
 
@@ -211,87 +211,87 @@ static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t i
 
     for(int32_t i=0; i<siz; i++){
         int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers
-        o += (buf[k]-a) * (buf[k]-a);
+        p += (buf[k]-a) * (buf[k]-a);
     }
-    o = isqrt32(o);
+    p = isqrt32(p);
 
-    return mp_obj_new_int(o);
+    return mp_obj_new_int(p);
 
     // PASSING A TUPLE IS SLOW, WE'LL CALC IDX IN PARENT
     // idx = (idx+1)%siz;
     // mp_obj_t ret = mp_obj_new_tuple(2, NULL);
     // mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);
     // tuple->items[0] = mp_obj_new_int(idx);
-    // tuple->items[1] = mp_obj_new_int(o);
+    // tuple->items[1] = mp_obj_new_int(p);
     // return ret;
 }
 static MP_DEFINE_CONST_FUN_OBJ_3(power_meter_core_obj, mp_power_meter_core);
-
-/*// POWER METER */
-/*// ARGS:  buf, siz, v, idx*/
-/*// OUT : tuple(idx, o)*/
-/*//static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t siz_obj, mp_obj_t v_obj, mp_obj_t idx_obj) {*/
-/*static mp_obj_t mp_power_meter_core(size_t n_args, const mp_obj_t *args) {*/
-    /*[>mp_obj_array_t *buf_array = MP_OBJ_TO_PTR(buf_obj);<]*/
-    /*[>int32_t v = mp_obj_get_int(v_obj);<]*/
-    /*[>int32_t siz = mp_obj_get_int(siz_obj);<]*/
-    /*[>int32_t idx = mp_obj_get_int(idx_obj);<]*/
-    /*(void)n_args; // always 5 args: coefs, buf, v, idx, scale*/
-    /*mp_obj_array_t *buf_array = MP_OBJ_TO_PTR(args[0]);*/
-    /*int32_t siz = mp_obj_get_int(args[1]);*/
-    /*int32_t v = mp_obj_get_int(args[2]);*/
-    /*int32_t idx = mp_obj_get_int(args[3]);*/
-
-    /*int32_t o = 0;*/
-    /*int32_t bufsiz = buf_array->len;*/
-    /*int32_t *buf = buf_array->items;*/
-
-    /*buf[idx] = v;*/
-      
-    /*// get average*/
-    /*int64_t avg = 0;*/
-    /*for(int64_t i=0; i<bufsiz; i++){*/
-        /*avg += buf[i];*/
-    /*}*/
-    /*avg /= bufsiz;*/
-    /*avg = 0;*/
-    /*//avg = 337;*/
-
-    /*//*/
-    /*for(int32_t i=0; i<siz; i++){*/
-        /*int32_t k = idx-i>=0 ? idx-i : bufsiz+idx-i; // emulate python mod for negative numbers*/
-        /*int64_t x = (int64_t)buf[k] - avg;*/
-        /*o += x*x;*/
-    /*}*/
-    /*o = isqrt32(o);*/
-    /*idx = (idx+1)%siz;*/
-
-    /*mp_obj_t ret = mp_obj_new_tuple(2, NULL);*/
-    /*mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);*/
-    /*tuple->items[0] = mp_obj_new_int(idx);*/
-    /*tuple->items[1] = mp_obj_new_int(o);*/
-    /*return ret;*/
-/*}*/
-/*[>static MP_DEFINE_CONST_FUN_OBJ_4(power_meter_core_obj, mp_power_meter_core);<]*/
-/*MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(power_meter_core_obj, 4, 4, mp_power_meter_core);*/
 
 
 
 static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
 
-    // GET AND PRINT CLASS ATTRIBUTE (INT)
-    // qstr attr_name = qstr_from_str("test");
-    // mp_obj_t attr_val = mp_load_attr(ctx_obj, attr_name);
-    // mp_int_t test_val = mp_obj_get_int(attr_val);
-    // mp_printf(MP_PYTHON_PRINTER, "test = %d\n", test_val);
-
-    // GET AND CALL CLASS METHOD
-    // mp_obj_t do_pin = mp_load_attr(ctx_obj, qstr_from_str("do"));
-    // mp_obj_t toggle_method = mp_load_attr(do_pin, qstr_from_str("toggle"));
+    // toggle debug pin
     mp_obj_t toggle_method = mp_load_attr(ctx_obj, MP_QSTR_tog);
     mp_call_function_0(toggle_method);
 
-    return mp_const_none;
+    // read from adc
+    mp_obj_t read_method = mp_load_attr(ctx_obj, MP_QSTR_read);
+    mp_obj_t o_obj = mp_call_function_0(read_method);
+    int32_t o = mp_obj_get_int(o_obj);
+    // mp_printf(MP_PYTHON_PRINTER, "%d ", o);
+
+    // write adc value into our pre-allocated buffer
+    mp_obj_t buf_obj = mp_load_attr(ctx_obj, MP_QSTR_buf);
+	mp_buffer_info_t bufinfo;
+	mp_get_buffer(buf_obj, &bufinfo, MP_BUFFER_READ|MP_BUFFER_WRITE);
+    uint8_t *bufin = bufinfo.buf;
+    *((uint16_t *)bufin) = (uint16_t)o; // int(o).to_bytes(2,'little')
+                                        
+    // write bytes to ringio
+    mp_obj_t write_method = mp_load_attr(ctx_obj, MP_QSTR_write);
+    mp_call_function_1(write_method, buf_obj);
+
+    // power meter
+    static int32_t buf[20];
+    static int32_t siz = 20;
+    static int32_t idx = 0;
+    int64_t a = 0;
+    int32_t p = 0;
+    buf[idx] = o;
+    for(int32_t i=0; i<siz; i++){
+        a += buf[i];
+    }
+    a /= siz;
+    for(int32_t i=0; i<siz; i++){
+        int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers
+        p += (buf[k]-a) * (buf[k]-a);
+    }
+    p = isqrt32(p);
+    idx = (idx+1)%siz;
+
+    // get current state, isin attr
+    mp_obj_t isin_attr = mp_load_attr(ctx_obj, MP_QSTR_isin);
+    int32_t isin = mp_obj_get_int(isin_attr);
+
+    // check powermeter level and state to determine edge
+    if(p >= 200 && isin == 0){
+        // set isin to 1
+        mp_store_attr(ctx_obj, MP_QSTR_isin, mp_obj_new_int(1));
+    }
+    if(p < 200 && isin == 1){
+        // call tsf.set()
+        mp_obj_t tsfset_method = mp_load_attr(ctx_obj, MP_QSTR_tsfset);
+        mp_call_function_0(tsfset_method);
+
+        // // deinit the timer
+        // mp_obj_t deinit_method = mp_load_attr(ctx_obj, MP_QSTR_deinit);
+        // mp_call_function_0(deinit_method);
+        return mp_obj_new_int(0);
+    }
+
+    return mp_obj_new_int(1);
+    // return mp_const_none;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(tim_cb_obj, mp_tim_cb);
 

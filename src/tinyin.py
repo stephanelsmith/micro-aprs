@@ -41,61 +41,80 @@ cReadi16 = {
     'u16'    : 0  | uctypes.UINT16,
 }
 
-from cdsp import tim_cb
-
-class TimerCallback:
-    def __init__(self, adc, do, tsf, rio):
-        self.test = 42
-        self.tog = do.toggle  # debug toggler
-        self.tsf_set = tsf.set
-        self.read = adc.read_u16
-        self.write = rio.write
-
-    def __call__(self, timer):
-        tim_cb(self)
-
 async def in_afsk(adc, rio, demod, do):
     pwrmtr = create_power_meter(siz = 40)
 
     read = adc.read_u16
     write = rio.write
-    # stdout = sys.stdout.write
 
     # pre-allocate read/write buffer
     buf = bytearray(uctypes.sizeof(cReadi16))
     stu = uctypes.struct(uctypes.addressof(buf),  cReadi16, uctypes.LITTLE_ENDIAN)
 
     tsf = ThreadSafeFlag()
-    # tog = do.toggle
+    tog = do.toggle
 
     isin:int = 0
 
     tim = Timer(1)
-    cb = TimerCallback(adc = adc,
-                       do  = do,
-                       tsf = tsf,
-                       rio = rio)
     
     try:
-        # @micropython.viper
-        # def cb(tim):
-            # nonlocal isin
-            # _o:int = int(read()) # read from adc
-            # stu.u16 = _o
-            # write(buf)
-            # tog() # debug
-            # _o -= 32768 # u16 adc value convert to s16
-            # _p:int = int(pwrmtr(_o))
-            # # print(_o,_p)
-            # _isin:int = int(isin)
-            # if _p >= 10000 and _isin == 0:
-                # isin = 3 # HACK OBJECT VALUE = 1 ... (1<<1)|1
-            # if _p < 10000 and _isin == 1:
-                # tsf.set()
-                # tim.deinit()
+        @micropython.viper
+        def cb(tim):
+            nonlocal isin
+            _o:int = int(read()) # read from adc
+            stu.u16 = _o
+            write(buf)
+            tog() # debug
+            _o -= 32768 # u16 adc value convert to s16
+            _p:int = int(pwrmtr(_o))
+            # print(_o,_p)
+            _isin:int = int(isin)
+            if _p >= 10000 and _isin == 0:
+                isin = 3 # HACK OBJECT VALUE = 1 ... (1<<1)|1
+            if _p < 10000 and _isin == 1:
+                tsf.set()
+                tim.deinit()
         tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
         await tsf.wait()
 
+    except Exception as err:
+        sys.print_exception(err)
+    finally:
+        tim.deinit()
+
+from cdsp import tim_cb
+
+class TimerCallback:
+    def __init__(self, adc, do, tsf, rio, pwrmtr, tim):
+        self.test = 42
+        self.tog = do.toggle
+        self.tsfset = tsf.set
+        self.read = adc.read_u16
+        self.write = rio.write
+        self.pwrmtr = pwrmtr
+        self.deinit = tim.deinit
+        self.buf = bytearray(2)
+        self.isin = 0
+
+    def __call__(self, timer):
+        if not tim_cb(self):
+            timer.deinit()
+
+async def in_afsk2(adc, rio, demod, do):
+    pwrmtr = create_power_meter(siz = 40)
+    tim = Timer(1)
+    tsf = ThreadSafeFlag()
+    cb = TimerCallback(adc    = adc,
+                       do     = do,
+                       tsf    = tsf,
+                       rio    = rio,
+                       pwrmtr = pwrmtr,
+                       tim    = tim)
+    
+    try:
+        tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
+        await tsf.wait()
     except Exception as err:
         sys.print_exception(err)
     finally:
@@ -127,7 +146,7 @@ async def start():
                 while True:
                     # synchronous read from ADC
                     print(0)
-                    await in_afsk(adc, rio, demod, do)
+                    await in_afsk2(adc, rio, demod, do)
                     print('READ: {}'.format(rio.any()))
 
                     if rio.any() == 0:
@@ -147,6 +166,7 @@ async def start():
 
                     # clean up
                     gc.collect()
+                    return
 
         await asyncio.gather(*tasks, return_exceptions=True)
 

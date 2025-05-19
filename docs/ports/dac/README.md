@@ -6,11 +6,14 @@ The recommended way forward is to either use the PWM (their LEDC peripheral) or 
 
 Here we choose the PWM route simply because Micropython already has PWM support for the ESP32S3 target.  
 
-### Passive filter
+### Input/Output Filters
 
-We also implement a basic LPF, where $` R = 5.6k Ohm `$ and $` C = 4.7n F `$.  That gives about a 7kHz cutoff covering $`f_{mark} = 1200Hz`$ and $`f_{space} = 2200Hz`$.
+#### Output filter
+As the PWM is digital, and output LPF, where $` R = 5.6k Ohm `$ and $` C = 47n F `$.  That gives about a 600Hz cutoff covering $`f_{mark} = 1200Hz`$ and $`f_{space} = 2200Hz`$.
 
-<img src="lpf.png?raw=true" alt="" width="600">
+[Click here to visit CircuitJs simulation](https://www.falstad.com/circuit/circuitjs.html?ctz=CQAgjCAMB0l3BWc0DscBMkDMBOHAWOAydEBSMsihAUwFowwAoAcxEIq03bhCwVIVITAE4h0CAGzhJFDjKFlZwgMY8KYWer7d87VPENHIYejmQo86fCgnWw+BAA5BsE1CaYU4yE-D49TD9GUj0ANwBLADtPSG95TTleEPYQMIB7AFcAFyYAdz4BBW1EjwKg4oqHPWFy30qpYuEAJWKwFGlS9GtwcXFyPnFoJCFhpi760rB0YK1SbjBjQyGEJjD2YIDwGf8a3unk4eQRqDH1-GCO7cvpDXFMDSOwI9HVtgvwK4+KoXyNz+kH2qHnSqQgGm6OD86GgeBwKFs6HaJnwOGctzc7gopCwHiAA)
+<br>
+<img src="circuit-20250518-2010.svg" alt="" width="600">
 
 ### DMA-like output at fixed frequency
 

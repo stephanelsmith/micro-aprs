@@ -70,9 +70,9 @@ async def in_afsk(adc, rio, demod, do):
             _p:int = int(pwrmtr(_o))
             # print(_o,_p)
             _isin:int = int(isin)
-            if _p >= 10000 and _isin == 0:
+            if _p >= 300 and _isin == 0:
                 isin = 3 # HACK OBJECT VALUE = 1 ... (1<<1)|1
-            if _p < 10000 and _isin == 1:
+            if _p < 300 and _isin == 1:
                 tsf.set()
                 tim.deinit()
         tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
@@ -86,30 +86,36 @@ async def in_afsk(adc, rio, demod, do):
 from cdsp import tim_cb
 
 class TimerCallback:
-    def __init__(self, adc, do, tsf, rio, pwrmtr, tim):
+    def __init__(self, adc, do, tsf, rio, tim):
         self.test = 42
         self.tog = do.toggle
         self.tsfset = tsf.set
         self.read = adc.read_u16
         self.write = rio.write
-        self.pwrmtr = pwrmtr
+        # self.pwrmtr = pwrmtr
         self.deinit = tim.deinit
         self.buf = bytearray(2)
-        self.isin = 0
+        self.state = 0
+        # self.rst = 1
+        self.siz = 10
+        self.arr = array('i', [0 for x in range(self.siz)])
+        self.idx = 0
+        self.cnt = 0
 
     def __call__(self, timer):
-        if not tim_cb(self):
-            timer.deinit()
+        # if not tim_cb(self):
+            # timer.deinit()
+        tim_cb(self)
 
 async def in_afsk2(adc, rio, demod, do):
-    pwrmtr = create_power_meter(siz = 40)
+    # pwrmtr = create_power_meter(siz = 40)
     tim = Timer(1)
     tsf = ThreadSafeFlag()
     cb = TimerCallback(adc    = adc,
                        do     = do,
                        tsf    = tsf,
                        rio    = rio,
-                       pwrmtr = pwrmtr,
+                       # pwrmtr = pwrmtr,
                        tim    = tim)
     
     try:
@@ -145,28 +151,28 @@ async def start():
                                     verbose        = False):
                 while True:
                     # synchronous read from ADC
-                    print(0)
+                    # print(0)
                     await in_afsk2(adc, rio, demod, do)
                     print('READ: {}'.format(rio.any()))
 
                     if rio.any() == 0:
                         break
-                    print(1)
+                    # print(1)
 
                     # process results
                     await demod.stream_core(in_rx = rio)
-                    print(2)
+                    # print(2)
 
                     # process ax25
                     while not ax25_q.empty():
-                        print(3)
+                        # print(3)
                         ax25 = await ax25_q.get()
                         print(ax25)
-                    print(4)
+                    # print(4)
 
                     # clean up
                     gc.collect()
-                    return
+                    # return
 
         await asyncio.gather(*tasks, return_exceptions=True)
 

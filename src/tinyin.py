@@ -119,7 +119,7 @@ async def start():
                     if rio.any() == 0:
                         async with lck:
                             await in_afsk(timcb)
-                        rio.write(b'\x7f'*1000)
+                        # rio.write(b'\x7f'*1000)
                         await asyncio.sleep_ms(10)
                     print('READ: {}'.format(rio.any()))
 

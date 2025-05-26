@@ -37,70 +37,21 @@ _FOUT = 11_025
 _AFSK_IN_PIN = const(2)
 _DEBUG_OUT_PIN = const(6)
 
-cReadi16 = {
-    'u16'    : 0  | uctypes.UINT16,
-}
-
-async def in_afsk(adc, rio, demod, do):
-    pwrmtr = create_power_meter(siz = 40)
-
-    read = adc.read_u16
-    write = rio.write
-
-    # pre-allocate read/write buffer
-    buf = bytearray(uctypes.sizeof(cReadi16))
-    stu = uctypes.struct(uctypes.addressof(buf),  cReadi16, uctypes.LITTLE_ENDIAN)
-
-    tsf = ThreadSafeFlag()
-    tog = do.toggle
-
-    isin:int = 0
-
-    tim = Timer(1)
-    
-    try:
-        @micropython.viper
-        def cb(tim):
-            nonlocal isin
-            _o:int = int(read()) # read from adc
-            stu.u16 = _o
-            write(buf)
-            tog() # debug
-            _o -= 32768 # u16 adc value convert to s16
-            _p:int = int(pwrmtr(_o))
-            # print(_o,_p)
-            _isin:int = int(isin)
-            if _p >= 300 and _isin == 0:
-                isin = 3 # HACK OBJECT VALUE = 1 ... (1<<1)|1
-            if _p < 300 and _isin == 1:
-                tsf.set()
-                tim.deinit()
-        tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
-        await tsf.wait()
-
-    except Exception as err:
-        sys.print_exception(err)
-    finally:
-        tim.deinit()
-
 from cdsp import tim_cb
 
-class TimerCallback:
+class TimCB:
     def __init__(self, adc, do, tsf, rio, tim):
-        self.test = 42
         self.tog = do.toggle
         self.tsfset = tsf.set
         self.read = adc.read_u16
         self.write = rio.write
-        # self.pwrmtr = pwrmtr
         self.deinit = tim.deinit
+
         self.buf = bytearray(2)
         self.state = 0
-        # self.rst = 1
-        self.siz = 10
-        self.arr = array('i', [0 for x in range(self.siz)])
-        self.idx = 0
-        self.cnt = 0
+        self.cnt = 0 # count the number of iterations
+        self.arr = array('i', [0 for x in range(100)]) # the buffer
+        self.idx = 0 # indexing position
 
     def __call__(self, timer):
         # if not tim_cb(self):
@@ -108,15 +59,13 @@ class TimerCallback:
         tim_cb(self)
 
 async def in_afsk2(adc, rio, demod, do):
-    # pwrmtr = create_power_meter(siz = 40)
     tim = Timer(1)
     tsf = ThreadSafeFlag()
-    cb = TimerCallback(adc    = adc,
-                       do     = do,
-                       tsf    = tsf,
-                       rio    = rio,
-                       # pwrmtr = pwrmtr,
-                       tim    = tim)
+    cb = TimCB(adc    = adc,
+               do     = do,
+               tsf    = tsf,
+               rio    = rio,
+               tim    = tim)
     
     try:
         tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
@@ -134,13 +83,14 @@ async def start():
         ax25_q = Queue()
         rio = RingIO(100000)
 
-        adc = ADC(Pin(_AFSK_IN_PIN, Pin.IN), atten=ADC.ATTN_11DB)
+        # adc = ADC(Pin(_AFSK_IN_PIN, Pin.IN), atten=ADC.ATTN_11DB)
+        adc = ADC(Pin(_AFSK_IN_PIN, Pin.IN))
         do = Pin(_DEBUG_OUT_PIN, Pin.OUT)
 
         bits_q = Queue()
         async with AFSKDemodulator(sampling_rate = _FOUT,
                                    in_rx         = None,   # don't launch core task
-                                   stream_type   = 'u16',
+                                   stream_type   = 's16',
                                    bits_out_q    = bits_q,
                                    is_embedded   = True,
                                    options       = {},

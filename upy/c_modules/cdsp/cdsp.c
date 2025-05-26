@@ -241,6 +241,7 @@ static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
     mp_obj_t read_method = mp_load_attr(ctx_obj, MP_QSTR_read);
     mp_obj_t o_obj = mp_call_function_0(read_method);
     int32_t o = mp_obj_get_int(o_obj);
+    o -= 32768; // unsigned to signed
 
     // write adc value into our pre-allocated buffer
     mp_obj_t buf_obj = mp_load_attr(ctx_obj, MP_QSTR_buf);
@@ -258,57 +259,55 @@ static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
     // get the cnt
     mp_obj_t cnt_attr = mp_load_attr(ctx_obj, MP_QSTR_cnt);
     int32_t cnt = mp_obj_get_int(cnt_attr);
-    mp_store_attr(ctx_obj, MP_QSTR_cnt, mp_obj_new_int(cnt+1));
+    cnt += 1;
+    mp_store_attr(ctx_obj, MP_QSTR_cnt, mp_obj_new_int(cnt));
 
     // get the idx
-    // mp_obj_t idx_attr = mp_load_attr(ctx_obj, MP_QSTR_idx);
-    // int32_t idx = mp_obj_get_int(idx_attr);
-    int32_t idx = cnt % siz;
+    mp_obj_t idx_attr = mp_load_attr(ctx_obj, MP_QSTR_idx);
+    int32_t idx = mp_obj_get_int(idx_attr);
     
-
     // write into internal array
-    arr[idx] = (int32_t)o;
-    // mp_printf(MP_PYTHON_PRINTER, "%d ", o);
+    arr[idx] = o;
 
+    #define PMDEPTH 60
+    if(cnt < PMDEPTH){
+        return mp_const_none;
+    }
 
-    int32_t a = 8200; // TODO, WHY?
-    // for(int32_t i=0; i<siz; i++){
-        // a += arr[i];
-    // }
-    // a /= siz;
-    int64_t p = 0;
-    for(int32_t i=0; i<siz; i++){
-        p += ((arr[i]-a) * (arr[i]-a)) / siz;
+    // int32_t a  32768; // mid-point
+    int32_t a = 0;
+    int32_t sizcnt = cnt < siz ? cnt : siz;
+    for(int32_t i=0; i<sizcnt; i++){
+        a += arr[i]/sizcnt;
+    }
+    int32_t p = 0;
+    int32_t dep = PMDEPTH;
+    for(int32_t i=0; i<dep; i++){
+        int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers
+        p += ((arr[k]-a) * (arr[k]-a)) / dep;
     }
     p = isqrt32(p);
-    // mp_printf(MP_PYTHON_PRINTER, "%d ", p);
+
+    // if(cnt%20==0){
+        // mp_printf(MP_PYTHON_PRINTER, "%d ", p);
+    // }
+
+    // save idx
+    idx = (idx+1)%siz;
+    mp_store_attr(ctx_obj, MP_QSTR_idx, mp_obj_new_int(idx));
     
-    // update and save idx
-    // idx = (idx+1)%siz;
-    // mp_store_attr(ctx_obj, MP_QSTR_idx, mp_obj_new_int(idx));
-
-    // mp_obj_t cnt_attr = mp_load_attr(ctx_obj, MP_QSTR_cnt);
-    // int32_t cnt = mp_obj_get_int(cnt_attr);
-
-    // check powermeter level and state to determine edge
-    if(cnt > siz && p >= 4000 && state == 0){
-    // if(o >= 10000 && state == 0){
-        // set state to 1
+    if(p >= 5000 && state == 0){
         mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(1));
-        // mp_printf(MP_PYTHON_PRINTER, "IN %d ", p);
-
-        // cnt = 0;
-        // mp_store_attr(ctx_obj, MP_QSTR_cnt, mp_obj_new_int(cnt));
     }
     if(state == 1){
         mp_obj_t write_method = mp_load_attr(ctx_obj, MP_QSTR_write);
         mp_call_function_1(write_method, buf_obj);
-        // cnt += 1;
-        // mp_store_attr(ctx_obj, MP_QSTR_cnt, mp_obj_new_int(cnt));
-     }
-    if(p < 1000 && state == 1){
-        // set state to 2
+    }
+    if(p < 2500 && state == 1){
         mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(2));
+    }
+    if(state == 2){
+        mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(3));
 
         // call tsf.set()
         mp_obj_t tsfset_method = mp_load_attr(ctx_obj, MP_QSTR_tsfset);
@@ -317,8 +316,6 @@ static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
         // deinit the timer
         mp_obj_t deinit_method = mp_load_attr(ctx_obj, MP_QSTR_deinit);
         mp_call_function_0(deinit_method);
-        // mp_printf(MP_PYTHON_PRINTER, "OUT %d ", p);
-        // return mp_obj_new_int(0);
     }
 
     // return mp_obj_new_int(1);

@@ -248,7 +248,9 @@ static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
 	mp_buffer_info_t bufinfo;
 	mp_get_buffer(buf_obj, &bufinfo, MP_BUFFER_READ|MP_BUFFER_WRITE);
     uint8_t *bufin = bufinfo.buf;
-    *((uint16_t *)bufin) = (uint16_t)o; // int(o).to_bytes(2,'little')
+
+    // get write method
+    mp_obj_t write_method = mp_load_attr(ctx_obj, MP_QSTR_write);
                                         
     // get the array, typecode 'i'
     mp_obj_t arr_obj = mp_load_attr(ctx_obj, MP_QSTR_arr);
@@ -269,53 +271,52 @@ static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
     // write into internal array
     arr[idx] = o;
 
-    #define PMDEPTH 60
-    if(cnt < PMDEPTH){
+    if(cnt < siz){
         return mp_const_none;
     }
 
-    // int32_t a  32768; // mid-point
     int32_t a = 0;
-    int32_t sizcnt = cnt < siz ? cnt : siz;
-    for(int32_t i=0; i<sizcnt; i++){
-        a += arr[i]/sizcnt;
-    }
+    // int32_t sizcnt = cnt < siz ? cnt : siz;
+    // for(int32_t i=0; i<siz; i++){
+        // a += arr[i]/siz;
+    // }
     int32_t p = 0;
-    int32_t dep = PMDEPTH;
-    for(int32_t i=0; i<dep; i++){
+    for(int32_t i=0; i<siz; i++){
         int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers
-        p += ((arr[k]-a) * (arr[k]-a)) / dep;
+        p += ((arr[k]-a) * (arr[k]-a)) / siz;
     }
     p = isqrt32(p);
-
-    // if(cnt%20==0){
-        // mp_printf(MP_PYTHON_PRINTER, "%d ", p);
-    // }
 
     // save idx
     idx = (idx+1)%siz;
     mp_store_attr(ctx_obj, MP_QSTR_idx, mp_obj_new_int(idx));
     
-    if(p >= 5000 && state == 0){
+    if(p >= 6000 && state == 0){
         mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(1));
+        // write everything in the buffer in order except current point
+        for(int32_t i=1; i<siz; i++){
+            int32_t k = (idx+i)%siz;
+            *((uint16_t *)bufin) = (uint16_t)arr[k];
+            mp_call_function_1(write_method, buf_obj);
+        }
     }
     if(state == 1){
-        mp_obj_t write_method = mp_load_attr(ctx_obj, MP_QSTR_write);
+        *((uint16_t *)bufin) = (uint16_t)o; // int(o).to_bytes(2,'little')
         mp_call_function_1(write_method, buf_obj);
     }
     if(p < 2500 && state == 1){
-        mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(2));
-    }
-    if(state == 2){
-        mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(3));
+        // mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(2));
+    // }
+    // if(state == 2){
+        // deinit the timer
+        mp_obj_t deinit_method = mp_load_attr(ctx_obj, MP_QSTR_deinit);
+        mp_call_function_0(deinit_method);
+
+        // mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(3));
 
         // call tsf.set()
         mp_obj_t tsfset_method = mp_load_attr(ctx_obj, MP_QSTR_tsfset);
         mp_call_function_0(tsfset_method);
-
-        // deinit the timer
-        mp_obj_t deinit_method = mp_load_attr(ctx_obj, MP_QSTR_deinit);
-        mp_call_function_0(deinit_method);
     }
 
     // return mp_obj_new_int(1);

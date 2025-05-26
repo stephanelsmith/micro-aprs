@@ -11,6 +11,7 @@ from machine import ADC
 from machine import Pin
 from machine import Timer
 from asyncio import ThreadSafeFlag
+from asyncio import Lock
 import uctypes
 
 from lib.compat import Queue
@@ -40,17 +41,23 @@ _DEBUG_OUT_PIN = const(6)
 from cdsp import tim_cb
 
 class TimCB:
-    def __init__(self, adc, do, tsf, rio, tim):
+    def __init__(self, adc, do, rio, tim):
         self.tog = do.toggle
-        self.tsfset = tsf.set
         self.read = adc.read_u16
         self.write = rio.write
         self.deinit = tim.deinit
+        self.tim = tim
 
         self.buf = bytearray(2)
         self.state = 0
         self.cnt = 0 # count the number of iterations
-        self.arr = array('i', [0 for x in range(100)]) # the buffer
+        self.arr = array('i', [0 for x in range(30)]) # the buffer
+        self.idx = 0 # indexing position
+
+    def reset(self, tsf):
+        self.tsfset = tsf.set
+        self.state = 0
+        self.cnt = 0 # count the number of iterations
         self.idx = 0 # indexing position
 
     def __call__(self, timer):
@@ -58,17 +65,13 @@ class TimCB:
             # timer.deinit()
         tim_cb(self)
 
-async def in_afsk2(adc, rio, demod, do):
-    tim = Timer(1)
+async def in_afsk(timcb):
     tsf = ThreadSafeFlag()
-    cb = TimCB(adc    = adc,
-               do     = do,
-               tsf    = tsf,
-               rio    = rio,
-               tim    = tim)
-    
+    timcb.reset(tsf = tsf)
+    tim = timcb.tim
+   
     try:
-        tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=cb)
+        tim.init(mode=Timer.PERIODIC, freq=_FOUT, callback=timcb)
         await tsf.wait()
     except Exception as err:
         sys.print_exception(err)
@@ -81,11 +84,17 @@ async def start():
     tasks = []
     try:
         ax25_q = Queue()
-        rio = RingIO(100000)
+        rio = RingIO(50_000)
 
-        # adc = ADC(Pin(_AFSK_IN_PIN, Pin.IN), atten=ADC.ATTN_11DB)
         adc = ADC(Pin(_AFSK_IN_PIN, Pin.IN))
         do = Pin(_DEBUG_OUT_PIN, Pin.OUT)
+        tim = Timer(1)
+        lck = Lock()
+
+        timcb = TimCB(adc    = adc,
+                      do     = do,
+                      rio    = rio,
+                      tim    = tim)
 
         bits_q = Queue()
         async with AFSKDemodulator(sampling_rate = _FOUT,
@@ -102,7 +111,8 @@ async def start():
                 while True:
                     # synchronous read from ADC
                     # print(0)
-                    await in_afsk2(adc, rio, demod, do)
+                    async with lck:
+                        await in_afsk(timcb)
                     print('READ: {}'.format(rio.any()))
 
                     if rio.any() == 0:

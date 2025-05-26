@@ -84,7 +84,7 @@ async def start():
     tasks = []
     try:
         ax25_q = Queue()
-        rio = RingIO(50_000)
+        rio = RingIO(20_000)
 
         adc = ADC(Pin(_AFSK_IN_PIN, Pin.IN))
         do = Pin(_DEBUG_OUT_PIN, Pin.OUT)
@@ -130,6 +130,8 @@ async def start():
                     # process results
                     print('demod')
                     await demod.stream_core(in_rx = rio)
+                    await demod.join()
+                    await bits_q.join()
                     # print(2)
 
                     # process ax25

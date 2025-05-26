@@ -40,42 +40,38 @@ async def gc_coro():
 async def start():
 
     try:
+        pwm = PWM(Pin(_AFSK_OUT_PIN), freq=_FPWM, duty_u16=0) # resolution = 26.2536 - 1.4427 log(fpwm)
         gc_task = asyncio.create_task(gc_coro())
 
         async with AFSKModulator(sampling_rate = _FOUT,
                                  signed        = False,
                                  verbose       = False) as afsk_mod:
-            aprs = b'KI5TOF>APRS:>hello world!'
-            ax25 = AX25(aprs    = aprs,
-                        verbose = False,)
-            #AFSK
-            afsk,stop_bit = ax25.to_afsk()
-            # print(afsk)
-
-            await afsk_mod.pad_zeros(ms = 10)
-            await afsk_mod.send_flags(10)
-            await afsk_mod.to_samples(afsk     = afsk, 
-                                      stop_bit = stop_bit,
-                                      )
-            await afsk_mod.send_flags(2)
-            await afsk_mod.pad_zeros(ms = 10)
-            arr,siz = await afsk_mod.flush()
-
-        x = 0
-
-        try:
-            pwm = PWM(Pin(_AFSK_OUT_PIN), freq=_FPWM, duty_u16=0) # resolution = 26.2536 - 1.4427 log(fpwm)
+            x = 0
             while True:
-                print('loop {}'.format(x))
+                aprs = b'KI5TOF>APRS:>hello world {}'.format(x)
+                ax25 = AX25(aprs    = aprs,
+                            verbose = False,)
+                #AFSK
+                afsk,stop_bit = ax25.to_afsk()
+
+                await afsk_mod.pad_zeros(ms = 10)
+                await afsk_mod.send_flags(10)
+                await afsk_mod.to_samples(afsk     = afsk, 
+                                        stop_bit = stop_bit,
+                                        )
+                await afsk_mod.send_flags(2)
+                await afsk_mod.pad_zeros(ms = 10)
+                arr,siz = await afsk_mod.flush()
+
+                print(aprs)
                 await out_afsk(pwm, arr, siz, _FOUT)
                 x += 1
                 await asyncio.sleep_ms(5000)
-        finally:
-            pwm.deinit()
 
     except Exception as err:
         sys.print_exception(err)
     finally:
+        pwm.deinit()
         gc_task.cancel()
 
 def main():

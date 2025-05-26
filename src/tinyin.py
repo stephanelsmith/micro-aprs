@@ -108,18 +108,27 @@ async def start():
             async with AX25FromAFSK(bits_in_q      = bits_q,
                                     ax25_q         = ax25_q,
                                     verbose        = False):
+
+                # warmup
+                # rio.write(b'\x7f'*10000)
+
                 while True:
                     # synchronous read from ADC
                     # print(0)
-                    async with lck:
-                        await in_afsk(timcb)
+                    print('top')
+                    if rio.any() == 0:
+                        async with lck:
+                            await in_afsk(timcb)
+                        rio.write(b'\x7f'*1000)
+                        await asyncio.sleep_ms(10)
                     print('READ: {}'.format(rio.any()))
 
-                    if rio.any() == 0:
-                        break
+                    # if rio.any() == 0:
+                        # break
                     # print(1)
 
                     # process results
+                    print('demod')
                     await demod.stream_core(in_rx = rio)
                     # print(2)
 
@@ -131,8 +140,9 @@ async def start():
                     # print(4)
 
                     # clean up
+                    print('collect')
                     gc.collect()
-                    # return
+                    await asyncio.sleep_ms(100)
 
         await asyncio.gather(*tasks, return_exceptions=True)
 

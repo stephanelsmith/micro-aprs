@@ -51,7 +51,7 @@ class TimCB:
         self.buf = bytearray(2)
         self.state = 0
         self.cnt = 0 # count the number of iterations
-        self.arr = array('i', [0 for x in range(30)]) # the buffer
+        self.arr = array('i', [0 for x in range(50)]) # the buffer
         self.idx = 0 # indexing position
 
     def reset(self, tsf):

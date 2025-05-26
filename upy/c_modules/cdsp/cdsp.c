@@ -291,7 +291,7 @@ static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
     idx = (idx+1)%siz;
     mp_store_attr(ctx_obj, MP_QSTR_idx, mp_obj_new_int(idx));
     
-    if(p >= 6000 && state == 0){
+    if(p >= 5000 && state == 0){
         mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(1));
         // write everything in the buffer in order except current point
         for(int32_t i=1; i<siz; i++){
@@ -304,7 +304,7 @@ static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
         *((uint16_t *)bufin) = (uint16_t)o; // int(o).to_bytes(2,'little')
         mp_call_function_1(write_method, buf_obj);
     }
-    if(p < 2500 && state == 1){
+    if(p < 3000 && state == 1){
         // mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(2));
     // }
     // if(state == 2){

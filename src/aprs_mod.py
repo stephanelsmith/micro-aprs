@@ -21,7 +21,7 @@ from lib.compat import get_stdin_streamreader
 
 if not IS_UPY:
     import wave
-    from subprocess import check_output
+    # from subprocess import check_output
 
 async def read_aprs_from_pipe(aprs_q, 
                               ):
@@ -34,7 +34,7 @@ async def read_aprs_from_pipe(aprs_q,
                 buf[idx:idx+1] = await reader.readexactly(1)
             except EOFError:
                 break #eof break
-            if buf[idx] == 10: #\n
+            if buf[idx] == 10: # \n
                 await aprs_q.put(bytes(buf[:idx]))
                 idx = 0
                 continue
@@ -57,10 +57,10 @@ async def afsk_mod(aprs_q,
                                  verbose       = verbose) as afsk_mod:
 
             while True:
-                #get aprs from input
+                # get aprs from input
                 aprs = await aprs_q.get()
 
-                #try to process as ax25
+                # try to process as ax25
                 try:
                     ax25 = AX25(aprs    = aprs,
                                 verbose = verbose,)
@@ -70,34 +70,34 @@ async def afsk_mod(aprs_q,
                     eprint('# bad aprs ax25:{}\n{}'.format(aprs,err))
                     continue
 
-                #verbose output messaging
+                # verbose output messaging
                 if verbose:
                     _aprs = ax25.to_aprs()
                     eprint('===== MOD >>>>>', _aprs.decode())
                     eprint('--ax25--')
                     pretty_binary(ax25.to_frame())
 
-                #AFSK
+                # AFSK
                 afsk,stop_bit = ax25.to_afsk()
 
                 await afsk_mod.pad_zeros(10)
                 
-				#pre-message flags
-				#we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
+				# pre-message flags
+				# we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
                 if vox:
                     await afsk_mod.send_flags(150)
                 else:
                     await afsk_mod.send_flags(4)
                 # await afsk_mod.send_flags(4)
 
-                #generate samples
+                # generate samples
                 await afsk_mod.to_samples(afsk     = afsk, 
                                           stop_bit = stop_bit,
                                           )
-                #send post message flags
-                #multimon-ng and direwolf want one additional post flag in addition to the one at the end
-                #of the message
-				#we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
+                # send post message flags
+                # multimon-ng and direwolf want one additional post flag in addition to the one at the end
+                # of the message
+				# we need at least one since nrzi has memory and you have 50-50 chance depending on how the code intializes the nrzi
                 if vox:
                     await afsk_mod.send_flags(4)
                 else:
@@ -118,9 +118,9 @@ async def afsk_mod(aprs_q,
     except Exception as err:
         print_exc(err)
 
-async def run(cmd):
-    print(cmd)
-    return await asyncio.to_thread(check_output, cmd.split())
+# async def run_in_thread(cmd):
+    # print(cmd)
+    # return await asyncio.to_thread(check_output, cmd.split())
 
 def create_wav(wave_filename):
     wav = wave.open(wave_filename, 'w')
@@ -139,8 +139,8 @@ async def afsk_out(afsk_q,
         # set wave filename
         is_wave = False
         wav = None
-        if out_file[-4:] == '.wav' or\
-           out_file == 'play':
+        if out_file[-4:] == '.wav':# or\
+           # out_file == 'play':
             if IS_UPY:
                 raise Exception('wave files not supported in upy')
             is_wave = True
@@ -155,7 +155,7 @@ async def afsk_out(afsk_q,
                 if arr and siz:
                     for i in range(siz):
                         samp = struct.pack('<h', arr[i]) # little-endian signed output
-                        write(samp) #buffer write binary
+                        write(samp) # buffer write binary
                     flush()
             elif out_file == 'null':
                 pass
@@ -168,9 +168,9 @@ async def afsk_out(afsk_q,
                         wav.writeframesraw(samp)
                 elif wav:
                     wav.close()
-                    if out_file == 'play':
-                        # play wav
-                        await run('play {}'.format(wave_filename))
+                    # if out_file == 'play':
+                        # # play wav
+                        # await run_in_thread('play {}'.format(wave_filename))
                     wav = None
 
             afsk_q.task_done()
@@ -181,9 +181,9 @@ async def afsk_out(afsk_q,
     finally:
         if wav:
             wav.close()
-            if out_file == 'play':
-                # play wav
-                await run('play {}'.format(wave_filename))
+            # if out_file == 'play':
+                # # play wav
+                # await run_in_thread('play {}'.format(wave_filename))
 
 async def main():
     args = mod_parse_args(sys.argv)
@@ -196,22 +196,36 @@ async def main():
     eprint('# IN   {}'.format(args['in']['file']))
     eprint('# OUT  {}'.format(args['out']['file']))
 
-    aprs_q = Queue() #aprs input queue
-    afsk_q = Queue() #afsk output queue (array['i'], size)
+    # APRS queue, these items are queued in from stdin and out in afsk_mod
+    aprs_q = Queue()
+
+    # AFSK queue, the samples, each item is a tuple: (array['i'], size), queued in from afsk_mod and out in afsk_out
+    afsk_q = Queue() # afsk output queue
+
     tasks = []
     try:
-        tasks.append(asyncio.create_task(afsk_out(afsk_q, 
-                                                  out_file = args['out']['file'],
-                                                  )))
+
+        # afsk_mod, convert APRS messages into AFSK samples
         tasks.append(asyncio.create_task(afsk_mod(aprs_q, 
                                                   afsk_q, 
                                                   rate    = args['args']['rate'],
                                                   vox     = args['args']['vox'],
                                                   verbose = args['args']['verbose'],
                                                   )))
+
+        # afsk_out, output AFSK samples
+        tasks.append(asyncio.create_task(afsk_out(afsk_q, 
+                                                  out_file = args['out']['file'],
+                                                  )))
+        
+
+        # read all items from pipe, returns EOF
         await read_aprs_from_pipe(aprs_q)
+
+        # wait until queues are done
         await aprs_q.join()
         await afsk_q.join()
+
     except Exception as err:
         print_exc(err)
     finally:

@@ -24,7 +24,7 @@ source export.sh
 ```
 From here on, you will need to source ```export.sh``` to setup your environment.
 
-#### Now clone the (intbioncs) Micropython repo
+#### Now clone the Micropython repo
 ```
 git clone git@github.com:micropython/micropython.git micropython
 cd micropython

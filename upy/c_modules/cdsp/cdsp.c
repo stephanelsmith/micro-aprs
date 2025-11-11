@@ -227,102 +227,102 @@ static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t i
 }
 static MP_DEFINE_CONST_FUN_OBJ_3(power_meter_core_obj, mp_power_meter_core);
 
-static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {
+/*static mp_obj_t mp_tim_cb(mp_obj_t ctx_obj) {*/
 
-    // get current state, state attr
-    mp_obj_t state_attr = mp_load_attr(ctx_obj, MP_QSTR_state);
-    int32_t state = mp_obj_get_int(state_attr);
+    /*// get current state, state attr*/
+    /*mp_obj_t state_attr = mp_load_attr(ctx_obj, MP_QSTR_state);*/
+    /*int32_t state = mp_obj_get_int(state_attr);*/
 
-    // toggle debug pin
-    mp_obj_t toggle_method = mp_load_attr(ctx_obj, MP_QSTR_tog);
-    mp_call_function_0(toggle_method);
+    /*// toggle debug pin*/
+    /*mp_obj_t toggle_method = mp_load_attr(ctx_obj, MP_QSTR_tog);*/
+    /*mp_call_function_0(toggle_method);*/
 
-    // read from adc
-    mp_obj_t read_method = mp_load_attr(ctx_obj, MP_QSTR_read);
-    mp_obj_t o_obj = mp_call_function_0(read_method);
-    int32_t o = mp_obj_get_int(o_obj);
-    o -= 32768; // unsigned to signed
+    /*// read from adc*/
+    /*mp_obj_t read_method = mp_load_attr(ctx_obj, MP_QSTR_read);*/
+    /*mp_obj_t o_obj = mp_call_function_0(read_method);*/
+    /*int32_t o = mp_obj_get_int(o_obj);*/
+    /*o -= 32768; // unsigned to signed*/
 
-    // write adc value into our pre-allocated buffer
-    mp_obj_t buf_obj = mp_load_attr(ctx_obj, MP_QSTR_buf);
-	mp_buffer_info_t bufinfo;
-	mp_get_buffer(buf_obj, &bufinfo, MP_BUFFER_READ|MP_BUFFER_WRITE);
-    uint8_t *bufin = bufinfo.buf;
+    /*// write adc value into our pre-allocated buffer*/
+    /*mp_obj_t buf_obj = mp_load_attr(ctx_obj, MP_QSTR_buf);*/
+	/*mp_buffer_info_t bufinfo;*/
+	/*mp_get_buffer(buf_obj, &bufinfo, MP_BUFFER_READ|MP_BUFFER_WRITE);*/
+    /*uint8_t *bufin = bufinfo.buf;*/
 
-    // get write method
-    mp_obj_t write_method = mp_load_attr(ctx_obj, MP_QSTR_write);
+    /*// get write method*/
+    /*mp_obj_t write_method = mp_load_attr(ctx_obj, MP_QSTR_write);*/
                                         
-    // get the array, typecode 'i'
-    mp_obj_t arr_obj = mp_load_attr(ctx_obj, MP_QSTR_arr);
-    mp_obj_array_t *aptr = MP_OBJ_TO_PTR(arr_obj);
-    int32_t siz = aptr->len;
-    int32_t *arr = aptr->items;
+    /*// get the array, typecode 'i'*/
+    /*mp_obj_t arr_obj = mp_load_attr(ctx_obj, MP_QSTR_arr);*/
+    /*mp_obj_array_t *aptr = MP_OBJ_TO_PTR(arr_obj);*/
+    /*int32_t siz = aptr->len;*/
+    /*int32_t *arr = aptr->items;*/
 
-    // get the cnt
-    mp_obj_t cnt_attr = mp_load_attr(ctx_obj, MP_QSTR_cnt);
-    int32_t cnt = mp_obj_get_int(cnt_attr);
-    cnt += 1;
-    mp_store_attr(ctx_obj, MP_QSTR_cnt, mp_obj_new_int(cnt));
+    /*// get the cnt*/
+    /*mp_obj_t cnt_attr = mp_load_attr(ctx_obj, MP_QSTR_cnt);*/
+    /*int32_t cnt = mp_obj_get_int(cnt_attr);*/
+    /*cnt += 1;*/
+    /*mp_store_attr(ctx_obj, MP_QSTR_cnt, mp_obj_new_int(cnt));*/
 
-    // get the idx
-    mp_obj_t idx_attr = mp_load_attr(ctx_obj, MP_QSTR_idx);
-    int32_t idx = mp_obj_get_int(idx_attr);
+    /*// get the idx*/
+    /*mp_obj_t idx_attr = mp_load_attr(ctx_obj, MP_QSTR_idx);*/
+    /*int32_t idx = mp_obj_get_int(idx_attr);*/
     
-    // write into internal array
-    arr[idx] = o;
+    /*// write into internal array*/
+    /*arr[idx] = o;*/
 
-    if(cnt < siz){
-        return mp_const_none;
-    }
+    /*if(cnt < siz){*/
+        /*return mp_const_none;*/
+    /*}*/
 
-    int32_t a = 0;
-    // int32_t sizcnt = cnt < siz ? cnt : siz;
-    // for(int32_t i=0; i<siz; i++){
-        // a += arr[i]/siz;
-    // }
-    int32_t p = 0;
-    for(int32_t i=0; i<siz; i++){
-        int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers
-        p += ((arr[k]-a) * (arr[k]-a)) / siz;
-    }
-    p = isqrt32(p);
+    /*int32_t a = 0;*/
+    /*// int32_t sizcnt = cnt < siz ? cnt : siz;*/
+    /*// for(int32_t i=0; i<siz; i++){*/
+        /*// a += arr[i]/siz;*/
+    /*// }*/
+    /*int32_t p = 0;*/
+    /*for(int32_t i=0; i<siz; i++){*/
+        /*int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers*/
+        /*p += ((arr[k]-a) * (arr[k]-a)) / siz;*/
+    /*}*/
+    /*p = isqrt32(p);*/
 
-    // save idx
-    idx = (idx+1)%siz;
-    mp_store_attr(ctx_obj, MP_QSTR_idx, mp_obj_new_int(idx));
+    /*// save idx*/
+    /*idx = (idx+1)%siz;*/
+    /*mp_store_attr(ctx_obj, MP_QSTR_idx, mp_obj_new_int(idx));*/
     
-    if(p >= 5000 && state == 0){
-        mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(1));
-        // write everything in the buffer in order except current point
-        for(int32_t i=1; i<siz; i++){
-            int32_t k = (idx+i)%siz;
-            *((uint16_t *)bufin) = (uint16_t)arr[k];
-            mp_call_function_1(write_method, buf_obj);
-        }
-    }
-    if(state == 1){
-        *((uint16_t *)bufin) = (uint16_t)o; // int(o).to_bytes(2,'little')
-        mp_call_function_1(write_method, buf_obj);
-    }
-    if(p < 3000 && state == 1){
-        // mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(2));
-    // }
-    // if(state == 2){
-        // deinit the timer
-        mp_obj_t deinit_method = mp_load_attr(ctx_obj, MP_QSTR_deinit);
-        mp_call_function_0(deinit_method);
+    /*if(p >= 5000 && state == 0){*/
+        /*mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(1));*/
+        /*// write everything in the buffer in order except current point*/
+        /*for(int32_t i=1; i<siz; i++){*/
+            /*int32_t k = (idx+i)%siz;*/
+            /**((uint16_t *)bufin) = (uint16_t)arr[k];*/
+            /*mp_call_function_1(write_method, buf_obj);*/
+        /*}*/
+    /*}*/
+    /*if(state == 1){*/
+        /**((uint16_t *)bufin) = (uint16_t)o; // int(o).to_bytes(2,'little')*/
+        /*mp_call_function_1(write_method, buf_obj);*/
+    /*}*/
+    /*if(p < 3000 && state == 1){*/
+        /*// mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(2));*/
+    /*// }*/
+    /*// if(state == 2){*/
+        /*// deinit the timer*/
+        /*mp_obj_t deinit_method = mp_load_attr(ctx_obj, MP_QSTR_deinit);*/
+        /*mp_call_function_0(deinit_method);*/
 
-        // mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(3));
+        /*// mp_store_attr(ctx_obj, MP_QSTR_state, mp_obj_new_int(3));*/
 
-        // call tsf.set()
-        mp_obj_t tsfset_method = mp_load_attr(ctx_obj, MP_QSTR_tsfset);
-        mp_call_function_0(tsfset_method);
-    }
+        /*// call tsf.set()*/
+        /*mp_obj_t tsfset_method = mp_load_attr(ctx_obj, MP_QSTR_tsfset);*/
+        /*mp_call_function_0(tsfset_method);*/
+    /*}*/
 
-    // return mp_obj_new_int(1);
-    return mp_const_none;
-}
-static MP_DEFINE_CONST_FUN_OBJ_1(tim_cb_obj, mp_tim_cb);
+    /*// return mp_obj_new_int(1);*/
+    /*return mp_const_none;*/
+/*}*/
+/*static MP_DEFINE_CONST_FUN_OBJ_1(tim_cb_obj, mp_tim_cb);*/
 
 
 
@@ -337,7 +337,7 @@ static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_sign), MP_ROM_PTR(&sign_obj) },
     { MP_ROM_QSTR(MP_QSTR_fir_core), MP_ROM_PTR(&fir_core_obj) },
     { MP_ROM_QSTR(MP_QSTR_power_meter_core), MP_ROM_PTR(&power_meter_core_obj) },
-    { MP_ROM_QSTR(MP_QSTR_tim_cb), MP_ROM_PTR(&tim_cb_obj) },
+    /*{ MP_ROM_QSTR(MP_QSTR_tim_cb), MP_ROM_PTR(&tim_cb_obj) },*/
     { MP_ROM_QSTR(MP_QSTR_utoi32), MP_ROM_PTR(&utoi32_obj) },
     { MP_ROM_QSTR(MP_QSTR_utoi16), MP_ROM_PTR(&utoi16_obj) },
     { MP_ROM_QSTR(MP_QSTR_bs16toi), MP_ROM_PTR(&bs16toi_obj) },

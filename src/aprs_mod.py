@@ -154,8 +154,13 @@ async def afsk_out(afsk_q,
             if out_file == '-':
                 if arr and siz:
                     for i in range(siz):
-                        samp = struct.pack('<h', arr[i]) # little-endian signed output
-                        write(samp) #buffer write binary
+                        # samp = struct.pack('<h', arr[i]) # little-endian signed output
+                        # write(samp) #buffer write binary
+                        if IS_UPY:
+                            # to_bytes does not have kw in micropython
+                            write(arr[i].to_bytes(2, 'little', True))  # little-endian signed output
+                        else:
+                            write(arr[i].to_bytes(2, 'little', signed=True))  # little-endian signed output
                     flush()
             elif out_file == 'null':
                 pass

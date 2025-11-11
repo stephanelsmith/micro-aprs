@@ -179,6 +179,8 @@ class AFSKDemodulator():
             
             clsname = type(in_rx).__name__
 
+            # a bit tricky here, we are getting compatibilty for reading across platformats
+            # micropython and python, Stream, RingIO, and files, both sync and async interfaces...
             if hasattr(in_rx, 'readinto') and clsname == 'RingIO':
                 bi = bytearray(2) # fixed allocation
                 readinto = in_rx.readinto
@@ -204,6 +206,7 @@ class AFSKDemodulator():
 
             while True:
                 try:
+
                     # read two bytes from stream
                     if readinto:
                         if is_sync:

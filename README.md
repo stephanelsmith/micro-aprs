@@ -1,6 +1,6 @@
 # Python Micro APRS MODEM
 
-A python/micropython based library for encoding/decoding, modulating/demodulating APRS/AX.25 packets in AFSK audio.  (It's a TNC.)
+A python/micropython based library for encoding/decoding, modulating/demodulating APRS/AX.25 packets in AFSK audio. 
 <!---
 ![AFSK hello world](docs/afsk_hello.png?raw=true "AFSK hello")
 --->
@@ -54,6 +54,7 @@ With Micropython, these examples show some examples for embedded systems.  I pri
 ## :bulb: Future Work
 * Rx/Tx digipeating
 * Deploy as a :balloon: [HAB](https://amateur.sondehub.org/) payload!
+* Sister project: [Micro-WSPR](https://github.com/stephanelsmith/micro-wspr)
 
 ## :raised_hands: Acknowledgements
 - [Micropython](https://github.com/micropython/micropython) project

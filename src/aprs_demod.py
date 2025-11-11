@@ -96,9 +96,6 @@ async def main():
         #from .raw file
         if args['in']['file'] == '-':
             in_rx = await get_stdin_streamreader()
-            # await read_samples_from_pipe(in_rx,
-                                         # type = args['in']['type'],
-                                         # )
         elif args['in']['file']:
             in_rx = open(args['in']['file'], 'rb')
         elif args['in']['file'] == 'rtl_fm':
@@ -110,6 +107,7 @@ async def main():
         # DEMOD CORE
         await demod_core(in_rx, bits_q, ax25_q, args)
                             
+        # wait until queues are done
         await bits_q.join()
         await ax25_q.join()
 

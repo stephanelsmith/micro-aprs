@@ -145,7 +145,7 @@ def create_afsk(fs     = 22050, # sampling frequency
     phaseint:int = 0
     phaseres:int = 0
 
-    if IS_UPY and HAS_VIPER and False:
+    if IS_UPY and HAS_VIPER:
         # VIPER OPTIMIZED
         @micropython.viper
         def inner(k:int)->int:

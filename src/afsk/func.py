@@ -29,6 +29,9 @@ else:
     def sign(a:int)->int:
         return (a > 0) - (a < 0)
 
+
+# TO INT, typecast viper arrays to ints
+# we need this in viper modules since all arrays are always uint
 if IS_UPY and HAS_C:
     from cdsp import utoi32
     from cdsp import utoi16

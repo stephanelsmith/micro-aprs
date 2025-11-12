@@ -76,7 +76,6 @@ class AFSKModulator():
         self.nrzi = create_nrzi()
 
     async def __aenter__(self):
-        #zero-pad
         return self
 
     async def __aexit__(self, *args):

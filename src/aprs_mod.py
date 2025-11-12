@@ -23,6 +23,11 @@ if not IS_UPY:
     import wave
     # from subprocess import check_output
 
+# try:
+    # from rich import print
+# except ImportError:
+    # pass
+
 async def read_aprs_from_pipe(aprs_q, 
                               ):
     try:
@@ -72,8 +77,9 @@ async def afsk_mod(aprs_q,
 
                 # verbose output messaging
                 if verbose:
-                    _aprs = ax25.to_aprs()
-                    eprint('===== MOD >>>>>', _aprs.decode())
+                    # _aprs = ax25.to_aprs()
+                    eprint('===== MOD >>>>> {}'.format(aprs))
+                    # eprint(aprs)
                     eprint('--ax25--')
                     pretty_binary(ax25.to_frame())
 

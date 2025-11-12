@@ -5,6 +5,7 @@ import struct
 from array import array
 
 from lib.compat import Queue
+from lib.compat import const
 
 from ax25.defs import DecodeError
 from ax25.defs import DecodeErrorFix
@@ -21,18 +22,18 @@ from lib.utils import pretty_binary
 from lib.utils import eprint
 from lib.utils import format_bytes
 
-AX25_FLAG      = 0x7e
-AX25_ADDR_LEN  = 7
-AX25_FLAG_LEN  = 1
-AX25_CONTROLPID_LEN = 2
-AX25_CRC_LEN   = 2
+_AX25_FLAG       = const(0x7e)
+_AX25_ADDR_LEN  = const(7)
+_AX25_FLAG_LEN  = const(1)
+_AX25_CONTROLPID_LEN = const(2)
+_AX25_CRC_LEN   = const(2)
 
-ORD_0 = 48
-ORD_9 = 57
-ORD_A = 65
-ORD_Z = 90
-ORD_a = 97
-ORD_z = 122
+_ORD_0 = const(48)
+_ORD_9 = const(57)
+_ORD_A = const(65)
+_ORD_Z = const(90)
+_ORD_a = const(97)
+_ORD_z = const(122)
 
 class AX25():
     # __slots__ = (
@@ -120,8 +121,8 @@ class AX25():
         #find first character, this is to ignore message counters [%d] AX25
         for j in range(i):
             o = aprs[j]
-            if o >= ORD_A and o <= ORD_Z or\
-               o >= ORD_a and o <= ORD_z:
+            if o >= _ORD_A and o <= _ORD_Z or\
+               o >= _ORD_a and o <= _ORD_z:
                 break
 
         self.src = CallSSID(aprs = aprs[j:i])
@@ -152,29 +153,29 @@ class AX25():
         start_idx = 1
         idx = 1
         # stop_idx = 
-        # while mv[stop_idx] != AX25_FLAG:
+        # while mv[stop_idx] != _AX25_FLAG:
             # stop_idx += 1
             # if stop_idx >= len(mv):
                 # raise DecodeErrorFix(self)
         stop_idx = len(mv)-1
-        while stop_idx > 0 and mv[stop_idx] != AX25_FLAG:
+        while stop_idx > 0 and mv[stop_idx] != _AX25_FLAG:
             stop_idx-=1
 
         
         try:
             #destination
-            self.dst = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
-            idx += AX25_ADDR_LEN
+            self.dst = CallSSID(frame = mv[idx:idx+_AX25_ADDR_LEN])
+            idx += _AX25_ADDR_LEN
 
             #source
-            self.src = CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN])
-            idx += AX25_ADDR_LEN
+            self.src = CallSSID(frame = mv[idx:idx+_AX25_ADDR_LEN])
+            idx += _AX25_ADDR_LEN
         
             #digis
             self.digis = []
-            while not mv[idx-1]&0x01 and idx<stop_idx-1-AX25_ADDR_LEN:
-                self.digis.append(CallSSID(frame = mv[idx:idx+AX25_ADDR_LEN]))
-                idx += AX25_ADDR_LEN
+            while not mv[idx-1]&0x01 and idx<stop_idx-1-_AX25_ADDR_LEN:
+                self.digis.append(CallSSID(frame = mv[idx:idx+_AX25_ADDR_LEN]))
+                idx += _AX25_ADDR_LEN
         except IndexError:
             raise DecodeErrorFix(self)
         except CallSSIDError:
@@ -209,14 +210,14 @@ class AX25():
         #from structure to bytearray
 
         #pre-allocate entire buffer size
-        ax25_len = AX25_FLAG_LEN*flags_pre +\
-                    AX25_ADDR_LEN +\
-                    AX25_ADDR_LEN +\
-                    len(self.digis)*AX25_ADDR_LEN+\
-                    AX25_CONTROLPID_LEN+\
+        ax25_len =  _AX25_FLAG_LEN*flags_pre +\
+                    _AX25_ADDR_LEN +\
+                    _AX25_ADDR_LEN +\
+                    len(self.digis)*_AX25_ADDR_LEN+\
+                    _AX25_CONTROLPID_LEN+\
                     len(self.info)+\
-                    AX25_CRC_LEN +\
-                    AX25_FLAG_LEN*flags_post
+                    _AX25_CRC_LEN +\
+                    _AX25_FLAG_LEN*flags_post
         self._frame = bytearray(ax25_len + bit_stuff_margin)
 
         #create slices without copying
@@ -225,21 +226,21 @@ class AX25():
 
         #pre-flags
         for fidx in range(flags_pre):
-            mv[idx] = AX25_FLAG
-            idx += AX25_FLAG_LEN
+            mv[idx] = _AX25_FLAG
+            idx += _AX25_FLAG_LEN
 
         # destination Address  (note: opposite order in printed format)
-        self.dst.to_bytes(mv = mv[idx:idx+AX25_ADDR_LEN])
-        idx += AX25_ADDR_LEN
+        self.dst.to_bytes(mv = mv[idx:idx+_AX25_ADDR_LEN])
+        idx += _AX25_ADDR_LEN
 
         # source Address
-        self.src.to_bytes(mv = mv[idx:idx+AX25_ADDR_LEN])
-        idx += AX25_ADDR_LEN
+        self.src.to_bytes(mv = mv[idx:idx+_AX25_ADDR_LEN])
+        idx += _AX25_ADDR_LEN
 
         # 0-8 Digipeater Addresses
         for digi in self.digis[:8]:
-            digi.to_bytes(mv = mv[idx:idx+AX25_ADDR_LEN])
-            idx += AX25_ADDR_LEN
+            digi.to_bytes(mv = mv[idx:idx+_AX25_ADDR_LEN])
+            idx += _AX25_ADDR_LEN
 
         #LAST BIT OF ADDRESS, SET LSB TO 1
         mv[idx-1]  |= 0x01 
@@ -255,17 +256,17 @@ class AX25():
         idx += len(self.info)
 
         #crc
-        cm = mv[flags_pre*AX25_FLAG_LEN:idx]
+        cm = mv[flags_pre*_AX25_FLAG_LEN:idx]
         cc = crc16_ccit(cm)
         crc = struct.pack('<H',cc)
-        mv[idx:idx+AX25_CRC_LEN] = crc
-        idx += AX25_CRC_LEN
+        mv[idx:idx+_AX25_CRC_LEN] = crc
+        idx += _AX25_CRC_LEN
 
         #post-flags
         tidx = idx 
         for fidx in range(flags_post):
-            mv[idx] = AX25_FLAG
-            idx += AX25_FLAG_LEN
+            mv[idx] = _AX25_FLAG
+            idx += _AX25_FLAG_LEN
 
         if idx != ax25_len:
             raise Exception('ax25 len error: idx ({}) != ax25_len ({})'.format(idx, ax25_len))
@@ -297,8 +298,8 @@ class AX25():
         # stuff bits in place
         # update the total number of bits
         stuff_cnt = do_bitstuffing(mv, 
-                                   start_bit = flags_pre*AX25_FLAG_LEN*8, 
-                                   stop_bit  = stop_bit - flags_post*AX25_FLAG_LEN*8)
+                                   start_bit = flags_pre*_AX25_FLAG_LEN*8, 
+                                   stop_bit  = stop_bit - flags_post*_AX25_FLAG_LEN*8)
         stop_bit += stuff_cnt
         if self.verbose:
             eprint('-bit stuffed-')
@@ -308,4 +309,7 @@ class AX25():
 
     def __repr__(self):
         return self.to_aprs().decode()
+
+    def __rich__(self):
+        return self.to_aprs_rich()
 

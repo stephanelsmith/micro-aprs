@@ -36,25 +36,30 @@ As many who've gone down this path have mentioned, there's surprisingly little u
 Basic command line for encoding and APRS strings to AFSK audio samples and the reverse.
 * [Encode](docs/ports/mod/README.md) APRS strings to AFSK audio samples.
 * [Decode](docs/ports/demod/README.md) AFSK audio samples to APRS strings.
-* [Micropython](docs/ports/upy/README.md) unix build instructions, and encode/decode examples via cli.
 * [Pypy](docs/ports/pypy/README.md), another supported options faster than C python.
+
+
+## <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/ports/upy/micropython-icon.jpg?raw=true" alt="" width="25"> Micropython and Embedded ports and examples
+With Micropython, these examples show some examples for embedded systems.
+### Build instructions
+* [Unix](docs/ports/upy/README.md) build instructions, and encode/decode examples via cli.
+* [TinyS3](docs/ports/tinys3/README.md), ESP32S3 build isntructions on the TinyS3 (ESP32-S3).
+### Embedded
+* [ESP32-S3 - working around missing DAC](docs/ports/dac/README.md)
+* [LilyGo T-TWR Plus](docs/ports/lilygottwr/README.md), a commerically available esp32s3 board with SA868 Wireless Transceiver.
+
 
 ## :desktop_computer: Applications and examples
 Applications using ```aprs_mod.py``` and ```aprs_demod.py```.
 * [SDR applications](docs/ports/sdr/README.md) via [rtl_fm](https://manpages.ubuntu.com/manpages/trusty/man1/rtl_fm.1.html) from [rtl-sdr project](https://osmocom.org/projects/rtl-sdr/wiki).
 * [HT/Android APRS beacon](docs/ports/termux/README.md).
 
-## :pager: Embedded ports and examples
-With Micropython, these examples show some examples for embedded systems.  I primarily target ESP32-S3 at the moment.
-* [ESP32-S3 - working around missing DAC](docs/ports/dac/README.md)
-* [TinyS3](docs/ports/tinys3/README.md), ESP32S3 build isntructions on the TinyS3 (ESP32-S3).
-* [LilyGo T-TWR Plus](docs/ports/lilygottwr/README.md), a commerically available esp32s3 board with SA868 Wireless Transceiver.
-
 
 ## :bulb: Future Work
 * Rx/Tx digipeating
 * Deploy as a :balloon: [HAB](https://amateur.sondehub.org/) payload!
 * Sister project: [Micro-WSPR](https://github.com/stephanelsmith/micro-wspr)
+
 
 ## :raised_hands: Acknowledgements
 - [Micropython](https://github.com/micropython/micropython) project

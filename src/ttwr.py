@@ -2,15 +2,12 @@
 import sys
 import asyncio
 import gc
-from array import array
 
 from machine import Pin, PWM
-from machine import Timer
 from machine import UART
 from machine import I2C
 
 from asyncio import Event
-from asyncio import ThreadSafeFlag
 from micropython import const
 
 from lib.compat import Queue
@@ -23,10 +20,16 @@ from lilygottwr.sa868.pwr import SA868Pwr
 import lilygottwr.sa868.defs as sa868_defs
 from lilygottwr.xpower import start as xpower_start
 
+from upy.afsk import out_afsk
+
 import lib.upydash as _
 
+# pwm frequency
 _FPWM = const(500_000)
-_FOUT = const(22_050)
+
+# afsk sample frequency
+_FOUT = const(11_025)
+# _FOUT = const(22_050)
 # _FOUT = const(44_100)
 
 AFSK_OUT_PIN = sa868_defs.AUDIO_MIC
@@ -36,13 +39,9 @@ _MIC_CH_SEL  = const(17)     # mic channel select, 0->mic, 1->esp
 _I2C_SCA = 8
 _I2C_SCL = 9
 
-AFSK_LOCK = False
-
 async def gc_coro():
     try:
         while True:
-            if not AFSK_LOCK:
-                gc.collect()
             await asyncio.sleep(5)
     except asyncio.CancelledError:
         raise
@@ -75,40 +74,6 @@ async def sa868_tx_rx(sa868_uart, rx_q, msg):
             await asyncio.sleep_ms(1000)
             continue
 
-async def out_afsk(pwm, arr, siz):
-    global AFSK_LOCK
-
-    try:
-        AFSK_LOCK = True
-        tsf = ThreadSafeFlag()
-        tim = Timer(1)
-
-        # viper nonlocals
-        nl = array('H', [0,])
-
-        @micropython.viper
-        def cb(tim):
-            nonlocal nl,pwm,arr,siz,tsf
-            _nl  = ptr16(nl)  # uint
-            _arr = ptr16(arr) # uint
-            i:int = _nl[0]
-            if i < int(siz):
-                pwm.duty_u16(_arr[i])
-                i += 1
-            if i == int(siz):
-                tsf.set()
-                i += 1 # > int size we are done
-            _nl[0] = i
-
-        tim.init(freq=_FOUT, mode=Timer.PERIODIC, callback=cb)
-        await tsf.wait()
-    except Exception as err:
-        sys.print_exception(err)
-    finally:
-        tim.deinit()
-        # pwm.deinit()
-        AFSK_LOCK = False
-
 
 async def start():
 
@@ -119,7 +84,7 @@ async def start():
 
         async with AFSKModulator(sampling_rate = _FOUT,
                                  signed        = False,
-                                 amplitude     = 0x7fff,
+                                 amplitude     = 0x7000,
                                  is_square     = False,
                                  verbose       = False) as afsk_mod:
             aprs = b'KI5TOF>APRS:>hello world!'
@@ -185,7 +150,7 @@ async def start():
 
             # AT+SETFILTER=PRE/DE-EMPH,HIGHPASS,LOWPASS
             # 0->on, 1->off
-            await sa868_tx_rx(sa868_uart, rx_q, msg=b'AT+SETFILTER=1,0,0')
+            await sa868_tx_rx(sa868_uart, rx_q, msg=b'AT+SETFILTER=0,0,0')
             
             try:
                 pwm = PWM(Pin(AFSK_OUT_PIN), freq=_FPWM, duty_u16=bias) # resolution = 26.2536 - 1.4427 log(fpwm)
@@ -195,16 +160,13 @@ async def start():
                     x += 1
                     try:
                         print(':{}'.format(x))
-                        # pwm.duty_u16(bias)
                         ptt.value(0)
                         dbg15.value(1)
-                        await out_afsk(pwm, arr, siz)
-                        # pwm.duty_u16(bias)
+                        await out_afsk(pwm, arr, siz, _FOUT)
                     finally:
                         dbg15.value(0)
                         ptt.value(1)
-                        print('done')
-                        await asyncio.sleep_ms(2000)
+                        await asyncio.sleep_ms(5000)
             finally:
                 pwm.deinit()
 

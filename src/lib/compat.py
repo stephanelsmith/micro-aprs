@@ -1,8 +1,7 @@
 
-import asyncio
-
 import sys
 import io
+import asyncio
 
 # python or micropython?
 if sys.implementation.name == 'micropython':
@@ -19,12 +18,19 @@ else:
 # if micropython, do we have c modules?
 if IS_UPY:
     try:
-        import cvec
+        import cdsp
         HAS_C = True
     except ImportError:
         HAS_C = False
+    
+    # https://github.com/micropython/micropython/issues/11805#issuecomment-1598282774
+    if sys.implementation._mpy >> 10 == 0:
+        HAS_VIPER = False
+    else:
+        HAS_VIPER = True
 else:
     HAS_C = False
+    HAS_VIPER = False
 
 if IS_UPY:
     #micropython
@@ -32,8 +38,8 @@ if IS_UPY:
 else:
     #python3
     import traceback
-    print_exc = traceback.print_exc
-    # print_exc = traceback.print_exception
+    # print_exc = traceback.print_exc
+    print_exc = traceback.print_exception
 
 
 # Stdin

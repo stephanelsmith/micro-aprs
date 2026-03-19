@@ -1,17 +1,17 @@
 
 import sys
+import struct
 import asyncio
 from array import array
 import math
 import lib.upydash as _
+from asyncio import Event
 
-# import matplotlib.pyplot as plt
-
-# from lib.utils import frange
-import lib.defs as defs
 from lib.utils import eprint
 from lib.memoize import memoize_loads
 from lib.memoize import memoize_dumps
+from lib.compat import Queue
+from lib.compat import IS_UPY
 
 from afsk.func import create_unnrzi
 from afsk.func import create_corr
@@ -19,98 +19,81 @@ from afsk.func import lpf_fir_design
 from afsk.func import bandpass_fir_design
 from afsk.func import create_sampler
 from afsk.func import create_fir
-from afsk.func import create_outlier_fixer
+from afsk.func import create_power_meter
+from afsk.func import clamps16
+from afsk.fir_options import fir_options
+from afsk.func import bu16toi, bs16toi
 
 from lib.compat import print_exc
 
+_FMARK  = 1200
+_FSPACE = 2200
+_TMARK  = 0.0008333333333333334
+_FBAUD  = 1200
+_TBAUD  = 0.0008333333333333334
+
 class AFSKDemodulator():
-    def __init__(self, samples_in_q,
+    def __init__(self, in_rx, # array or tuple (array, size) OR a stream (with 'readexactly' method)
                        bits_out_q,
-                       sampling_rate = 22050,
-                       verbose       = False,
+                       sampling_rate = 11_025,
+                       verbose       = False, # output intermediate steps to stderr
+                       stream_type   = 's16', # if in_rx is a stream, u16 or s16?
+                       is_embedded   = False,
                        options       = {},
                        ):
+                       # debug_samples = False, # output intermediate samples to stderr
 
-        self.samples_q  = samples_in_q
+        self.in_rx  = in_rx
         self.bits_q = bits_out_q
         self.verbose = verbose
+        self.stream_type = stream_type
+        self.is_embedded = is_embedded
+        # self.debug_samples = debug_samples
+        self.stream_done = Event()
 
-        self.fmark = 1200
-        self.tmark = 1/self.fmark
-        self.fspace = 2200
-        self.tspace = 1/self.fspace
         self.fs = sampling_rate
         self.ts = 1/self.fs
-        self.fbaud = 1200
-        self.tbaud = 1/self.fbaud
         
-        # print(options)
         do_memoize = True
-        if options:
-            eprint('OPTIONS: {}'.format(options))
-        options = dict({
-            'bandpass_ncoefsbaud' : 3,
-            'bandpass_width'      : 460,
-            'bandpass_amark'      : 7,
-            'bandpass_aspace'     : 24,
-            'lpf_ncoefsbaud'      : 4,
-            'lpf_f'               : 1000,
-            'lpf_width'           : 360,
-            'lpf_aboost'          : 3,
-        }, **options)
-        # options = dict({
-            # 'bandpass_ncoefsbaud' : 5,
-            # 'bandpass_width'      : 460,
-            # 'bandpass_amark'      : 7,
-            # 'bandpass_aspace'     : 24,
-            # 'lpf_ncoefsbaud'      : 7,
-            # 'lpf_f'               : 1000,
-            # 'lpf_width'           : 360,
-            # 'lpf_aboost'          : 3,
-        # }, **options)
+        options = dict(fir_options,  **options)
+        nmark = int(_TMARK/self.ts)
 
-        nmark = int(self.tmark/self.ts)
         bandpass_ncoefsbaud = options['bandpass_ncoefsbaud']
         bandpass_ncoefs = int(nmark*bandpass_ncoefsbaud) if int(nmark*bandpass_ncoefsbaud)%2==1 else int(nmark*bandpass_ncoefsbaud)+1
         bandpass_width = options['bandpass_width']
         bandpass_amark = options['bandpass_amark']
         bandpass_aspace = options['bandpass_aspace']
-        if do_memoize:
-            coefs_g = memoize_loads('bpf', self.fmark, self.fspace, self.fs, 
-                                           bandpass_ncoefs,
-                                           bandpass_width, 
-                                           bandpass_amark, 
-                                           bandpass_aspace)
-        else:
-            coefs_g = None
+        coefs_g = memoize_loads('bpf', _FMARK, _FSPACE, self.fs, 
+                                       bandpass_ncoefs,
+                                       bandpass_width, 
+                                       bandpass_amark, 
+                                       bandpass_aspace)
         if coefs_g:
             coefs,g = coefs_g
         else: 
             coefs,g = bandpass_fir_design(ncoefs = bandpass_ncoefs,
-                                          fmark  = self.fmark,
-                                          fspace = self.fspace,
+                                          fmark  = _FMARK,
+                                          fspace = _FSPACE,
                                           fs     = self.fs,
                                           width  = bandpass_width,
                                           amark  = bandpass_amark,
                                           aspace = bandpass_aspace,
                                           )
-            memoize_dumps('bpf', (coefs,g), self.fmark, self.fspace, self.fs,
-                                           bandpass_ncoefs,
-                                           bandpass_width, 
-                                           bandpass_amark, 
-                                           bandpass_aspace)
+            memoize_dumps('bpf', (coefs,g), _FMARK, _FSPACE, self.fs,
+                                        bandpass_ncoefs,
+                                        bandpass_width, 
+                                        bandpass_amark, 
+                                        bandpass_aspace)
         self.bpf = create_fir(coefs = coefs, scale = g)
-
 
         self.corr = create_corr(ts    = self.ts,)
 
-        nmark = int(self.tmark/self.ts)
+        # nmark = int(_TMARK/self.ts)
         lpf_ncoefsbaud = options['lpf_ncoefsbaud']
         lpf_ncoefs = int(nmark*lpf_ncoefsbaud) if int(nmark*lpf_ncoefsbaud)%2==1 else int(nmark*lpf_ncoefsbaud)+1
         lpf_width = options['lpf_width']
         lpf_aboost = options['lpf_aboost']
         lpf_f = options['lpf_f']
-
         if do_memoize:
             coefs_g = memoize_loads('lpf', lpf_f, self.fs, 
                                            lpf_ncoefs, 
@@ -127,55 +110,177 @@ class AFSKDemodulator():
                                      width  = lpf_width,
                                      aboost = lpf_aboost,
                                      )
-            memoize_dumps('lpf', (coefs,g), lpf_f, self.fs,
-                                           lpf_ncoefs, 
-                                           lpf_width, 
-                                           lpf_aboost)
-        # eprint(coefs)
-        # eprint(g)
+            if do_memoize:
+                memoize_dumps('lpf', (coefs,g), lpf_f, self.fs,
+                                            lpf_ncoefs, 
+                                            lpf_width, 
+                                            lpf_aboost)
         self.lpf = create_fir(coefs = coefs, scale = g)
-        self.sampler = create_sampler(fbaud = self.fbaud,
+
+        self.sampler = create_sampler(fbaud = _FBAUD,
                                       fs    = self.fs)
         self.unnrzi = create_unnrzi()
 
-        self.outlier_fixer = create_outlier_fixer()
+        self.pwrmtr = create_power_meter(siz = 20)#nmark*2)
+        self.squelch = options['squelch']
 
         #how much we need to flush internal filters to process all sampled data
-        self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(self.tbaud/self.ts))
+        self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(_TBAUD/self.ts))
 
         self.tasks = []
 
     async def __aenter__(self):
-        self.tasks.append(asyncio.create_task(self.process_samples()))
+        if not self.in_rx:
+            return self
+        if isinstance(self.in_rx, Queue):
+            self.tasks.append(asyncio.create_task(self.q_core(in_rx = self.in_rx)))
+        elif hasattr(self.in_rx, 'readexactly') or hasattr(self.in_rx, 'read'):
+            self.tasks.append(asyncio.create_task(self.stream_core(in_rx = self.in_rx)))
+        else:
+            raise Exception('unknown in_rx format')
         return self
 
     async def __aexit__(self, *args):
-        _.for_each(self.tasks, lambda t: t.cancel())
+        # _.for_each(self.tasks, lambda t: t.cancel())
+        map(lambda t: t.cancel(), self.tasks)
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
-    async def process_samples(self):
+    async def join(self):
+        if not self.in_rx:
+            return
+        if isinstance(self.in_rx, Queue):
+            await self.in_rx.join()
+        else:
+            await self.stream_done.wait()
+
+    # directly access from a stream with readexactly method
+    # @micropython.native
+    async def stream_core(self, in_rx):
         try:
             # Process a chunk of samples
             corr     = self.corr
             lpf      = self.lpf
-            outfix   = self.outlier_fixer
             bpf      = self.bpf
+
             sampler  = self.sampler
             unnrzi   = self.unnrzi
 
-            bits_q = self.bits_q
-            samp_q = self.samples_q
+            pwrmtr   = self.pwrmtr
+
+            bits_q = self.bits_q   # output stream
+
+            asleep = asyncio.sleep
+
+            is_sync = False
+            readinto = None
+            read = None
+
+            in_rx = in_rx or self.in_rx
+            
+            clsname = type(in_rx).__name__
+
+            # a bit tricky here, we are getting compatibilty for reading across platformats
+            # micropython and python, Stream, RingIO, and files, both sync and async interfaces...
+            if hasattr(in_rx, 'readinto') and clsname == 'RingIO':
+                bi = bytearray(2) # fixed allocation
+                readinto = in_rx.readinto
+                is_sync = True
+            if hasattr(in_rx, 'readinto') and clsname == 'Stream':
+                bi = bytearray(2) # fixed allocation
+                readinto = in_rx.readinto
+                is_sync = False
+            elif hasattr(in_rx, 'readexactly'):
+                # already a stream
+                read = in_rx.readexactly
+                is_sync = False
+            elif hasattr(in_rx, 'read'):
+                read = in_rx.read
+                is_sync = True
+            else:
+                raise Exception('unknown stream {}'.format(in_rx))
+
+            sql = self.squelch
+
+            # bytes to integer converter
+            btoi = bs16toi if self.stream_type=='s16' else bu16toi
+
+            while True:
+                try:
+
+                    # read two bytes from stream
+                    if readinto:
+                        if is_sync:
+                            n = readinto(bi) # read 2 bytes into bytearray
+                        else:
+                            n = await readinto(bi)
+                        if not n:
+                            break
+                    elif read:
+                        if is_sync:
+                            bi = read(2)
+                        else:
+                            bi = await read(2)
+                        # did we read anything?
+                        if not bi:
+                            break
+
+                except EOFError:
+                    # always exit on eof
+                    break
+
+                # process
+                o = btoi(bi) # convert bytes to integer
+                o = bpf(o)
+                p = pwrmtr(o)
+                if p < sql:
+                    # skip if we are below squelch level
+                    continue
+                # eprint(o)
+                o = corr(o)
+                o = lpf(o)
+                bs = sampler(o)
+                if bs != 2: # _NONE
+                    bx = unnrzi(bs)
+                    # eprint(b,end='')
+                    await bits_q.put(bx) #bits_out_q
+        except Exception as err:
+            print_exc(err)
+        finally:
+            self.stream_done.set()
+            # print('STREAM DONE')
+
+
+    async def q_core(self, in_rx):
+        try:
+            # Process a chunk of samples
+            corr     = self.corr
+            lpf      = self.lpf
+            bpf      = self.bpf
+            sampler  = self.sampler
+            unnrzi   = self.unnrzi
+            pwrmtr   = self.pwrmtr
+
+            bits_q = self.bits_q   # output stream
+            in_rx = in_rx or self.in_rx
 
             while True:
                 #fetch next chunk of samples (array)
-                arr,arr_size = await samp_q.get()
-                #eprint(arr_size)
+                arr_siz = await in_rx.get()
+                if isinstance(arr_siz, tuple) and len(arr_siz)==2:
+                    # if we specified an array and a size...
+                    arr = arr_siz[0]
+                    siz = arr_siz[1]
+                else:
+                    # if we just have an array, use it
+                    arr = arr_siz
+                    siz = len(arr)
 
-                for i in range(arr_size):
+                for i in range(siz):
                     o = arr[i]
-                    # o = outfix(o)
-                    # print(o)
                     o = bpf(o)
+                    p = pwrmtr(o)
+                    if p < sql:
+                        continue
                     o = corr(o)
                     o = lpf(o)
                     bs = sampler(o)
@@ -184,9 +289,40 @@ class AFSKDemodulator():
                         # eprint(b,end='')
                         await bits_q.put(b) #bits_out_q
 
-                samp_q.task_done() # done
+                in_rx.task_done() # done
         except Exception as err:
             print_exc(err)
+
+
+##############################
+######### OLD STUFF ##########
+##############################
+                # # loop where we allow for inner-loop output
+                # for i in range(siz):
+                    # o = arr[i]
+                    # # print(o)
+                    # if self.debug_samples == 'in':
+                        # s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        # sys.stdout.buffer.write(s)
+                    # o = bpf(o)
+                    # if self.debug_samples == 'bpf':
+                        # s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        # sys.stdout.buffer.write(s)
+                    # o = corr(o)
+                    # if self.debug_samples == 'cor':
+                        # s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        # sys.stdout.buffer.write(s)
+                    # o = lpf(o)
+                    # if self.debug_samples == 'lpf':
+                        # s = struct.pack('<h',clamps16(o)) # little-endian signed output
+                        # sys.stdout.buffer.write(s)
+                    # bs = sampler(o)
+                    # if bs != 2: # _NONE
+                        # b = unnrzi(bs)
+                        # # eprint(b,end='')
+                        # await bits_q.put(b) #bits_out_q
+                # if self.debug_samples:
+                    # sys.stdout.buffer.flush()
 
     # def analyze(self,start_from = 100e-3):
         # o = self.o

@@ -1,6 +1,13 @@
 
 import sys
-from json import loads
+from json import loads as jsonloads
+
+# get the current year
+try:
+    from datetime import datetime
+    year = datetime.now().year
+except:
+    year = 2025
 
 def mod_parse_args(args):
     r = {
@@ -12,18 +19,18 @@ def mod_parse_args(args):
             'options' : {},
         },
         'in' : {
-            # 'type' : 'aprs',
             'file'  : '-', #from stdin
         },
         'out' : {
-            # 'type' : 'raw',
             'file'  : '-', #to stdout
         },
     }
 
     if '-h' in args or '--help' in args or '-help' in args:
-        print('''APRS MOD
-(C) Stephane Smith (KI5TOF) 2024
+        print(f'''APRS MOD
+© Stéphane Smith (KI5TOF) {year}
+
+aprs_mod.py parses input AX25 APRS strings and outputs AFSK samples in signed 16 bit little endian format.
 
 Usage: 
 aprs_mod.py [options] (-t outfile) (-t infile)
@@ -37,11 +44,9 @@ OPTIONS:
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:
-intype       aprs strings
 infile       '-' (default)
 
 -t OUTPUT TYPE OPTIONS:
-outtype       raw 16 bit samples
 outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' play audio
 ''')
         return
@@ -60,10 +65,6 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
             r['args']['verbose'] = True
         if '-q' in args or '-quiet' in args:
             r['args']['quiet'] = True
-        if '-o' in args:
-            r['args']['options'] = loads(get_arg_val(args, '-o'))
-        if '-options' in args:
-            r['args']['options'] = loads(get_arg_val(args, '-options'))
     except IndexError:
         pass
     if len(spl) == 2:
@@ -85,6 +86,7 @@ def demod_parse_args(args):
     r = {
         'args' : {
             'verbose' : False,
+            'debug_samples'   : False,
             'quiet'   : False,
             'rate'    : 22050,
             'options' : {},
@@ -100,8 +102,8 @@ def demod_parse_args(args):
     }
 
     if '-h' in args or '--help' in args:
-        print('''APRS DEMOD
-(C) Stephane Smith (KI5TOF) 2023
+        print(f'''APRS DEMOD
+© Stéphane Smith (KI5TOF) {year}
 
 Usage: 
 aprs_demod.py [options] (-t outfile) (-t infile)
@@ -112,6 +114,11 @@ aprs_demod.py
 OPTIONS:
 -r, --rate       22050 (default)
 -v, --verbose    verbose intermediate output to stderr
+
+DETAIL DEBUG MODE, output samples at specific stages within pipeline. Nominall use this
+option to create wav files at each step and view them in audacity to see what's up.
+Stages: input, bandpass filter, correlator, and lowpass filter.
+-d, --debug_samples 'in' | 'bpf' | 'cor' | 'lpf'
 
 -t INPUT TYPE OPTIONS:
 intype       's16' | 'u16'
@@ -128,27 +135,34 @@ outfile       '-' (default stdout)
     try:
         #general args
         args = spl.pop(0)
-        if '-rate' in args:
-            r['args']['rate'] = get_arg_val(args, '-rate', int)
+        if '--rate' in args:
+            r['args']['rate'] = get_arg_val(args, '--rate', int)
         if '-r' in args:
             r['args']['rate'] = get_arg_val(args, '-r', int)
-        if '-v' in args or '-verbose' in args:
+        if '-v' in args or '--verbose' in args:
             r['args']['verbose'] = True
+        if '--debug_samples' in args:
+            r['args']['debug_samples'] = get_arg_val(args, '--debug_samples', str)
+        if '-d' in args:
+            r['args']['debug_samples'] = get_arg_val(args, '-d', str)
         if '-o' in args:
-            r['args']['options'] = loads(get_arg_val(args, '-o', str))
+            jsonstr = get_arg_val(args, '-o', str)
+            jsonstr = jsonstr.replace('\'','')
+            jsonstr = jsonstr.replace('\\','')
+            r['args']['options'] = jsonloads(jsonstr)
             # print('OPTIONS:{}'.format(r['args']['options']))
     except IndexError:
         pass
     if len(spl) == 2:
         try:
             _out = spl.pop(0)
-            # r['out']['type'] = _out[0]
+            r['out']['type'] = _out[0]
             r['out']['file'] = _out[-1]
         except IndexError:
             pass
     try:
         _in = spl.pop(0)
-        r['in']['type'] = _in[0]
+        # r['in']['type'] = _in[0]
         r['in']['file'] = _in[-1]
     except IndexError:
         pass

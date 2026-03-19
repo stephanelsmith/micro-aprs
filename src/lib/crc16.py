@@ -1,6 +1,6 @@
 
 from array import array
-from .compat import IS_UPY, HAS_C
+from .compat import IS_UPY, HAS_C, HAS_VIPER
 
 #https://code.google.com/archive/p/pycrc16/
 CRC16_XMODEM_TABLE = array('H',[
@@ -43,7 +43,6 @@ if IS_UPY:
         # C OPTIMIZED
         from ccrc import crc16
     else:
-        # VIPER OPTIMIZED TODO
         def crc16(data, crc=0):
             table = CRC16_XMODEM_TABLE
             for byte in data:
@@ -94,21 +93,23 @@ CRC16_AX25 = array('H',[
    0x7bc7, 0x6a4e, 0x58d5, 0x495c, 0x3de3, 0x2c6a, 0x1ef1, 0x0f78
 ])
 
-if IS_UPY:
-    if HAS_C:
-        # C OPTIMIZED
-        from ccrc import crc16_ccit
-    else:
-        # VIPER OPTIMIZED
-        @micropython.viper
-        def crc16_ccit(data:object)->int:
-            crc:int = 0xffff
-            table = ptr16(CRC16_AX25)
-            bs = ptr8(data)
-            for i in range(int(len(data))):
-                b:int = bs[i]
-                crc = ((crc) >> 8) ^ table[((crc) ^ b) & 0xff];
-            return (crc ^ 0xffff) & 0xffff
+if IS_UPY and HAS_C:
+    # C OPTIMIZED
+    from ccrc import crc16_ccit
+elif IS_UPY and HAS_VIPER:
+    # VIPER OPTIMIZED
+    # viper needs to be in a different file, micropython workaround
+    # for architectures that don't support viper like raspberry pi
+    from .crc16_viper import crc16_ccit
+    # @micropython.viper
+    # def crc16_ccit(data:object)->int:
+        # crc:int = 0xffff
+        # table = ptr16(CRC16_AX25)
+        # bs = ptr8(data)
+        # for i in range(int(len(data))):
+            # b:int = bs[i]
+            # crc = ((crc) >> 8) ^ table[((crc) ^ b) & 0xff];
+        # return (crc ^ 0xffff) & 0xffff
 else:
     # PYTHON
     def crc16_ccit(data):

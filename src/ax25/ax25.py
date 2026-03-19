@@ -69,11 +69,11 @@ class AX25():
             self.digis      = [CallSSID(aprs = x) for x in digis]
             self.info       = info
 
-    # def callssid_to_str(self, callssid):
-        # try:
-            # return callssid.to_aprs()
-        # except:
-            # return b''
+    def callssid_to_str(self, callssid):
+        try:
+            return callssid.to_aprs().decode()
+        except:
+            return ''
 
     def to_aprs(self):
         src = self.src.to_aprs()
@@ -310,8 +310,8 @@ class AX25():
 
         return (frame,stop_bit)
 
-    # def encode(self):
-        # return self.to_aprs().encode()
+    def encode(self):
+        return self.to_aprs()
 
     def __repr__(self):
         return self.to_aprs().decode()

@@ -24,7 +24,11 @@ class CallSSID():
         #   1) By specifying call and ssid explicitly
         #   2) By specifying aprs formatted string/bytes, eg. KI5TOF-5
         #   3) By specifying frame bytes to be decoded
+        if isinstance(call, str):
+            call = call.encode()
         self.call = call 
+        if isinstance(ssid, str):
+            ssid = ssid.encode()
         self.ssid = ssid
         #self._frame = None
         if frame:
@@ -43,18 +47,19 @@ class CallSSID():
             raise Exception('unknown format '+str(call_ssid))
         call_ssid = call_ssid.split(b'-')
         self.call = call_ssid[0].upper()
-        self.ssid = int(call_ssid[1]) if len(call_ssid)==2 else 0
+        self.ssid = str(int(call_ssid[1]) if len(call_ssid)==2 else 0).encode()
 
     def to_aprs(self):
         if self.ssid:
-            # return self.call+b'-'+self.ssid
-            # return self.call+b'-'+bytes([48+self.ssid])
-            lcall = len(self.call)
-            b = bytearray(lcall + 1 + 1)
-            b[:lcall] = self.call
-            b[lcall:lcall+1] = b'-'
-            b[-1] = 48+self.ssid # classic '0'+# trick
-            return b
+            return self.call+b'-'+self.ssid
+            # lcall = len(self.call)
+            # b = bytearray(lcall + 1 + 1)
+            # b[:lcall] = self.call
+            # b[lcall:lcall+1] = b'-'
+            # # b[-1] = 48+self.ssid # classic '0'+# trick
+            # print(self.ssid)
+            # b[-1] = int(self.ssid)
+            # return b
             # return str(self.call)+'-'+str(self.ssid)
         else:
             return self.call
@@ -73,7 +78,7 @@ class CallSSID():
             self.call[i] = self.call[i]>>1
 
         # self.call = self.call.decode()
-        self.ssid = (mv[6] & 0x17)>>1
+        self.ssid = str((mv[6] & 0x17)>>1).encode()
 
     def is_valid(self):
         if not self.call:
@@ -108,6 +113,6 @@ class CallSSID():
         return mv
 
     def __repr__(self):
-        return self.to_aprs()
+        return self.to_aprs().decode()
 
 

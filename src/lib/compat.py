@@ -38,8 +38,7 @@ if IS_UPY:
 else:
     #python3
     import traceback
-    # print_exc = traceback.print_exc
-    print_exc = traceback.print_exception
+    print_exc = traceback.print_exc
 
 
 # Stdin

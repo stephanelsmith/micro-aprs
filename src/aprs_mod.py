@@ -49,7 +49,7 @@ async def read_aprs_from_pipe(aprs_q,
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc(err)
+        print_exc()
 
 async def afsk_mod(aprs_q,
                    afsk_q,
@@ -81,7 +81,9 @@ async def afsk_mod(aprs_q,
                     eprint('===== MOD >>>>> {}'.format(aprs))
                     # eprint(aprs)
                     eprint('--ax25--')
+                    eprint(1)
                     pretty_binary(ax25.to_frame())
+                    eprint(2)
 
                 # AFSK
                 afsk,stop_bit = ax25.to_afsk()
@@ -122,7 +124,7 @@ async def afsk_mod(aprs_q,
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc(err)
+        print_exc()
 
 # async def run_in_thread(cmd):
     # print(cmd)
@@ -188,7 +190,7 @@ async def afsk_out(afsk_q,
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc(err)
+        print_exc()
     finally:
         if wav:
             wav.close()
@@ -238,7 +240,7 @@ async def main():
         await afsk_q.join()
 
     except Exception as err:
-        print_exc(err)
+        print_exc()
     finally:
         for task in tasks:
             task.cancel()

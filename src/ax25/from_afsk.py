@@ -77,7 +77,7 @@ class AX25FromAFSK():
                     idx = 0
                 self.bits_q.task_done()
         except Exception as err:
-            print_exc(err)
+            print_exc()
 
     async def frame_to_ax25(self, buf, stop_bit):
         mv = memoryview(buf)

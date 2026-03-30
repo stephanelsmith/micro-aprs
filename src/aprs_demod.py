@@ -38,7 +38,7 @@ async def consume_ax25(ax25_q,
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc(err)
+        print_exc()
 
 async def demod_core(in_rx,
                      bits_q,
@@ -71,7 +71,7 @@ async def demod_core(in_rx,
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc(err)
+        print_exc()
 
 async def main():
     args = demod_parse_args(sys.argv)

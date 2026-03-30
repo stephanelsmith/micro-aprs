@@ -62,7 +62,8 @@ async def aprs_is_ingress(reader, login_evt, call):
         while True:
             data = await reader.read(1024)
             if data:
-                print('<<<',data)
+                if b'aprsc' not in data:
+                    print('<<<',data)
                 line = data.decode()
                 if len(line) > 0:
                     #if line[:7] != '# aprsc':

@@ -172,7 +172,6 @@ def is_parse_args(args):
     r = {
         'args' : {
             'call'      : 'KW5O',
-            'passcode'  : '17081',
             'lat'       : None,
             'lon'       : None,
             'msg'       : None,
@@ -190,17 +189,12 @@ aprs_is.py sends aprs commands from stdin to aprs is servers.
 
 OPTIONS:
     -c, --call         APRS call sign
-    -p, --passcode     APRS passcode (https://apps.magicbug.co.uk/passcode/)
     -lat               Beacon lat (decimal notation)
     -lon               Beacon lon (decimal notation)
     -msg               Beacon message, default: micro-aprs-modem 144.390MHz rx only APRS iGate
     -log_file          Save APRS messages received to log
 ''')
             exit()
-        if '-p' in args:
-            r['args']['passcode'] = get_arg_val(args, '-p', str)
-        if '--passcode' in args:
-            r['args']['passcode'] = get_arg_val(args, '--passcode', str)
         if '-c' in args:
             r['args']['call'] = get_arg_val(args, '-c', str)
         if '--call' in args:

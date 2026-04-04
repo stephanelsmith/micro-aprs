@@ -107,7 +107,7 @@ class AX25():
                                  info)
     
     def from_aprs(self, aprs):
-        # KI5TOF>APRS,WIDE1-1,WIDE2-1:hello world!
+        # KW5O>APRS,WIDE1-1,WIDE2-1:hello world!
         # if isinstance(aprs, (bytes, bytearray)):
             # aprs = aprs.decode()
         if isinstance(aprs, str):

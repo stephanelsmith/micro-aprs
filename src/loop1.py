@@ -31,7 +31,7 @@ async def gen_samples(rio, ):
         async with AFSKModulator(sampling_rate = _FOUT,
                                  signed        = False,
                                  verbose       = False) as afsk_mod:
-            aprs = b'KI5TOF>APRS:>hello world!'
+            aprs = b'KW5O>APRS:>hello world!'
             ax25 = AX25(aprs    = aprs,
                         verbose = False,)
             #AFSK

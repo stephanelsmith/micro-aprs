@@ -16,7 +16,7 @@ Here are the steps, in order, to generate AFSK samples:
 Aprs_mod verbose option allows for viewing the step-by-step rocess.  In ```aprs_mod.py```, enable verbose option with ```-v```.  The following parameters ```-t null -t -``` specifies no output (null) and the aprs string input from stdin.
 
 ```
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -v -t null -t -
+echo "KW5O>APRS:>hello world!" | python aprs_mod.py -v -t null -t -
 ```
 
 The result:
@@ -25,7 +25,7 @@ The result:
 # RATE 22050
 # IN   aprs -
 # OUT  null null
-===== MOD >>>>> KI5TOF>APRS:>hello world!
+===== MOD >>>>> KW5O>APRS:>hello world!
 --ax25--
 0000  7e 82 a0 a4 a6 40 40 60   01111110 10000010 10100000 10100100 10100110 01000000 01000000 01100000   ~----@@`
 0008  96 92 6a a8 9e 8c 61 03   10010110 10010010 01101010 10101000 10011110 10001100 01100001 00000011   --j---a-
@@ -71,7 +71,7 @@ To note:
 Once you got encode, decode is easy, just the flip.  We can again use the built-in utilities, this time piping the raw samples from ```aprs_mod.py``` into ```aprs_demod.py```, again with the verbose option.
 
 ```
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py -t raw - -t aprs -  | python aprs_demod.py -v -t raw -
+echo "KW5O>APRS:>hello world!" | python aprs_mod.py -t raw - -t aprs -  | python aprs_demod.py -v -t raw -
 ```
 
 The output is the reverse process of above.  In this case, NRZI is performed before the I show the demod frame.
@@ -100,7 +100,7 @@ frame
 0016  f0 3e 68 65 6c 6c 6f 20   11110000 00111110 01101000 01100101 01101100 01101100 01101111 00100000   ->hello
 0024  77 6f 72 6c 64 21 a7 07   01110111 01101111 01110010 01101100 01100100 00100001 10100111 00000111   world!--
 0032  7e 00 -- -- -- -- -- --   01111110 00000000 -------- -------- -------- -------- -------- --------   ~-------
-[1] KI5TOF>APRS:>hello world!
+[1] KW5O>APRS:>hello world!
 
 ```
 

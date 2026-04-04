@@ -23,7 +23,7 @@ class CallSSID():
                        ):
         # Initialize a callsign ssid in three ways
         #   1) By specifying call and ssid explicitly
-        #   2) By specifying aprs formatted string/bytes, eg. KI5TOF-5
+        #   2) By specifying aprs formatted string/bytes, eg. KW5O-5
         #   3) By specifying frame bytes to be decoded
         if isinstance(call, str):
             call = call.encode()
@@ -41,7 +41,7 @@ class CallSSID():
             self.from_aprs(aprs)
 
     def from_aprs(self, call_ssid):
-        #read in formats like KI5TOF-5
+        #read in formats like KW5O-5
         if isinstance(call_ssid, str):
             call_ssid = call_ssid.encode()
         elif isinstance(call_ssid, (bytes, bytearray)):

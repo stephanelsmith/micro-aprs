@@ -23,7 +23,7 @@ try:
 except ImportError:
     console = None
 
-CALL = 'KI5TOF'
+CALL = 'KW5O'
 PASSCODE = '17081'
 
 APRS_IS_HOST = 'rotate.aprs.net'
@@ -31,26 +31,27 @@ APRS_IS_FULL_FEED_PORT = 10152
 APRS_IS_FILTER_PORT = 14580
 
 #APRS
+#aprs how paths work: https://blog.aprs.fi/2020/02/how-aprs-paths-work.html
 #connecting: https://www.aprs-is.net/Connecting.aspx
 #filters: https://www.aprs-is.net/javAPRSFilter.aspx
 
-#position: KI5TOF>APRS:=2941.97N/09545.01WChello world
-#status:   KI5TOF>APRS:>hello world!
-#message:  KI5TOF>APRS::KI5TOF   :hello world
-#station:  KI5TOF-1>APKI5:!2941.97NI09545.01W#144.390MHz Rx Only APRS iGate
+#position: KW5O>APRS:=2941.97N/09545.01WChello world
+#status:   KW5O>APRS:>hello world!
+#message:  KW5O>APRS::KW5O   :hello world
+#station:  KW5O-1>APKI5:!2941.97NI09545.01W#144.390MHz Rx Only APRS iGate
 # W5LCR-10>APRX29,TCPIP*,qAC,T2QUEBEC:!2906.46NI09627.19W#144.390MHz Louise, TX APRS iGate Digi
 
 #https://aprs.fi/doc/guide/aprsfi-telemetry.html
 #https://github.com/PhirePhly/aprs_notes/blob/master/telemetry_format.md
 #specify parameter names and units
-#telem:    KI5TOF>APRS::KI5TOF   :PARM.Title_A1,Title_B2,Title_C3,Title_D4,Title_E5,BIT_A1,BIT_B2,BIT_C3,BIT_D4,BIT_E5,BIT_F6,BIT_G7,BIT_H8
-#telem:    KI5TOF>APRS::KI5TOF   :UNIT.Volt,Volt,Volt,Volt,Volt,B,B,B,B,B,B,B,B
+#telem:    KW5O>APRS::KW5O   :PARM.Title_A1,Title_B2,Title_C3,Title_D4,Title_E5,BIT_A1,BIT_B2,BIT_C3,BIT_D4,BIT_E5,BIT_F6,BIT_G7,BIT_H8
+#telem:    KW5O>APRS::KW5O   :UNIT.Volt,Volt,Volt,Volt,Volt,B,B,B,B,B,B,B,B
 #specify scaling ax^2+bx+c             a,b,c|a,b,c|a,b,c|a,b,c|a,b,c
-#telem:    KI5TOF>APRS::KI5TOF   :EQNS.0,1,0,0,1,0,0,1,0,0,1,0,0,1,0
+#telem:    KW5O>APRS::KW5O   :EQNS.0,1,0,0,1,0,0,1,0,0,1,0,0,1,0
 # sending data
-#telem:    KI5TOF>APRS:T#000,1,2,3,4,5,01010101
-#telem:    KI5TOF>APRS:T#002,10.12,20.23,30.45,40.67,50.89,10101010
-#telem:    KI5TOF>APRS:T#003,110.12,120.23,130.45,140.67,150.89,10101010comment
+#telem:    KW5O>APRS:T#000,1,2,3,4,5,01010101
+#telem:    KW5O>APRS:T#002,10.12,20.23,30.45,40.67,50.89,10101010
+#telem:    KW5O>APRS:T#003,110.12,120.23,130.45,140.67,150.89,10101010comment
 
 
 async def run(cmd):
@@ -62,8 +63,8 @@ async def aprs_is_ingress(reader, login_evt, call):
         while True:
             data = await reader.read(1024)
             if data:
-                if b'aprsc' not in data:
-                    print('<<<',data)
+                # if b'aprsc' not in data:
+                    # print('<<<',data)
                 line = data.decode()
                 if len(line) > 0:
                     #if line[:7] != '# aprsc':
@@ -119,23 +120,32 @@ async def stdin_ingress(call,
                 print('SKIPPING...')
            
             count += 1
-            if console:
-                print('[bright_blue bold]\[{}][/] {}'.format(count, ax25.to_aprs_rich()))
-            else:
-                print('[{}] {}'.format(count, ax25))
 
-            # skip paths with keywords
+            nogate = False
             for digi in ax25.digis:
                 via = digi.to_aprs().lower()
                 if b'tcpip' in via or\
                    b'tcpxx' in via or\
                    b'rfonly' in via or\
                    b'nogate' in via:
-                    print('X', ax25)
-                    continue
+                    nogate = True
+            if nogate:
+                if console:
+                    print('[bright_blue bold]\[{}][/] {}'.format('NOGATE', ax25.to_aprs_rich()))
+                else:
+                    print('[{}] {}'.format('NOGATE', ax25))
+            else:
+                if console:
+                    print('[bright_blue bold]\[{}][/] {}'.format(count, ax25.to_aprs_rich()))
+                else:
+                    print('[{}] {}'.format(count, ax25))
+
+            if nogate:
+                continue
+
 
             #Packets being relayed to APRS-IS network get ",qAR,IGATECALL-SSID" appended to outermost address before first ':' character
-            #qAR = Packet was received directly (via a verified connection) from an IGate 
+            #qAR = Packet is placed on APRS-IS by an IGate from RF.  The callSSID following the qAR it the callSSID of the IGate
             ax25.digis.append(CallSSID(call=b'qAR'))
             ax25.digis.append(CallSSID(aprs=call))
 
@@ -170,7 +180,7 @@ async def station_beacon(ax25_q,
         ax25.digis.append(CallSSID(aprs=call))
         while True:
             await ax25_q.put((ax25, False))
-            await asyncio.sleep(60*15)
+            await asyncio.sleep(60*60)
     except asyncio.CancelledError:
         raise
     except Exception as err:
@@ -201,7 +211,7 @@ async def aprs_is_egress(writer,
             ax25,echo = await ax25_q.get()
             if echo:
                 now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                print('>>>','{}'.format(ax25))
+                # print('>>>','{}'.format(ax25))
                 if log_file:
                     with open(log_file, 'a') as l:
                         l.write('[{}] {}\n'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ax25))

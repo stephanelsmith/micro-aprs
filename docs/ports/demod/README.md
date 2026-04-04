@@ -10,7 +10,7 @@ python aprs_demod.py -h
 ```
 ```
 APRS DEMOD
-© Stéphane Smith (KI5TOF) 2025
+© Stéphane Smith (KW5O) 2025
 
 Usage:
 aprs_demod.py [options] (-t outfile) (-t infile)
@@ -38,7 +38,7 @@ outfile       '-' (default stdout)
 
 ### 🛹 Inline encode+decode pipeline with verbose output
 ```
-echo "KI5TOF>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -v -t -
+echo "KW5O>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -v -t -
 ```
 ```
 frame
@@ -60,7 +60,7 @@ frame
 0016  f0 3e 68 65 6c 6c 6f 20   11110000 00111110 01101000 01100101 01101100 01101100 01101111 00100000   ->hello
 0024  77 6f 72 6c 64 21 a7 07   01110111 01101111 01110010 01101100 01100100 00100001 10100111 00000111   world!--
 0032  7e 00 -- -- -- -- -- --   01111110 00000000 -------- -------- -------- -------- -------- --------   ~-------
-[1] KI5TOF>APRS:>hello world!
+[1] KW5O>APRS:>hello world!
 ```
 
 

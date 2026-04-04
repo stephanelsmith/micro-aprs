@@ -21,7 +21,7 @@ python aprs_is.py -h
 ```
 ```
 APRS IS GATEWAY
-(C) Stephane Smith (KI5TOF) 2024
+(C) Stephane Smith (KW5O) 2024
 
 Usage: python aprs_is.py [OPTIONS]
 aprs_is.py sends aprs commands from stdin to aprs is servers.
@@ -36,7 +36,7 @@ OPTIONS:
 
 ### :round_pushpin: Send a message to APRS IS, viewable on [aprs.fi](https://aprs.fi/)
 ```
-echo "KI5TOF>APRS:>hello world!" | python aprs_is.py -c KI5TOF -p xxxxx
+echo "KW5O>APRS:>hello world!" | python aprs_is.py -c KW5O -p xxxxx
 ```
 
 ### 🚪 A 144.390MHz rx only APRS iGate

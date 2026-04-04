@@ -48,7 +48,7 @@ async def start():
                                  verbose       = False) as afsk_mod:
             x = 0
             while True:
-                aprs = b'KI5TOF>APRS:>hello world {}'.format(x)
+                aprs = b'KW5O>APRS:>hello world {}'.format(x)
                 ax25 = AX25(aprs    = aprs,
                             verbose = False,)
                 #AFSK

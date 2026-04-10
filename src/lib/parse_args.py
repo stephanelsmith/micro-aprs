@@ -16,7 +16,9 @@ def mod_parse_args(args):
             'quiet'   : False,
             'rate'    : 22050,
             'vox'     : False,
-            'options' : {},
+            'hf'      : False,
+            'vhf'     : False,
+            'options' : {}, 
         },
         'in' : {
             'file'  : '-', #from stdin
@@ -40,6 +42,8 @@ aprs_mod.py
 
 OPTIONS:
 -r, --rate       22050 (default)
+-vhf             VHF mode, space:2200 mark:1200, baud:1200 (default)
+-hf              HF mode, space:1600 mark:1400, baud:300
 -vox, --vox      Vox mode, pad header flags to activate radio vox
 -v, --verbose    verbose intermediate output to stderr
 
@@ -61,6 +65,12 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
         if '-r' in args:
             r['args']['rate'] = get_arg_val(args, '-r', int)
         r['args']['vox'] = True if '-vox' in args or '--vox' in args else False
+        if '-hf' in args:
+            r['args']['hf'] = True
+            r['args']['vhf'] = False
+        else:
+            r['args']['vhf'] = True
+            r['args']['hf'] = False
         if '-v' in args or '-verbose' in args:
             r['args']['verbose'] = True
         if '-q' in args or '-quiet' in args:
@@ -70,13 +80,11 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
     if len(spl) == 2:
         try:
             _out = spl.pop(0)
-            # r['out']['type'] = _out[0]
             r['out']['file'] = _out[-1]
         except IndexError:
             pass
     try:
         _in = spl.pop(0)
-        # r['in']['type'] = _in[0]
         r['in']['file'] = _in[-1]
     except IndexError:
         pass

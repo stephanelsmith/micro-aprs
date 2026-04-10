@@ -1,0 +1,12 @@
+
+
+General 30m APRS transmissions are 300
+baud FSK with tones emitted at 10.1492 and
+10.1494 Mhz. This is 200Hz shift HF Packet
+Radio and can be decoded by a number of
+devices & software programs.
+
+Another way of visualizing this would be a
+dial frequency of 10.1478 Mhz USB with your
+Mark/Space audio tones on 1400 & 1600Hz
+

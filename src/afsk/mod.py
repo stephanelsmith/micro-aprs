@@ -26,6 +26,8 @@ class AFSKModulator():
                        signed        = True,
                        amplitude     = 0x7fff,
                        is_square     = False,  # generate a square instead of sine
+                       afsks         = [2200, 1200], # space, mark
+                       baud          = 1200,
                        verbose       = False,
                        ):
 
@@ -37,11 +39,12 @@ class AFSKModulator():
         self.fs = sampling_rate
         self.ts = 1/self.fs
         self.afsk_tone_gen = create_afsk_tone_gen(fs     = self.fs,
-                                                  afsks  = [2200, 1200],
                                                   signed = self.signed,
                                                   ampli  = amplitude,
-                                                  baud   = 1200,
+                                                  baud   = baud,
+                                                  afsks  = afsks,
                                                   )
+                                                  # afsks  = [2200, 1200],
         #nrzi converter
         self.nrzi = create_nrzi()
 

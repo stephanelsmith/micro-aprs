@@ -55,10 +55,21 @@ async def afsk_mod(aprs_q,
                    afsk_q,
                    rate    = 22050,
                    vox     = False, # add additiona flags to enable vox
+                   is_hf   = False,
                    verbose = False,
                    ):
+    
+    if is_hf:
+        baud = 300
+        afsks = [1600,1400]
+    else:
+        baud = 1200
+        afsks = [2200,1200]
+
     try:
         async with AFSKModulator(sampling_rate = rate,
+                                 baud          = baud,
+                                 afsks         = afsks,
                                  verbose       = verbose) as afsk_mod:
 
             while True:
@@ -81,9 +92,7 @@ async def afsk_mod(aprs_q,
                     eprint('===== MOD >>>>> {}'.format(aprs))
                     # eprint(aprs)
                     eprint('--ax25--')
-                    eprint(1)
                     pretty_binary(ax25.to_frame())
-                    eprint(2)
 
                 # AFSK
                 afsk,stop_bit = ax25.to_afsk()
@@ -223,6 +232,7 @@ async def main():
                                                   afsk_q, 
                                                   rate    = args['args']['rate'],
                                                   vox     = args['args']['vox'],
+                                                  is_hf   = args['args']['hf'],
                                                   verbose = args['args']['verbose'],
                                                   )))
 

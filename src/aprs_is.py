@@ -121,12 +121,17 @@ async def stdin_ingress(call,
 
             nogate = False
             for digi in ax25.digis:
-                via = digi.to_aprs().lower()
-                if b'tcpip' in via or\
-                   b'tcpxx' in via or\
-                   b'rfonly' in via or\
-                   b'nogate' in via:
-                    nogate = True
+                try:
+                    via = digi.to_aprs().lower()
+                    if b'tcpip' in via or\
+                    b'tcpxx' in via or\
+                    b'rfonly' in via or\
+                    b'nogate' in via:
+                        nogate = True
+                except asyncio.CancelledError:
+                    raise
+                except:
+                    pass
             if nogate:
                 if console:
                     print('[bright_blue bold]\[{}][/] {}'.format('NOGATE', ax25.to_aprs_rich()))

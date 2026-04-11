@@ -38,10 +38,6 @@ cat test/aprs.txt | micropython aprs_mod.py -v | micropython aprs_demod.py -v -t
 gen_packets -r 22050 -o test/test.wav
 sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python aprs_demod.py -t -
 
-#HF
-echo "KW5O>APRS:>hello world!" | python aprs_mod.py -hf | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/test.wav
-echo "KW5O>APRS:>hello world!" | python aprs_mod.py -hf -v | python aprs_demod.py -hf -v -t -
-
 #TNC TESTs
 cd test
 wget http://wa8lmf.net/TNCtest/TNC_Test_CD_Ver-1.1.zip
@@ -65,6 +61,11 @@ sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | pyth
 sox -t wav test/ISSpkt.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | micropython aprs_demod.py -t -
 python aprs_demod.py -t test/ISSpkt.raw
 micropython aprs_demod.py -t test/ISSpkt.raw
+
+#HF
+echo "KW5O>APRS:>hello world!" | python aprs_mod.py -hf | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/test.wav
+echo "KW5O>APRS:>hello world!" | python aprs_mod.py -r 11025 -hf -v | python aprs_demod.py -r 11025 -hf -v -t -
+echo "KW5O>APRS:>hello world!" | python aprs_mod.py -hf -v | python aprs_demod.py -hf -v -t -
 
 
 #RTL-SDR

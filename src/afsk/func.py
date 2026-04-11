@@ -333,10 +333,9 @@ else:
             return r
         return inner
 
-CORRELATOR_DELAY = 446e-6
 if IS_UPY and HAS_C:
-    def create_corr(ts,):
-        delay:int = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
+    def create_corr(ts,corr_delay):
+        delay:int = int(round(corr_delay/ts)) #correlator delay (index)
         i:int = 0
         dat = array('i', (0 for x in range(delay)))
         # C OPTIMIZED
@@ -356,8 +355,8 @@ if IS_UPY and HAS_C:
         return inner
 elif IS_UPY and HAS_VIPER:
     # VIPER OPTIMIZED
-    def create_corr(ts,):
-        delay:int = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
+    def create_corr(ts,corr_delay):
+        delay:int = int(round(corr_delay/ts)) #correlator delay (index)
         i:int = 0
         dat = array('i', (0 for x in range(delay)))
         @micropython.viper
@@ -377,8 +376,8 @@ elif IS_UPY and HAS_VIPER:
         return inner
 else:
     # PYTHON
-    def create_corr(ts,):
-        delay = int(round(CORRELATOR_DELAY/ts)) #correlator delay (index)
+    def create_corr(ts,corr_delay):
+        delay = int(round(corr_delay/ts)) #correlator delay (index)
         dat = array('i', (0 for x in range(delay)))
         i = 0
         def inner(v:int)->int:

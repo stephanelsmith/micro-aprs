@@ -54,12 +54,14 @@ class AFSKDemodulator():
             self.tmark  = 1.0/self.fmark
             self.fbaud  = 300
             self.tbaud  = 1.0/self.fbaud
+            self.corr_delay = 2500e-6
         else:
             self.fmark  = 1200
             self.fspace = 2200
             self.tmark  = 1.0/self.fmark
             self.fbaud  = 1200
             self.tbaud  = 1.0/self.fbaud
+            self.corr_delay = 446e-6
 
         self.fs = sampling_rate
         self.ts = 1/self.fs
@@ -95,8 +97,9 @@ class AFSKDemodulator():
                                         bandpass_amark, 
                                         bandpass_aspace)
         self.bpf = create_fir(coefs = coefs, scale = g)
-
-        self.corr = create_corr(ts    = self.ts,)
+        
+        self.corr = create_corr(ts    = self.ts,
+                                corr_delay = self.corr_delay)
 
         # nmark = int(self.tmark/self.ts)
         lpf_ncoefsbaud = options['lpf_ncoefsbaud']
@@ -213,6 +216,7 @@ class AFSKDemodulator():
 
             # bytes to integer converter
             btoi = bs16toi if self.stream_type=='s16' else bu16toi
+            i = 0
 
             while True:
                 try:
@@ -245,10 +249,11 @@ class AFSKDemodulator():
                 if p < sql:
                     # skip if we are below squelch level
                     continue
-                # eprint(o)
                 o = corr(o)
                 o = lpf(o)
                 bs = sampler(o)
+                # eprint(f'{i:10} {o:10} {o2:10} {o3:10} {bs:10}')
+                # i+=1
                 if bs != 2: # _NONE
                     bx = unnrzi(bs)
                     # eprint(b,end='')

@@ -23,6 +23,9 @@ In practice this means we:
 
 ### **Micro-Aprs decodes 1000+ error-free frames on the [TNC CD Track 2](http://wa8lmf.net/TNCtest/).  That's **1010** :eyes: in a balanced mode at **1020** :fireworks: in a more computational intensive mode!**  (TNC CD Track 2 is the universal test for APRS demod, [this performance is very good!](https://github.com/wb2osz/direwolf/blob/dev/doc/WA8LMF-TNC-Test-CD-Results.pdf))
 
+#### Supporting APRS encoding and decoding
+* VHF - baud: 1200, space: 2200, mark: 1200
+* HF - baud: 300, space: 1600, mark: 1400
 
 ## :mortar_board: Tutorials
 As many who've gone down this path have mentioned, there's surprisingly little useful information out there covering these topics.  I hope these tutorial sections will provide you additional information on getting started!

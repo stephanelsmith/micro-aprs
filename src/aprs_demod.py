@@ -50,6 +50,7 @@ async def demod_core(in_rx,
         #in_rx consumer
         #bits_q producer
         async with AFSKDemodulator(sampling_rate = args['args']['rate'],
+                                   is_hf         = args['args']['hf'],
                                    in_rx         = in_rx,
                                    bits_out_q    = bits_q,
                                    stream_type   = args['in']['type'],

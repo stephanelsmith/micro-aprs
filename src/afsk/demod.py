@@ -26,16 +26,12 @@ from afsk.func import bu16toi, bs16toi
 
 from lib.compat import print_exc
 
-_FMARK  = 1200
-_FSPACE = 2200
-_TMARK  = 0.0008333333333333334
-_FBAUD  = 1200
-_TBAUD  = 0.0008333333333333334
 
 class AFSKDemodulator():
     def __init__(self, in_rx, # array or tuple (array, size) OR a stream (with 'readexactly' method)
                        bits_out_q,
                        sampling_rate = 11_025,
+                       is_hf         = False,
                        verbose       = False, # output intermediate steps to stderr
                        stream_type   = 's16', # if in_rx is a stream, u16 or s16?
                        is_embedded   = False,
@@ -50,20 +46,34 @@ class AFSKDemodulator():
         self.is_embedded = is_embedded
         # self.debug_samples = debug_samples
         self.stream_done = Event()
+        self.is_hf = is_hf
+
+        if self.is_hf:
+            self.fmark  = 1400
+            self.fspace = 1600
+            self.tmark  = 1.0/self.fmark
+            self.fbaud  = 300
+            self.tbaud  = 1.0/self.fbaud
+        else:
+            self.fmark  = 1200
+            self.fspace = 2200
+            self.tmark  = 1.0/self.fmark
+            self.fbaud  = 1200
+            self.tbaud  = 1.0/self.fbaud
 
         self.fs = sampling_rate
         self.ts = 1/self.fs
         
         do_memoize = True
         options = dict(fir_options,  **options)
-        nmark = int(_TMARK/self.ts)
+        nmark = int(self.tmark/self.ts)
 
         bandpass_ncoefsbaud = options['bandpass_ncoefsbaud']
         bandpass_ncoefs = int(nmark*bandpass_ncoefsbaud) if int(nmark*bandpass_ncoefsbaud)%2==1 else int(nmark*bandpass_ncoefsbaud)+1
         bandpass_width = options['bandpass_width']
         bandpass_amark = options['bandpass_amark']
         bandpass_aspace = options['bandpass_aspace']
-        coefs_g = memoize_loads('bpf', _FMARK, _FSPACE, self.fs, 
+        coefs_g = memoize_loads('bpf', self.fmark, self.fspace, self.fs, 
                                        bandpass_ncoefs,
                                        bandpass_width, 
                                        bandpass_amark, 
@@ -72,14 +82,14 @@ class AFSKDemodulator():
             coefs,g = coefs_g
         else: 
             coefs,g = bandpass_fir_design(ncoefs = bandpass_ncoefs,
-                                          fmark  = _FMARK,
-                                          fspace = _FSPACE,
+                                          fmark  = self.fmark,
+                                          fspace = self.fspace,
                                           fs     = self.fs,
                                           width  = bandpass_width,
                                           amark  = bandpass_amark,
                                           aspace = bandpass_aspace,
                                           )
-            memoize_dumps('bpf', (coefs,g), _FMARK, _FSPACE, self.fs,
+            memoize_dumps('bpf', (coefs,g), self.fmark, self.fspace, self.fs,
                                         bandpass_ncoefs,
                                         bandpass_width, 
                                         bandpass_amark, 
@@ -88,7 +98,7 @@ class AFSKDemodulator():
 
         self.corr = create_corr(ts    = self.ts,)
 
-        # nmark = int(_TMARK/self.ts)
+        # nmark = int(self.tmark/self.ts)
         lpf_ncoefsbaud = options['lpf_ncoefsbaud']
         lpf_ncoefs = int(nmark*lpf_ncoefsbaud) if int(nmark*lpf_ncoefsbaud)%2==1 else int(nmark*lpf_ncoefsbaud)+1
         lpf_width = options['lpf_width']
@@ -117,7 +127,7 @@ class AFSKDemodulator():
                                             lpf_aboost)
         self.lpf = create_fir(coefs = coefs, scale = g)
 
-        self.sampler = create_sampler(fbaud = _FBAUD,
+        self.sampler = create_sampler(fbaud = self.fbaud,
                                       fs    = self.fs)
         self.unnrzi = create_unnrzi()
 
@@ -125,7 +135,7 @@ class AFSKDemodulator():
         self.squelch = options['squelch']
 
         #how much we need to flush internal filters to process all sampled data
-        self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(_TBAUD/self.ts))
+        self.flush_size = int((lpf_ncoefs+bandpass_ncoefs)*(self.tbaud/self.ts))
 
         self.tasks = []
 

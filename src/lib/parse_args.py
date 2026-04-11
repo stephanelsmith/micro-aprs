@@ -97,6 +97,8 @@ def demod_parse_args(args):
             'debug_samples'   : False,
             'quiet'   : False,
             'rate'    : 22050,
+            'hf'      : False,
+            'vhf'     : False,
             'options' : {},
         },
         'in' : {
@@ -121,6 +123,8 @@ aprs_demod.py
 
 OPTIONS:
 -r, --rate       22050 (default)
+-vhf             VHF mode, space:2200 mark:1200, baud:1200 (default)
+-hf              HF mode, space:1600 mark:1400, baud:300
 -v, --verbose    verbose intermediate output to stderr
 
 DETAIL DEBUG MODE, output samples at specific stages within pipeline. Nominall use this
@@ -147,6 +151,12 @@ outfile       '-' (default stdout)
             r['args']['rate'] = get_arg_val(args, '--rate', int)
         if '-r' in args:
             r['args']['rate'] = get_arg_val(args, '-r', int)
+        if '-hf' in args:
+            r['args']['hf'] = True
+            r['args']['vhf'] = False
+        else:
+            r['args']['vhf'] = True
+            r['args']['hf'] = False
         if '-v' in args or '--verbose' in args:
             r['args']['verbose'] = True
         if '--debug_samples' in args:

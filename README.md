@@ -1,6 +1,6 @@
 # Python Micro-APRS
 
-A python/micropython based library for encoding/decoding, modulating/demodulating APRS/AX.25 packets in AFSK audio. 
+A python/micropython based library for encoding/decoding, modulating/demodulating APRS/AX.25 packets in AFSK audio. For ham folks, it's an APRS TNC.
 <!---
 ![AFSK hello world](docs/afsk_hello.png?raw=true "AFSK hello")
 --->

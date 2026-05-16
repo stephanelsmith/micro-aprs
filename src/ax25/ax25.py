@@ -119,6 +119,7 @@ class AX25():
             raise Exception('could not find source',aprs)
 
         #find first character, this is to ignore message counters [%d] AX25
+        j = 0
         for j in range(i):
             o = aprs[j]
             if o >= _ORD_A and o <= _ORD_Z or\

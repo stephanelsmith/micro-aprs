@@ -133,14 +133,22 @@ async def stdin_ingress(call,
                 except:
                     pass
             if nogate:
-                if console:
-                    print('[bright_blue bold]\[{}][/] {}'.format('NOGATE', ax25.to_aprs_rich()))
-                else:
+                try:
+                    if console:
+                        print('[bright_blue bold]\[{}][/] {}'.format('NOGATE', ax25.to_aprs_rich()))
+                    else:
+                        print('[{}] {}'.format('NOGATE', ax25))
+                except Exception as err:
+                    print(err)
                     print('[{}] {}'.format('NOGATE', ax25))
             else:
-                if console:
-                    print('[bright_blue bold]\[{}][/] {}'.format(count, ax25.to_aprs_rich()))
-                else:
+                try:
+                    if console:
+                        print('[bright_blue bold]\[{}][/] {}'.format(count, ax25.to_aprs_rich()))
+                    else:
+                        print('[{}] {}'.format(count, ax25))
+                except Exception as err:
+                    print(err)
                     print('[{}] {}'.format(count, ax25))
 
             if nogate:
@@ -164,7 +172,7 @@ async def stdin_ingress(call,
 async def station_beacon(ax25_q, 
                          call = None, 
                          lat = None, lon = None, 
-                         msg = 'micro-aprs 144.390MHz rx only APRS iGate',
+                         msg = '',
                          ):
     if not lat or not lon or not call:
         print('skipping beacon lat:{} lon:{}'.format(lat, lon))
@@ -173,7 +181,7 @@ async def station_beacon(ax25_q,
                                    symbol1 = 'I',  # use letter 'I'
                                    symbol2 = '#',  # digipeater symbol (green star)
                                    )
-        msg = 'micro-aprs 144.390MHz rx only APRS iGate'
+        msg = 'https://github.com/stephanelsmith/micro-aprs RX igate'
         ax25 = AX25(src  = call,
                     dst  = b'APRS',
                     info = '!{}{}'.format(aprs_loc, msg).encode(),
@@ -212,16 +220,20 @@ async def aprs_is_egress(writer,
 
         while True:
             ax25,echo = await ax25_q.get()
-            if echo:
-                now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                # print('>>>','{}'.format(ax25))
-                if log_file:
-                    with open(log_file, 'a') as l:
-                        l.write('[{}] {}\n'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ax25))
-            writer.write(ax25.encode())
-            writer.write(b'\r\n')
-            await writer.drain()
-            ax25_q.task_done()
+            try:
+                if echo:
+                    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    # print('>>>','{}'.format(ax25))
+                    if log_file:
+                        with open(log_file, 'a') as l:
+                            l.write('[{}] {}\n'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ax25))
+                writer.write(ax25.encode())
+                writer.write(b'\r\n')
+                await writer.drain()
+            except Exception as err:
+                traceback.print_exc()
+            finally:
+                ax25_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:

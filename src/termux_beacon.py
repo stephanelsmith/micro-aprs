@@ -16,7 +16,7 @@ from ax25.ax25 import AX25
 from ax25.callssid import CallSSID
 from lib.gps import aprs_gps_format
 
-CALL = 'KW5O-9'
+CALL = 'KX5X-9'
 PASSCODE = '17081'
 
 async def run(cmd):

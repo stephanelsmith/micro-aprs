@@ -30,7 +30,7 @@ def mod_parse_args(args):
 
     if '-h' in args or '--help' in args or '-help' in args:
         print(f'''APRS MOD
-© Stéphane Smith (KW5O) {year}
+© Stéphane Smith (KX5X) {year}
 
 aprs_mod.py parses input AX25 APRS strings and outputs AFSK samples in signed 16 bit little endian format.
 
@@ -113,7 +113,7 @@ def demod_parse_args(args):
 
     if '-h' in args or '--help' in args:
         print(f'''APRS DEMOD
-© Stéphane Smith (KW5O) {year}
+© Stéphane Smith (KX5X) {year}
 
 Usage: 
 aprs_demod.py [options] (-t outfile) (-t infile)
@@ -189,7 +189,7 @@ outfile       '-' (default stdout)
 def is_parse_args(args):
     r = {
         'args' : {
-            'call'      : 'KW5O',
+            'call'      : 'KX5X',
             'lat'       : None,
             'lon'       : None,
             'msg'       : None,
@@ -200,7 +200,7 @@ def is_parse_args(args):
         #general args
         if '-h' in args or '--help' in args or len(args)==1:
             print('''APRS IS GATEWAY
-(C) Stephane Smith (KW5O) 2023
+(C) Stephane Smith (KX5X) 2023
 
 Usage: python aprs_is.py [OPTIONS]
 aprs_is.py sends aprs commands from stdin to aprs is servers.

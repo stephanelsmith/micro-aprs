@@ -33,23 +33,23 @@ APRS_IS_FILTER_PORT = 14580
 #connecting: https://www.aprs-is.net/Connecting.aspx
 #filters: https://www.aprs-is.net/javAPRSFilter.aspx
 
-#position: KW5O>APRS:=2941.97N/09545.01WChello world
-#status:   KW5O>APRS:>hello world!
-#message:  KW5O>APRS::KW5O   :hello world
-#station:  KW5O-1>APRS:!2941.97NI09545.01W#144.390MHz Rx Only APRS iGate
+#position: KX5X>APRS:=2941.97N/09545.01WChello world
+#status:   KX5X>APRS:>hello world!
+#message:  KX5X>APRS::KX5X   :hello world
+#station:  KX5X-1>APRS:!2941.97NI09545.01W#144.390MHz Rx Only APRS iGate
 # W5LCR-10>APRX29,TCPIP*,qAC,T2QUEBEC:!2906.46NI09627.19W#144.390MHz Louise, TX APRS iGate Digi
 
 #https://aprs.fi/doc/guide/aprsfi-telemetry.html
 #https://github.com/PhirePhly/aprs_notes/blob/master/telemetry_format.md
 #specify parameter names and units
-#telem:    KW5O>APRS::KW5O   :PARM.Title_A1,Title_B2,Title_C3,Title_D4,Title_E5,BIT_A1,BIT_B2,BIT_C3,BIT_D4,BIT_E5,BIT_F6,BIT_G7,BIT_H8
-#telem:    KW5O>APRS::KW5O   :UNIT.Volt,Volt,Volt,Volt,Volt,B,B,B,B,B,B,B,B
+#telem:    KX5X>APRS::KX5X   :PARM.Title_A1,Title_B2,Title_C3,Title_D4,Title_E5,BIT_A1,BIT_B2,BIT_C3,BIT_D4,BIT_E5,BIT_F6,BIT_G7,BIT_H8
+#telem:    KX5X>APRS::KX5X   :UNIT.Volt,Volt,Volt,Volt,Volt,B,B,B,B,B,B,B,B
 #specify scaling ax^2+bx+c             a,b,c|a,b,c|a,b,c|a,b,c|a,b,c
-#telem:    KW5O>APRS::KW5O   :EQNS.0,1,0,0,1,0,0,1,0,0,1,0,0,1,0
+#telem:    KX5X>APRS::KX5X   :EQNS.0,1,0,0,1,0,0,1,0,0,1,0,0,1,0
 # sending data
-#telem:    KW5O>APRS:T#000,1,2,3,4,5,01010101
-#telem:    KW5O>APRS:T#002,10.12,20.23,30.45,40.67,50.89,10101010
-#telem:    KW5O>APRS:T#003,110.12,120.23,130.45,140.67,150.89,10101010comment
+#telem:    KX5X>APRS:T#000,1,2,3,4,5,01010101
+#telem:    KX5X>APRS:T#002,10.12,20.23,30.45,40.67,50.89,10101010
+#telem:    KX5X>APRS:T#003,110.12,120.23,130.45,140.67,150.89,10101010comment
 
 
 async def run(cmd):

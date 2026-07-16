@@ -10,7 +10,7 @@ python aprs_mod.py -h
 ```
 ```
 APRS MOD
-© Stéphane Smith (KW5O) 2026
+© Stéphane Smith (KX5X) 2026
 
 aprs_mod.py parses input AX25 APRS strings and outputs AFSK samples in signed 16 bit little endian format.
 
@@ -37,14 +37,14 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
 ### 📝 Encode AX25 APRS string in verbose mode
 ```-v``` verbose mode is designed to show the intermediate steps (on stderr).  For this example, we suppress output (setting stdout to null).
 ```
-echo "KW5O>APRS:>hello world!" | python aprs_mod.py -v -t null -t -
+echo "KX5X>APRS:>hello world!" | python aprs_mod.py -v -t null -t -
 ```
 ```
 # APRS MOD
 # RATE 22050
 # IN   -
 # OUT  null
-===== MOD >>>>> b'KW5O>APRS:>hello world!'
+===== MOD >>>>> b'KX5X>APRS:>hello world!'
 --ax25--
 0000  7e 82 a0 a4 a6 40 40 60   01111110 10000010 10100000 10100100 10100110 01000000 01000000 01100000   ~----@@`
 0008  96 ae 6a 9e 40 40 61 03   10010110 10101110 01101010 10011110 01000000 01000000 01100001 00000011   --j-@@a-
@@ -81,12 +81,12 @@ echo "KW5O>APRS:>hello world!" | python aprs_mod.py -v -t null -t -
 ### 〰️ Generate AFSK audio file
 Generate wave file via ```sox```.
 ```
-echo "KW5O>APRS:>hello world!" | python aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/test.wav
+echo "KX5X>APRS:>hello world!" | python aprs_mod.py | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test/test.wav
 ```
 
 Wave file as output.
 ```
-echo "KW5O>APRS:>hello world!" | python aprs_mod.py -t test/test.wav -t -
+echo "KX5X>APRS:>hello world!" | python aprs_mod.py -t test/test.wav -t -
 ```
 
 Decode wave file using [Direwolf (atest)](https://github.com/wb2osz/direwolf), [multimon-ng](https://github.com/EliasOenal/multimon-ng), and [aprs_demod.py](https://github.com/stephanelsmith/micro-aprs/tree/master/docs/ports/demod).
@@ -98,10 +98,10 @@ sox -t wav test/test.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | python
 
 ### 🛹 Inline encode+decode pipeline
 ```
-echo "KW5O>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -t -
+echo "KX5X>APRS:>hello world!" | python aprs_mod.py | python aprs_demod.py -t -
 ```
 ```
-[1] KW5O>APRS:>hello world!
+[1] KX5X>APRS:>hello world!
 ```
 
 ### 🔩 Multiple APRS message encode+decode pipeline
@@ -110,8 +110,8 @@ With verbose output enabled on output
 cat test/aprs.txt | python aprs_mod.py | python aprs_demod.py -t -
 ```
 ```
-[1] KW5O>APRS:hello world!
-[2] KW5O>APRS,WIDE2-1,WIDE1-1:hello world1
-[3] KW5O>APRS,WIDE2-1,WIDE1-1:hello world2
-[4] KW5O>APRS,WIDE2-1,WIDE1-1:hello world3
+[1] KX5X>APRS:hello world!
+[2] KX5X>APRS,WIDE2-1,WIDE1-1:hello world1
+[3] KX5X>APRS,WIDE2-1,WIDE1-1:hello world2
+[4] KX5X>APRS,WIDE2-1,WIDE1-1:hello world3
 ```

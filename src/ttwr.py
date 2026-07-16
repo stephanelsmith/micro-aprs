@@ -87,7 +87,7 @@ async def start():
                                  amplitude     = 0x7000,
                                  is_square     = False,
                                  verbose       = False) as afsk_mod:
-            aprs = b'KW5O>APRS:>hello world!'
+            aprs = b'KX5X>APRS:>hello world!'
             ax25 = AX25(aprs    = aprs,
                         verbose = False,)
             #AFSK

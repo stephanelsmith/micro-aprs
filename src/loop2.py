@@ -34,7 +34,7 @@ async def gen_adc( ):
         async with AFSKModulator(sampling_rate = _FOUT,
                                  signed        = False,
                                  verbose       = False) as afsk_mod:
-            aprs = b'KW5O>APRS:>hello world!'
+            aprs = b'KX5X>APRS:>hello world!'
             ax25 = AX25(aprs    = aprs,
                         verbose = False,)
             #AFSK

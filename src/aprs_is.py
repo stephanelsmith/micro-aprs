@@ -132,24 +132,28 @@ async def stdin_ingress(call,
                     raise
                 except:
                     pass
-            if nogate:
-                try:
-                    if console:
-                        print('[bright_blue bold]\[{}][/] {}'.format('NOGATE', ax25.to_aprs_rich()))
-                    else:
+            try:
+                if nogate:
+                    try:
+                        if console:
+                            print('[bright_blue bold]\[{}][/] {}'.format('NOGATE', ax25.to_aprs_rich()))
+                        else:
+                            print('[{}] {}'.format('NOGATE', ax25))
+                    except Exception as err:
+                        print(err)
                         print('[{}] {}'.format('NOGATE', ax25))
-                except Exception as err:
-                    print(err)
-                    print('[{}] {}'.format('NOGATE', ax25))
-            else:
-                try:
-                    if console:
-                        print('[bright_blue bold]\[{}][/] {}'.format(count, ax25.to_aprs_rich()))
-                    else:
+                else:
+                    try:
+                        if console:
+                            print('[bright_blue bold]\[{}][/] {}'.format(count, ax25.to_aprs_rich()))
+                        else:
+                            print('[{}] {}'.format(count, ax25))
+                    except Exception as err:
+                        print(err)
                         print('[{}] {}'.format(count, ax25))
-                except Exception as err:
-                    print(err)
-                    print('[{}] {}'.format(count, ax25))
+            except Exception as err:
+                print(err)
+                continue
 
             if nogate:
                 continue

@@ -37,12 +37,13 @@ From here, the commands assume the current working directory is ```micropython/p
 
 #### Add the board file from the aprs-micro folder into the micropython build folder
 ```
-ln -sf ~/micro-aprs/upy/boards/SS_TINYS3 boards/.
+ln -sf $IDF_PATH/../micro-aprs/upy/boards/SS_TINYS3 boards/.
 ```
 
 #### Build micropython port with C modules
 ```
-make BOARD=SS_TINYS3 USER_C_MODULES=~/micro-aprs/upy/c_modules/esp32.cmake
+make BOARD=SS_TINYS3 USER_C_MODULES=$IDF_PATH/../micro-aprs/upy/c_modules/esp32.cmake
+
 ```
 
 OR, try the vanilla TinyS3 board (already included in the Micropython project.)

@@ -1,2 +1,2 @@
 include("$(MPY_DIR)/extmod/asyncio")
-freeze("/home/ssmith/micro-aprs/src")
+freeze("../../../src")  # relative to this manifest

@@ -42,7 +42,7 @@ ln -sf $IDF_PATH/../micro-aprs/upy/boards/SS_TINYS3 boards/.
 
 #### Build micropython port with C modules
 ```
-make BOARD=SS_TINYS3 USER_C_MODULES=$IDF_PATH/../micro-aprs/upy/c_modules/esp32.cmake
+make BOARD=SS_TINYS3
 
 ```
 

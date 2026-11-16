@@ -118,7 +118,7 @@ class AFSKModulator():
             if verbose:
                 eprint('\n')
         except Exception as err:
-            traceback.print_exc()
+            traceback.print_exc(err)
 
     # return the array and size
     async def flush(self):

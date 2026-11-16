@@ -32,13 +32,25 @@ else:
     HAS_C = False
     HAS_VIPER = False
 
+# print_exc(err): print an exception's traceback on either runtime.
+# MicroPython's sys.print_exception() requires the exception, while CPython's
+# traceback.print_exc() takes none (and would misread one as its 'limit' arg),
+# so always call print_exc(err) from inside an `except ... as err:` block.
 if IS_UPY:
     #micropython
-    print_exc = sys.print_exception
+    def print_exc(err=None):
+        if err is None and hasattr(sys, 'exc_info'):
+            err = sys.exc_info()[1]
+        if err is not None:
+            sys.print_exception(err)
 else:
     #python3
     import traceback
-    print_exc = traceback.print_exc
+    def print_exc(err=None):
+        if err is None:
+            traceback.print_exc()
+        else:
+            traceback.print_exception(type(err), err, err.__traceback__)
 
 
 # Stdin

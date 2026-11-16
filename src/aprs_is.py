@@ -55,24 +55,29 @@ APRS_IS_FILTER_PORT = 14580
 async def run(cmd):
     return await asyncio.to_thread(check_output, cmd.split())
 
+# APRS-IS servers send a '# aprsc ...' keepalive about every 20s, so silence this long means a dead link
+RX_TIMEOUT_S = 60
+TX_TIMEOUT_S = 15
+CONNECT_TIMEOUT_S = 20
+
 async def aprs_is_ingress(reader, login_evt, call):
     try:
         login_resp = 'logresp {} verified'.format(call.decode())
         while True:
-            data = await reader.read(1024)
-            if data:
-                # if b'aprsc' not in data:
-                    # print('<<<',data)
-                line = data.decode()
-                if len(line) > 0:
-                    #if line[:7] != '# aprsc':
-                    #    print(line.rstrip())
-                    if line.find(login_resp) != -1:
-                        login_evt.set()
+            try:
+                data = await asyncio.wait_for(reader.read(1024), RX_TIMEOUT_S)
+            except asyncio.TimeoutError:
+                raise ConnectionError('no data from APRS-IS in {}s'.format(RX_TIMEOUT_S))
+            if not data:
+                raise ConnectionError('APRS-IS closed the connection')
+            line = data.decode(errors='replace')
+            if line.find(login_resp) != -1:
+                login_evt.set()
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        traceback.print_exc()
+        print('aprs_is ingress:', repr(err))
+        raise # let the session notice and reconnect
     finally:
         print('exiting aprs_is ingress')
 
@@ -116,7 +121,8 @@ async def stdin_ingress(call,
             except Exception as err:
                 traceback.print_exc()
                 print('SKIPPING...')
-           
+                continue
+
             count += 1
 
             nogate = False
@@ -213,61 +219,76 @@ async def aprs_is_egress(writer,
         print('>>>',login_str)
         writer.write(login_str.encode())
         writer.write(b'\r\n')
-        await writer.drain()
+        await asyncio.wait_for(writer.drain(), TX_TIMEOUT_S)
        
         #wait for login response
-        await login_evt.wait()
+        await asyncio.wait_for(login_evt.wait(), CONNECT_TIMEOUT_S)
 
         while True:
             ax25,echo = await ax25_q.get()
+            sent = False
             try:
-                if echo:
-                    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    # print('>>>','{}'.format(ax25))
-                    if log_file:
-                        with open(log_file, 'a') as l:
-                            l.write('[{}] {}\n'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ax25))
+                if echo and log_file:
+                    with open(log_file, 'a') as l:
+                        l.write('[{}] {}\n'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ax25))
                 writer.write(ax25.encode())
                 writer.write(b'\r\n')
-                await writer.drain()
-            except Exception as err:
-                traceback.print_exc()
+                await asyncio.wait_for(writer.drain(), TX_TIMEOUT_S)
+                sent = True
             finally:
+                if not sent:
+                    ax25_q.put_nowait((ax25, False)) # connection failed, keep the packet for the next session
                 ax25_q.task_done()
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        traceback.print_exc()
+        print('aprs_is egress:', repr(err))
+        raise # let the session notice and reconnect
     finally:
         print('exiting aprs is egress')
 
+async def aprs_is_session(call, passcode, ax25_q, log_file):
+    '''One connection to APRS-IS. Returns/raises when the connection is lost.'''
+    reader, writer = await asyncio.wait_for(
+                         asyncio.open_connection(APRS_IS_HOST, APRS_IS_FILTER_PORT),
+                         CONNECT_TIMEOUT_S)
+    login_evt = Event()
+    tasks = [asyncio.create_task(aprs_is_ingress(reader    = reader,
+                                                 call      = call,
+                                                 login_evt = login_evt,
+                                                 )),
+             asyncio.create_task(aprs_is_egress(writer    = writer,
+                                                call      = call,
+                                                passcode  = passcode,
+                                                login_evt = login_evt,
+                                                ax25_q    = ax25_q,
+                                                log_file  = log_file,
+                                                ))]
+    try:
+        # whichever side fails first ends the session
+        await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+    finally:
+        for t in tasks:
+            t.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        writer.close()
+        try:
+            await asyncio.wait_for(writer.wait_closed(), 5)
+        except Exception:
+            pass
+
 async def main():
     args = is_parse_args(sys.argv)
+    tasks = []
     try:
-        reader, writer = await asyncio.open_connection(APRS_IS_HOST, APRS_IS_FILTER_PORT)
-        tasks = []
         call = args['args']['call'].upper().encode()
         passcode  = generate_aprs_passcode(call)
-        login_evt = Event()
-        ax25_q = Queue()
+        ax25_q = Queue() # outlives connections, packets wait here during an outage
 
-        tasks.append(asyncio.create_task(aprs_is_ingress(reader    = reader,
-                                                         call      = call,
-                                                         login_evt = login_evt,
-                                                         )))
-
-        tasks.append(asyncio.create_task(aprs_is_egress(writer    = writer,
-                                                        call      = call,
-                                                        passcode  = passcode,
-                                                        login_evt = login_evt,
-                                                        ax25_q    = ax25_q,
-                                                        log_file  = args['args']['log_file'],
-                                                        )))
-
+        # these live for the whole program, independent of the network
         tasks.append(asyncio.create_task(stdin_ingress(call      = call,
                                                        ax25_q    = ax25_q,
                                                        )))
-
         tasks.append(asyncio.create_task(station_beacon(call      = call,
                                                         ax25_q    = ax25_q,
                                                         lat       = args['args']['lat'],
@@ -275,11 +296,27 @@ async def main():
                                                         msg       = args['args']['msg'],
                                                         )))
 
-        await asyncio.gather(*tasks, return_exceptions=True)
+        retry_s = 1
+        while True:
+            t0 = asyncio.get_running_loop().time()
+            try:
+                await aprs_is_session(call, passcode, ax25_q, args['args']['log_file'])
+            except asyncio.CancelledError:
+                raise
+            except Exception as err:
+                print('aprs_is session ended:', repr(err))
+            if asyncio.get_running_loop().time() - t0 > 60:
+                retry_s = 1 # it was up a while, start backoff over
+            print('reconnecting in {}s'.format(retry_s))
+            await asyncio.sleep(retry_s)
+            retry_s = min(retry_s*2, 60)
     except asyncio.CancelledError:
         raise
     except Exception as err:
         traceback.print_exc()
+    finally:
+        for t in tasks:
+            t.cancel()
 
 if __name__ == '__main__':
     try:

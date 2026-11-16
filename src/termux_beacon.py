@@ -34,7 +34,7 @@ async def set_volume(volume):
         v = _.find(d, lambda v: v['stream'] == 'music')
         v = int(volume/100*v['max_volume'])
     except json.JSONDecodeError as err:
-        traceback.print_exc()
+        traceback.print_exc(err)
         v = 10
     cmd = 'termux-volume music {}'.format(v)
     r = await run(cmd)
@@ -57,7 +57,7 @@ async def get_loc():
             try:
                 d = json.loads(r.decode())
             except json.JSONDecodeError as err:
-                traceback.print_exc()
+                traceback.print_exc(err)
                 eprint('skipping')
                 continue
             eprint('latlon: {} {}'.format(d['latitude'], d['longitude']))
@@ -79,7 +79,7 @@ async def get_loc():
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        traceback.print_exc()
+        traceback.print_exc(err)
 
 async def main():
     #eprint('starting termux')
@@ -94,7 +94,7 @@ async def main():
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        traceback.print_exc()
+        traceback.print_exc(err)
     finally:
         await set_wake_unlock()
 

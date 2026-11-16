@@ -17,3 +17,10 @@
 #define MICROPY_PY_CRYPTOLIB (1)
 #define MICROPY_PY_HASHLIB (1)
 
+
+// USB descriptor (MicroPython no longer reads CONFIG_TINYUSB_DESC_* from sdkconfig;
+// the serial number is now derived from the MAC address)
+#define MICROPY_HW_USB_VID                  (0x303A)
+#define MICROPY_HW_USB_PID                  (0x80D1)
+#define MICROPY_HW_USB_MANUFACTURER_STRING  "SS"
+#define MICROPY_HW_USB_PRODUCT_FS_STRING    "SS_TTWR"

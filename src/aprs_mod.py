@@ -23,6 +23,14 @@ if not IS_UPY:
     import wave
     # from subprocess import check_output
 
+# int.to_bytes(..., signed=True): CPython and MicroPython since mid-2026 (e00daa3a5)
+# take the keyword; older MicroPython only took signed as a 3rd positional arg.
+try:
+    (0).to_bytes(2, 'little', signed=True)
+    _TO_BYTES_SIGNED_KW = True
+except TypeError:
+    _TO_BYTES_SIGNED_KW = False
+
 # try:
     # from rich import print
 # except ImportError:
@@ -49,7 +57,7 @@ async def read_aprs_from_pipe(aprs_q,
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc()
+        print_exc(err)
 
 async def afsk_mod(aprs_q,
                    afsk_q,
@@ -133,7 +141,7 @@ async def afsk_mod(aprs_q,
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc()
+        print_exc(err)
 
 # async def run_in_thread(cmd):
     # print(cmd)
@@ -173,11 +181,11 @@ async def afsk_out(afsk_q,
                     for i in range(siz):
                         # samp = struct.pack('<h', arr[i]) # little-endian signed output
                         # write(samp) #buffer write binary
-                        if IS_UPY:
-                            # to_bytes does not have kw in micropython
-                            write(arr[i].to_bytes(2, 'little', True))  # little-endian signed output
-                        else:
+                        if _TO_BYTES_SIGNED_KW:
                             write(arr[i].to_bytes(2, 'little', signed=True))  # little-endian signed output
+                        else:
+                            # older micropython: no signed kw, positional only
+                            write(arr[i].to_bytes(2, 'little', True))  # little-endian signed output
                     flush()
             elif out_file == 'null':
                 pass
@@ -199,7 +207,7 @@ async def afsk_out(afsk_q,
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        print_exc()
+        print_exc(err)
     finally:
         if wav:
             wav.close()
@@ -250,7 +258,7 @@ async def main():
         await afsk_q.join()
 
     except Exception as err:
-        print_exc()
+        print_exc(err)
     finally:
         for task in tasks:
             task.cancel()

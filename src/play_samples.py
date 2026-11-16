@@ -48,7 +48,7 @@ async def read_raw_from_pipe(samples_q,
 
     except Exception as err:
         print(err)
-        traceback.print_exc()
+        traceback.print_exc(err)
     except asyncio.CancelledError:
         raise
 
@@ -70,7 +70,7 @@ async def play_samples(samples_q):
             except asyncio.CancelledError:
                 raise
             except Exception as err:
-                traceback.print_exc()
+                traceback.print_exc(err)
             finally:
                 if a:
                     # play the samples
@@ -90,7 +90,7 @@ async def play_samples(samples_q):
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        traceback.print_exc()
+        traceback.print_exc(err)
 
 # async def play_samples(samples_q):
     # try:
@@ -114,7 +114,7 @@ async def play_samples(samples_q):
     # except asyncio.CancelledError:
         # raise
     # except Exception as err:
-        # traceback.print_exc()
+        # traceback.print_exc(err)
     # finally:
         # stream.close()
         # p.terminate()
@@ -131,7 +131,7 @@ async def main():
     except asyncio.CancelledError:
         raise
     except Exception as err:
-        traceback.print_exc()
+        traceback.print_exc(err)
 
 if __name__ == '__main__':
     try:
